@@ -47,7 +47,7 @@ scene.add(plane);
 
 // particles
 const pGeo = new THREE.BufferGeometry();
-const pCount = 1000;
+let pCount = 1000;
 const positions = new Float32Array(pCount*3);
 
 for(let i=0;i<pCount;i++){
@@ -82,6 +82,14 @@ function animate(){
 }
 
 animate();
+
+// SIMPLE STRESS TEST: press "S" to increase particles
+window.addEventListener('keydown', (e) => {
+  if(e.key === "s" || e.key === "S"){
+    pCount += 1000;
+    console.log("Stress test: particles =", pCount);
+  }
+});
 
 window.addEventListener('resize',()=>{
   camera.aspect = window.innerWidth/window.innerHeight;
