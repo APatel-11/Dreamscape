@@ -19,6 +19,10 @@
 <body>
 <input id="timeline" type="range" min="0" max="100" value="50"/>
 
+<div id="hud" style="position:fixed;top:12px;left:12px;color:white;font-family:monospace;z-index:10;">
+  particles: 1000
+</div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 
@@ -77,12 +81,16 @@
 
   createParticles(pCount);
 
+  const hud = document.getElementById("hud");
+  hud.textContent = "particles: " + pCount;
+
   // Stress test: press S to add particles
   window.addEventListener('keydown', (e) => {
     if (e.key === "s" || e.key === "S") {
       pCount += 1000;
       createParticles(pCount);
       console.log("Stress test: particles =", pCount);
+      hud.textContent = "particles: " + pCount;
     }
   });
 
