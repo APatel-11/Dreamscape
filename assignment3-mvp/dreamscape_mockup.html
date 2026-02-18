@@ -45,25 +45,36 @@ const plane = new THREE.Mesh(geo,mat);
 plane.rotation.x = -Math.PI/2;
 scene.add(plane);
 
-// particles
-const pGeo = new THREE.BufferGeometry();
-let pCount = 1000;
-const positions = new Float32Array(pCount*3);
+//particles
+let particles;
 
-for(let i=0;i<pCount;i++){
-  positions[i*3]=(Math.random()-0.5)*10;
-  positions[i*3+1]=Math.random()*3;
-  positions[i*3+2]=(Math.random()-0.5)*10;
+function createParticles(count){
+  if(particles){
+    scene.remove(particles);
+  }
+
+  const pGeo = new THREE.BufferGeometry();
+  const positions = new Float32Array(count*3);
+
+  for(let i=0;i<count;i++){
+    positions[i*3]=(Math.random()-0.5)*10;
+    positions[i*3+1]=Math.random()*3;
+    positions[i*3+2]=(Math.random()-0.5)*10;
+  }
+
+  pGeo.setAttribute('position',new THREE.BufferAttribute(positions,3));
+
+  const pMat = new THREE.PointsMaterial({
+    color:0xffffff,
+    size:0.05
+  });
+
+  particles = new THREE.Points(pGeo,pMat);
+  scene.add(particles);
 }
 
-pGeo.setAttribute('position',new THREE.BufferAttribute(positions,3));
+createParticles(pCount);
 
-const pMat = new THREE.PointsMaterial({
-  color:0xffffff,
-  size:0.05
-});
-
-const particles = new THREE.Points(pGeo,pMat);
 scene.add(particles);
 
 const timeline = document.getElementById("timeline");
@@ -88,6 +99,7 @@ window.addEventListener('keydown', (e) => {
   if(e.key === "s" || e.key === "S"){
     pCount += 1000;
     console.log("Stress test: particles =", pCount);
+    createParticles(pCount);
   }
 });
 
