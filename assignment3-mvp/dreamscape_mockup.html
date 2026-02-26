@@ -29,9 +29,9 @@ timeline = memory clarity
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stats.js/r17/Stats.min.js"></script>
 
 <script>
-  // --- Scene setup ---
   const scene = new THREE.Scene();
   scene.fog = new THREE.FogExp2(0x111122, 0.02);
 
@@ -41,8 +41,13 @@ timeline = memory clarity
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
   document.body.appendChild(renderer.domElement);
+  
+  const stats = new Stats();
+  stats.showPanel(0); 
+  stats.dom.style.left = "12px";
+  stats.dom.style.top = "72px"; 
+  document.body.appendChild(stats.dom);
 
-  // Orbit controls (makes demo feel more legit)
   const controls = new THREE.OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
 
@@ -53,14 +58,12 @@ timeline = memory clarity
   const ambient = new THREE.AmbientLight(0xffffff, 0.25);
   scene.add(ambient);
 
-  // Ground plane
   const geo = new THREE.PlaneGeometry(20, 20, 50, 50);
   const mat = new THREE.MeshStandardMaterial({ color: 0x222244, wireframe: true });
   const plane = new THREE.Mesh(geo, mat);
   plane.rotation.x = -Math.PI/2;
   scene.add(plane);
 
-  // --- Particles (regeneratable) ---
   let pCount = 1000;
   let particles = null;
 
@@ -101,6 +104,7 @@ timeline = memory clarity
   const timeline = document.getElementById("timeline");
 
   function animate() {
+    stats.begin();
     requestAnimationFrame(animate);
 
     const t = Number(timeline.value) / 100;
@@ -115,6 +119,8 @@ timeline = memory clarity
 
     controls.update();
     renderer.render(scene, camera);
+
+    stats.end();
   }
 
   animate();
