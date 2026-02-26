@@ -26,3 +26,10 @@ Dreamscape is a web-based 3D visualization prototype exploring temporal editing 
 
 ### Notes
 - Tested in Chrome.
+
+### Phase 1 Checklist (Assignment 3)
+- **Framework initialized:** Three.js scene, camera, renderer, lighting, fog, and OrbitControls are initialized in the MVP.
+- **Core graphics logic:** Timeline input maps to procedural visual parameters (fog density, geometry scaling, particle motion). Particles represent memory fragments and can be regenerated for stress testing.
+- **Target frame rate:** Target is 60 FPS; an on-screen FPS counter (Stats.js) is included for verification.
+- **Offline AI:** AI-generated concept mockups are included in `assets/ai/`.
+- **Runtime AI:** Not used in the MVP build.
