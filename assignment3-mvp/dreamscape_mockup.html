@@ -23,13 +23,16 @@
   memory fragments: 1000
 </div>
 
+<div id="fps" style="position:fixed;top:72px;left:12px;color:white;font-family:monospace;z-index:10;">
+  fps: --
+</div>
+
 <div style="position:fixed;top:40px;left:12px;color:#aaa;font-family:monospace;font-size:12px;">
 timeline = memory clarity
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/stats.js/r17/Stats.min.js"></script>
 
 <script>
   const scene = new THREE.Scene();
@@ -41,12 +44,6 @@ timeline = memory clarity
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
   document.body.appendChild(renderer.domElement);
-  
-  const stats = new Stats();
-  stats.showPanel(0); 
-  stats.dom.style.left = "12px";
-  stats.dom.style.top = "72px"; 
-  document.body.appendChild(stats.dom);
 
   const controls = new THREE.OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
@@ -103,8 +100,11 @@ timeline = memory clarity
 
   const timeline = document.getElementById("timeline");
 
+  const fpsEl = document.getElementById("fps");
+  let lastFpsTime = performance.now();
+  let frames = 0;
+
   function animate() {
-    stats.begin();
     requestAnimationFrame(animate);
 
     const t = Number(timeline.value) / 100;
@@ -120,7 +120,14 @@ timeline = memory clarity
     controls.update();
     renderer.render(scene, camera);
 
-    stats.end();
+    frames++;
+    const now = performance.now();
+    if (now - lastFpsTime >= 500) {
+      const fps = Math.round((frames * 1000) / (now - lastFpsTime));
+      fpsEl.textContent = "fps: " + fps;
+      frames = 0;
+      lastFpsTime = now;
+    }
   }
 
   animate();
