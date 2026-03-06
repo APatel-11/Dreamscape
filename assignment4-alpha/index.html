@@ -55,11 +55,15 @@ timeline = memory clarity
   const ambient = new THREE.AmbientLight(0xffffff, 0.25);
   scene.add(ambient);
 
-  const geo = new THREE.PlaneGeometry(20, 20, 50, 50);
-  const mat = new THREE.MeshStandardMaterial({ color: 0x222244, wireframe: true });
-  const plane = new THREE.Mesh(geo, mat);
-  plane.rotation.x = -Math.PI/2;
-  scene.add(plane);
+  const sphereGeo = new THREE.SphereGeometry(30, 64, 64);
+  const sphereMat = new THREE.MeshStandardMaterial({
+    color: 0x0b0b14,
+    side: THREE.BackSide,
+    roughness: 1,
+    metalness: 0
+  });
+  const museumSphere = new THREE.Mesh(sphereGeo, sphereMat);
+  scene.add(museumSphere);
 
   let pCount = 1000;
   let particles = null;
