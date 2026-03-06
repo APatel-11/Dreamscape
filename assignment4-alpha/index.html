@@ -71,6 +71,77 @@ timeline = memory clarity
   const museumSphere = new THREE.Mesh(sphereGeo, sphereMat);
   scene.add(museumSphere);
 
+  const MEMORY_COUNT = 6;
+  const savedNames = JSON.parse(localStorage.getItem("dreamscape_memory_names") || "null");
+  const memories = Array.from({ length: MEMORY_COUNT }, (_, i) => ({
+    id: i,
+    name: savedNames? .[i] || 'Memory ${String(i + 1).padStart(2, "0")}',
+    clarity: 0.5,
+    tone: "neutral",
+    edited: false,
+    history: []
+  }));
+
+  let selectedMemoryId = 0;
+
+  const framesGroup = new THREE.Group();
+  scene.add(framesGroup);
+
+  const frameMeshes = [];
+
+  function createFrame() {
+    const frame = new THREE.Group();
+
+    const outerGeo = new THREE.BoxGeometry(1.6, 1.1, 0.08);
+    const outerMat = new THREE.MeshStandardMaterial({
+      color: 0x1a1a2a,
+      roughness: 0.4
+    });
+    const outer = new THREE.Mesh(outerGeo, outerMat);
+    frame.add(outer);
+
+    const innerGeo = new THREE.PlaneGeometry(1.35, 0.85);
+    const innerMat = new THREE.MeshStandardMaterial({
+      color: 0x101020,
+      emissive: 0x050510
+    });
+    const inner = new THREE.Mesh(innerGeo, innerMat);
+    inner.position.z = 0.05;
+    frame.add(inner);
+
+    frame.userData.outerMat = outerMat;
+    frame.userData.innerMat = innerMat;
+
+    return frame;
+  }
+
+  function layoutFrames() {
+    framesGroup.clear();
+    frameMeshes.length = 0;
+
+    const radius = 7.5;
+
+    for (let i = 0; i < MEMORY_COUNT; i++) {
+      const frame = createFrame();
+      const angle = (i / MEMORY_COUNT) * Math.PI * 2;
+
+      frame.position.set(
+        Math.cos(angle) * radius,
+        1.8,
+        Math.sin(angle) * radius
+      );
+
+      frame.lookAt(0, 1.6, 0);
+
+      frame.userData.memoryId = i;
+
+      framesGroup.add(frame);
+      frameMeshes.push(frame);
+    }
+  }
+
+  layoutFrames();
+
   let pCount = 1000;
   let particles = null;
 
