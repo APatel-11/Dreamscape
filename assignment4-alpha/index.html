@@ -114,7 +114,6 @@ timeline = memory clarity
     const t = Number(timeline.value) / 100;
 
     // timeline -> visuals
-    plane.scale.y = 0.5 + t * 1.5;
     scene.fog.density = 0.01 + t * 0.05;
 
     if (particles) {
