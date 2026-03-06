@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<title>Dreamscape MVP Mockup</title>
+<style>
+  body { margin:0; overflow:hidden; background:black; }
+  #timeline {
+    position:fixed;
+    bottom:20px;
+    left:50%;
+    transform:translateX(-50%);
+    width:60%;
+    z-index: 10;
+  }
+</style>
+</head>
+
+<body>
+<input id="timeline" type="range" min="0" max="100" value="50"/>
+
+<div id="hud" style="position:fixed;top:12px;left:12px;color:white;font-family:monospace;z-index:10;">
+  memory fragments: 1000
+</div>
+
+<div id="fps" style="position:fixed;top:72px;left:12px;color:white;font-family:monospace;z-index:10;">
+  fps: --
+</div>
+
+<div style="position:fixed;top:40px;left:12px;color:#aaa;font-family:monospace;font-size:12px;">
+timeline = memory clarity
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+<script>
+  const scene = new THREE.Scene();
+  scene.fog = new THREE.FogExp2(0x111122, 0.02);
+
+  const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+  camera.position.set(0, 3, 8);
+
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  document.body.appendChild(renderer.domElement);
+
+  const controls = new THREE.OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+
+  const light = new THREE.PointLight(0xffffff, 1);
+  light.position.set(5, 10, 5);
+  scene.add(light);
+
+  const ambient = new THREE.AmbientLight(0xffffff, 0.25);
+  scene.add(ambient);
+
+  const geo = new THREE.PlaneGeometry(20, 20, 50, 50);
+  const mat = new THREE.MeshStandardMaterial({ color: 0x222244, wireframe: true });
+  const plane = new THREE.Mesh(geo, mat);
+  plane.rotation.x = -Math.PI/2;
+  scene.add(plane);
+
+  let pCount = 1000;
+  let particles = null;
+
+  function createParticles(count) {
+    if (particles) scene.remove(particles);
+
+    const pGeo = new THREE.BufferGeometry();
+    const positions = new Float32Array(count * 3);
+
+    for (let i = 0; i < count; i++) {
+      positions[i*3]   = (Math.random() - 0.5) * 10;
+      positions[i*3+1] = Math.random() * 3;
+      positions[i*3+2] = (Math.random() - 0.5) * 10;
+    }
+
+    pGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+    const pMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.05 });
+    particles = new THREE.Points(pGeo, pMat);
+    scene.add(particles);
+  }
+
+  createParticles(pCount);
+
+  const hud = document.getElementById("hud");
+  hud.textContent = "memory fragments: " + pCount;
+
+  // Stress test: press S to add particles
+  window.addEventListener('keydown', (e) => {
+    if (e.key === "s" || e.key === "S") {
+      pCount += 1000;
+      createParticles(pCount);
+      console.log("Stress test: particles =", pCount);
+      hud.textContent = "memory fragments: " + pCount;
+    }
+  });
+
+  const timeline = document.getElementById("timeline");
+
+  const fpsEl = document.getElementById("fps");
+  let lastFpsTime = performance.now();
+  let frames = 0;
+
+  function animate() {
+    requestAnimationFrame(animate);
+
+    const t = Number(timeline.value) / 100;
+
+    // timeline -> visuals
+    plane.scale.y = 0.5 + t * 1.5;
+    scene.fog.density = 0.01 + t * 0.05;
+
+    if (particles) {
+      particles.rotation.y += 0.002 + t * 0.01;
+    }
+
+    controls.update();
+    renderer.render(scene, camera);
+
+    frames++;
+    const now = performance.now();
+    if (now - lastFpsTime >= 500) {
+      const fps = Math.round((frames * 1000) / (now - lastFpsTime));
+      fpsEl.textContent = "fps: " + fps;
+      frames = 0;
+      lastFpsTime = now;
+    }
+  }
+
+  animate();
+
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+</script>
+
+</body>
+</html>
