@@ -50,8 +50,8 @@
   
   controls.target.set(0, 1.6, -2.2);
   controls.enablePan = false;
-  controls.minDistance = 0.1;
-  controls.maxDistance = 2.5;
+  controls.minDistance = 1.5;
+  controls.maxDistance = 8.5;
   controls.update();
 
   const light = new THREE.PointLight(0xffffff, 1);
@@ -102,6 +102,30 @@
   platform.position.set(0, 0.2, 0);
   scene.add(platform);
 
+  const ringsGroup = new THREE.Group();
+  scene.add(ringsGroup);
+
+  function createOrbitRing(radius, y, color, opacity) {
+    const ringGeo = new THREE.TorusGeometry(radius, 0.02, 12, 120);
+    const ringMat = new THREE.MeshStandardMaterial({
+      color,
+      transparent: true,
+      opacity,
+      emissive: color,
+      emissiveIntensity: 0.5
+    });
+    
+    const ring = new THREE.Mesh(ringGeo, ringMat);
+    ring.rotation.x = Math.PI / 2;
+    ring.position.y = y;
+    ringsGroup.add(ring);
+    return ring;
+  }
+
+  const orbitRing1 = createOrbitRing(5.2, 1.6, 0x66ccff, 0.35);
+  const orbitRing2 = createOrbitRing(6.6, 2.6, 0x88ddff, 0.22);
+  const orbitRing3 = createOrbitRing(6.0, 0.6, 0x5577ff, 0.18);
+  
   const consoleGroup = new THREE.Group();
 
   const pedestalGeo = new THREE.CylinderGeometry(0.7, 0.95, 1.0, 24);
@@ -119,11 +143,11 @@
 
   const mainScreenGeo = new THREE.PlaneGeometry(1.6, 0.95);
   const mainScreenMat = new THREE.MeshStandardMaterial({
-    color: 0x6ab7ff,
+    color: 0x9ad8ff,
     transparent: true,
-    opacity: 0.32,
-    emissive: 0x3366ff,
-    emissiveIntensity: 0.95,
+    opacity: 0.20,
+    emissive: 0x4c8cff,
+    emissiveIntensity: 1.15,
     side: THREE.DoubleSide
   });
   
@@ -134,11 +158,11 @@
 
   const sideGeo = new THREE.PlaneGeometry(0.6, 0.42);
   const sideMat = new THREE.MeshStandardMaterial({
-    color: 0x8fd3ff,
+    color: 0xaee2ff,
     transparent: true,
-    opacity: 0.22,
-    emissive: 0x4f7fff,
-    emissiveIntensity: 0.75,
+    opacity: 0.15,
+    emissive: 0x5f9dff,
+    emissiveIntensity: 0.9,
     side: THREE.DoubleSide
   });
 
@@ -153,6 +177,20 @@
   rightPane.rotation.y = -0.28;
   rightPane.rotation.x = -0.15;
   consoleGroup.add(rightPane);
+
+  const holoRingGeo = new THREE.TorusGeometry(0.24, 0.015, 12, 64);
+  const holoRingMat = new THREE.MeshStandardMaterial({
+    color: 0x9be7ff,
+    emissive: 0x66ccff,
+    emissiveIntensity: 1.0,
+    transparent: true,
+    opacity: 0.5
+  });
+  
+  const holoRing = new THREE.Mesh(holoRingGeo, holoRingMat);
+  holoRing.position.set(0.48, 1.62, 0.42);
+  holoRing.rotation.x = -0.22;
+  consoleGroup.add(holoRing);
 
   const lineMat = new THREE.MeshStandardMaterial({
     color: 0xb9e4ff,
@@ -179,43 +217,67 @@
   consoleGroup.lookAt(0, 1.4, 0);
   scene.add(consoleGroup);
 
-  function createFrame() {
+    function createFrame() {
     const frame = new THREE.Group();
 
-    const outerGeo = new THREE.BoxGeometry(1.6, 1.1, 0.08);
+    // Thin glowing border
+    const outerGeo = new THREE.BoxGeometry(1.45, 0.9, 0.025);
     const outerMat = new THREE.MeshStandardMaterial({
-      color: 0x2a2544,
-      roughness: 0.35,
-      emissive: 0x120830,
-      emissiveIntensity: 0.35
+      color: 0x87cfff,
+      transparent: true,
+      opacity: 0.28,
+      emissive: 0x4ea3ff,
+      emissiveIntensity: 0.75
     });
     const outer = new THREE.Mesh(outerGeo, outerMat);
     frame.add(outer);
 
-    const innerGeo = new THREE.PlaneGeometry(1.35, 0.85);
+    const innerGeo = new THREE.PlaneGeometry(1.28, 0.76);
     const innerMat = new THREE.MeshStandardMaterial({
-      color: 0x1b1830,
-      emissive: 0x221144,
-      emissiveIntensity: 0.45
+      color: 0x1a2440,
+      transparent: true,
+      opacity: 0.22,
+      emissive: 0x224477,
+      emissiveIntensity: 0.35,
+      side: THREE.DoubleSide
     });
+      
     const inner = new THREE.Mesh(innerGeo, innerMat);
-    inner.position.z = 0.05;
+    inner.position.z = 0.02;
     frame.add(inner);
+
+    const lineMat = new THREE.MeshStandardMaterial({
+      color: 0xc6ecff,
+      emissive: 0x66ccff,
+      emissiveIntensity: 0.85
+    });
+
+    const line1 = new THREE.Mesh(new THREE.PlaneGeometry(0.55, 0.025), lineMat);
+    line1.position.set(0, 0.18, 0.03);
+    frame.add(line1);
+
+    const line2 = new THREE.Mesh(new THREE.PlaneGeometry(0.42, 0.02), lineMat);
+    line2.position.set(-0.08, 0.03, 0.03);
+    frame.add(line2);
+
+    const line3 = new THREE.Mesh(new THREE.PlaneGeometry(0.3, 0.02), lineMat);
+    line3.position.set(-0.16, -0.12, 0.03);
+    frame.add(line3);
 
     frame.userData.outerMat = outerMat;
     frame.userData.innerMat = innerMat;
 
     return frame;
   }
-
+  
   function layoutFrames() {
     framesGroup.clear();
     frameMeshes.length = 0;
   
     const layouts = [
-      { count: 8, radius: 7.5, y: 1.8, tilt: 0.0, speed: 0.08 },   // middle ring
-      { count: 6, radius: 6.5, y: 4.5, tilt: 0.35, speed: 0.05 },  // upper ring
-      { count: 6, radius: 6.5, y: -1.0, tilt: -0.35, speed: -0.06 } // lower ring
+      { count: 8, radius: 7.5, y: 1.8, tilt: 0.0, speed: 0.08 },   
+      { count: 6, radius: 6.5, y: 4.5, tilt: 0.35, speed: 0.05 },  
+      { count: 6, radius: 6.5, y: -1.0, tilt: -0.35, speed: -0.06 }
     ];
   
     let memoryIndex = 0;
@@ -287,9 +349,16 @@
       frame.rotation.x = frame.userData.tilt + Math.sin(time * 0.7 + frame.userData.floatOffset) * 0.05;
       frame.rotation.z = Math.cos(time * 0.6 + frame.userData.floatOffset) * 0.04;
     }
+
+    orbitRing1.rotation.z += 0.0015;
+    orbitRing2.rotation.z -= 0.001;
+    orbitRing3.rotation.z += 0.0008;
   
-    consoleGroup.position.y = Math.sin(time * 1.2) * 0.04;
+    consoleGroup.position.y = consoleBaseY + Math.sin(time * 1.2) * 0.04;
     consoleGroup.rotation.y = Math.sin(time * 0.35) * 0.05;
+
+    consoleGroup.position.set(0, 0, -2.6);
+    const consoleBaseY = 0;
   
     controls.update();
     renderer.render(scene, camera);
