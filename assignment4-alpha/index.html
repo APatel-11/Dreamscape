@@ -75,7 +75,7 @@ timeline = memory clarity
   const savedNames = JSON.parse(localStorage.getItem("dreamscape_memory_names") || "null");
   const memories = Array.from({ length: MEMORY_COUNT }, (_, i) => ({
     id: i,
-    name: savedNames? .[i] || 'Memory ${String(i + 1).padStart(2, "0")}',
+    name: savedNames?.[i] || 'Memory ${String(i + 1).padStart(2, "0")}',
     clarity: 0.5,
     tone: "neutral",
     edited: false,
