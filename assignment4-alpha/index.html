@@ -39,7 +39,7 @@ timeline = memory clarity
   scene.fog = new THREE.FogExp2(0x111122, 0.02);
 
   const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-  camera.position.set(0, 3, 8);
+  camera.position.set(0, 1.6, 0);
 
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
@@ -47,6 +47,12 @@ timeline = memory clarity
 
   const controls = new THREE.OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
+  
+  controls.target.set(0, 1.6, -1);
+  controls.enablePan = false;
+  controls.minDistance = 0.1;
+  controls.maxDistance = 2.5;
+  controls.update();
 
   const light = new THREE.PointLight(0xffffff, 1);
   light.position.set(5, 10, 5);
@@ -74,10 +80,24 @@ timeline = memory clarity
     const pGeo = new THREE.BufferGeometry();
     const positions = new Float32Array(count * 3);
 
+    const innerR = 3.5;   
+    const outerR = 9.0;   
+    
     for (let i = 0; i < count; i++) {
-      positions[i*3]   = (Math.random() - 0.5) * 10;
-      positions[i*3+1] = Math.random() * 3;
-      positions[i*3+2] = (Math.random() - 0.5) * 10;
+      const u = Math.random();
+      const v = Math.random();
+      const theta = 2 * Math.PI * u;
+      const phi = Math.acos(2 * v - 1);
+    
+      const r = innerR + Math.random() * (outerR - innerR);
+    
+      const x = r * Math.sin(phi) * Math.cos(theta);
+      const y = 1.6 + r * Math.cos(phi); 
+      const z = r * Math.sin(phi) * Math.sin(theta);
+    
+      positions[i*3]   = x;
+      positions[i*3+1] = y;
+      positions[i*3+2] = z;
     }
 
     pGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
@@ -117,7 +137,8 @@ timeline = memory clarity
     scene.fog.density = 0.01 + t * 0.05;
 
     if (particles) {
-      particles.rotation.y += 0.002 + t * 0.01;
+      particles.rotation.y += 0.001 + t * 0.006;
+      particles.rotation.x += 0.0005;
     }
 
     controls.update();
