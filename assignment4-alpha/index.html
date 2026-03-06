@@ -20,7 +20,7 @@
 <input id="timeline" type="range" min="0" max="100" value="50"/>
 
 <div id="hud" style="position:fixed;top:12px;left:12px;color:white;font-family:monospace;z-index:10;">
-  memory fragments: 1000
+  memory fragments: curated frames
 </div>
 
 <div id="fps" style="position:fixed;top:72px;left:12px;color:white;font-family:monospace;z-index:10;">
@@ -28,7 +28,7 @@
 </div>
 
 <div style="position:fixed;top:40px;left:12px;color:#aaa;font-family:monospace;font-size:12px;">
-timeline = memory clarity
+  timeline = memory clarity
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -104,30 +104,79 @@ timeline = memory clarity
 
   const consoleGroup = new THREE.Group();
 
-  const pedestalGeo = new THREE.BoxGeometry(1.2, 1.0, 0.8);
+  const pedestalGeo = new THREE.CylinderGeometry(0.7, 0.95, 1.0, 24);
   const pedestalMat = new THREE.MeshStandardMaterial({
-    color: 0x181826,
-    roughness: 0.5,
-    metalness: 0.25,
-    emissive: 0x0a0a18,
-    emissiveIntensity: 0.3
+    color: 0x171724,
+    roughness: 0.45,
+    metalness: 0.35,
+    emissive: 0x0c0c18,
+    emissiveIntensity: 0.35
   });
+  
   const pedestal = new THREE.Mesh(pedestalGeo, pedestalMat);
-  pedestal.position.set(0, 0.8, 0);
+  pedestal.position.set(0, 0.5, 0);
   consoleGroup.add(pedestal);
 
-  const screenGeo = new THREE.PlaneGeometry(1.2, 0.75);
-  const screenMat = new THREE.MeshStandardMaterial({
-    color: 0x66aaff,
+  const mainScreenGeo = new THREE.PlaneGeometry(1.6, 0.95);
+  const mainScreenMat = new THREE.MeshStandardMaterial({
+    color: 0x6ab7ff,
+    transparent: true,
+    opacity: 0.32,
     emissive: 0x3366ff,
-    emissiveIntensity: 0.7
+    emissiveIntensity: 0.95,
+    side: THREE.DoubleSide
   });
-  const screen = new THREE.Mesh(screenGeo, screenMat);
-  screen.position.set(0, 1.3, 0.42);
-  consoleGroup.add(screen);
+  
+  const mainScreen = new THREE.Mesh(mainScreenGeo, mainScreenMat);
+  mainScreen.position.set(0, 1.55, 0.38);
+  mainScreen.rotation.x = -0.32;
+  consoleGroup.add(mainScreen);
 
-  consoleGroup.position.set(0, 0, -2.2);
-  consoleGroup.lookAt(0, 1.2, 0);
+  const sideGeo = new THREE.PlaneGeometry(0.6, 0.42);
+  const sideMat = new THREE.MeshStandardMaterial({
+    color: 0x8fd3ff,
+    transparent: true,
+    opacity: 0.22,
+    emissive: 0x4f7fff,
+    emissiveIntensity: 0.75,
+    side: THREE.DoubleSide
+  });
+
+  const leftPane = new THREE.Mesh(sideGeo, sideMat.clone());
+  leftPane.position.set(-0.95, 1.45, 0.18);
+  leftPane.rotation.y = 0.28;
+  leftPane.rotation.x = -0.15;
+  consoleGroup.add(leftPane);
+
+  const rightPane = new THREE.Mesh(sideGeo, sideMat.clone());
+  rightPane.position.set(0.95, 1.45, 0.18);
+  rightPane.rotation.y = -0.28;
+  rightPane.rotation.x = -0.15;
+  consoleGroup.add(rightPane);
+
+  const lineMat = new THREE.MeshStandardMaterial({
+    color: 0xb9e4ff,
+    emissive: 0x66ccff,
+    emissiveIntensity: 1.0
+  });
+
+  const uiLine1 = new THREE.Mesh(new THREE.PlaneGeometry(0.9, 0.03), lineMat);
+  uiLine1.position.set(0, 1.76, 0.39);
+  uiLine1.rotation.x = -0.32;
+  consoleGroup.add(uiLine1);
+
+  const uiLine2 = new THREE.Mesh(new THREE.PlaneGeometry(0.65, 0.03), lineMat);
+  uiLine2.position.set(0, 1.60, 0.39);
+  uiLine2.rotation.x = -0.32;
+  consoleGroup.add(uiLine2);
+
+  const uiLine3 = new THREE.Mesh(new THREE.PlaneGeometry(0.45, 0.03), lineMat);
+  uiLine3.position.set(-0.22, 1.43, 0.39);
+  uiLine3.rotation.x = -0.32;
+  consoleGroup.add(uiLine3);
+
+  consoleGroup.position.set(0, 0, -2.6);
+  consoleGroup.lookAt(0, 1.4, 0);
   scene.add(consoleGroup);
 
   function createFrame() {
@@ -159,40 +208,51 @@ timeline = memory clarity
     return frame;
   }
 
-    function layoutFrames() {
-      framesGroup.clear();
-      frameMeshes.length = 0;
+  function layoutFrames() {
+    framesGroup.clear();
+    frameMeshes.length = 0;
   
-      const layouts = [
-        { count: 8, radius: 7.5, y: 1.8, tilt: 0 }, 
-        { count: 6, radius: 6.5, y: 4.5, tilt: 0.35 },  
-        { count: 6, radius: 6.5, y: -1.0, tilt: -0.35 } 
-      ];
+    const layouts = [
+      { count: 8, radius: 7.5, y: 1.8, tilt: 0.0, speed: 0.08 },   // middle ring
+      { count: 6, radius: 6.5, y: 4.5, tilt: 0.35, speed: 0.05 },  // upper ring
+      { count: 6, radius: 6.5, y: -1.0, tilt: -0.35, speed: -0.06 } // lower ring
+    ];
   
-      let memoryIndex = 0;
+    let memoryIndex = 0;
   
-      for (const ring of layouts) {
-        for (let i = 0; i < ring.count; i++) {
-          const frame = createFrame();
-          const angle = (i / ring.count) * Math.PI * 2;
+    for (let ringIndex = 0; ringIndex < layouts.length; ringIndex++) {
+      const ring = layouts[ringIndex];
   
-          frame.position.set(
-            Math.cos(angle) * ring.radius,
-            ring.y,
-            Math.sin(angle) * ring.radius
-          );
+      for (let i = 0; i < ring.count; i++) {
+        const frame = createFrame();
+        const angle = (i / ring.count) * Math.PI * 2;
   
-          frame.rotation.y = -angle + Math.PI / 2;
-          frame.rotation.x = ring.tilt;
+        frame.position.set(
+          Math.cos(angle) * ring.radius,
+          ring.y,
+          Math.sin(angle) * ring.radius
+        );
   
-          frame.userData.memoryId = memoryIndex % MEMORY_COUNT;
-          memoryIndex++;
+        frame.rotation.y = -angle + Math.PI / 2;
+        frame.rotation.x = ring.tilt;
   
-          framesGroup.add(frame);
-          frameMeshes.push(frame);
-        }
+        frame.userData.memoryId = memoryIndex % MEMORY_COUNT;
+  
+        frame.userData.baseAngle = angle;
+        frame.userData.radius = ring.radius;
+        frame.userData.baseY = ring.y;
+        frame.userData.tilt = ring.tilt;
+        frame.userData.ringSpeed = ring.speed;
+        frame.userData.floatOffset = Math.random() * Math.PI * 2;
+        frame.userData.ringIndex = ringIndex;
+  
+        memoryIndex++;
+  
+        framesGroup.add(frame);
+        frameMeshes.push(frame);
       }
     }
+  }
   
   layoutFrames();
 
@@ -207,14 +267,33 @@ timeline = memory clarity
 
   function animate() {
     requestAnimationFrame(animate);
-
+  
     const t = Number(timeline.value) / 100;
-
+    const time = performance.now() * 0.001;
+  
     // timeline -> visuals
     scene.fog.density = 0.01 + t * 0.05;
+  
+    for (const frame of frameMeshes) {
+      const angle = frame.userData.baseAngle + time * frame.userData.ringSpeed;
+      const radius = frame.userData.radius;
+      const floatY = Math.sin(time * 0.9 + frame.userData.floatOffset) * 0.22;
+  
+      frame.position.x = Math.cos(angle) * radius;
+      frame.position.z = Math.sin(angle) * radius;
+      frame.position.y = frame.userData.baseY + floatY;
+  
+      frame.rotation.y = -angle + Math.PI / 2;
+      frame.rotation.x = frame.userData.tilt + Math.sin(time * 0.7 + frame.userData.floatOffset) * 0.05;
+      frame.rotation.z = Math.cos(time * 0.6 + frame.userData.floatOffset) * 0.04;
+    }
+  
+    consoleGroup.position.y = Math.sin(time * 1.2) * 0.04;
+    consoleGroup.rotation.y = Math.sin(time * 0.35) * 0.05;
+  
     controls.update();
     renderer.render(scene, camera);
-
+  
     frames++;
     const now = performance.now();
     if (now - lastFpsTime >= 500) {
