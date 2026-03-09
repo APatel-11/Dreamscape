@@ -123,10 +123,86 @@
     color: #9fb8d8;
     line-height: 1.45;
   }
+
+  /* Start / Reset menu overlay */
+  #startOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background:
+      radial-gradient(circle at center, rgba(36,46,92,0.35), rgba(4,6,16,0.92)),
+      rgba(0,0,0,0.86);
+  }
+
+  #startCard {
+    width: min(540px, 88vw);
+    padding: 28px;
+    border-radius: 18px;
+    background: rgba(10, 14, 28, 0.82);
+    border: 1px solid rgba(145, 198, 255, 0.18);
+    box-shadow: 0 0 40px rgba(78, 123, 255, 0.14);
+    color: white;
+    backdrop-filter: blur(12px);
+  }
+
+  #startCard h1 {
+    margin: 0 0 10px 0;
+    font-size: 28px;
+    color: #e7f5ff;
+  }
+
+  #startCard p {
+    margin: 0 0 18px 0;
+    color: #bed4ec;
+    line-height: 1.55;
+    font-size: 14px;
+  }
+
+  #startCard .menuRow {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+  }
+
+  #startCard button {
+    flex: 1;
+    padding: 12px 14px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 700;
+    color: white;
+    background: linear-gradient(135deg, rgba(80,110,255,0.96), rgba(77,182,255,0.96));
+  }
+
+  #startCard button.secondary {
+    background: rgba(255,255,255,0.09);
+    border: 1px solid rgba(255,255,255,0.12);
+  }
 </style>
 </head>
 
 <body>
+
+<div id="startOverlay">
+  <div id="startCard">
+    <h1>Dreamscape</h1>
+    <p>
+      Enter a curated memory sphere where framed fragments orbit around you.
+      Select a memory, rename it, adjust its clarity, and enter a focused memory state.
+    </p>
+    <p>
+      This alpha build demonstrates the interaction loop: menu → hub → memory → reset.
+    </p>
+    <div class="menuRow">
+      <button id="startBtn">Start Dreamscape</button>
+      <button id="backToMenuBtn" class="secondary">Return to Menu</button>
+    </div>
+  </div>
+</div>
 
 <input id="timeline" type="range" min="0" max="100" value="50" />
 
@@ -144,6 +220,7 @@
     <div><strong>ID:</strong> <span id="memoryIdText">0</span></div>
     <div><strong>Clarity:</strong> <span id="clarityText">0.50</span></div>
     <div><strong>Tone:</strong> <span id="toneText">neutral</span></div>
+    <div><strong>State:</strong> <span id="stateText">hub</span></div>
   </div>
 
   <div class="btnRow">
@@ -153,13 +230,18 @@
 
   <div class="btnRow">
     <button id="enterBtn">Enter Memory</button>
+    <button id="exitBtn" class="secondary">Exit Memory</button>
+  </div>
+
+  <div class="btnRow">
+    <button id="resetBtn" class="secondary">Reset Experience</button>
   </div>
 
   <div id="controlsHint">
     Click a floating memory frame to select it.<br>
     Rename it here, then Save Name.<br>
     Undo restores the last saved name.<br>
-    Scroll = zoom, drag = rotate.
+    Enter Memory shifts the build into a focused memory state.
   </div>
 </div>
 
@@ -167,7 +249,58 @@
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 
 <script>
-  
+
+  let appState = "menu"; // menu | hub | memory
+
+  function setAppState(nextState) {
+    appState = nextState;
+    stateText.textContent = nextState;
+
+    if (nextState === "menu") {
+      startOverlay.style.display = "flex";
+      memoryPanel.style.display = "none";
+      timeline.style.display = "none";
+      timelineLabel.style.display = "none";
+      hud.textContent = "memory fragments: waiting";
+    }
+
+    if (nextState === "hub") {
+      startOverlay.style.display = "none";
+      memoryPanel.style.display = "block";
+      timeline.style.display = "block";
+      timelineLabel.style.display = "block";
+      enterBtn.disabled = false;
+      exitBtn.disabled = false;
+      hud.textContent = "memory fragments: curated frames";
+      scene.fog.color.set(0x111122);
+      scene.fog.density = 0.02;
+      museumSphere.material.color.set(0x0b0b14);
+      framesGroup.visible = true;
+      platform.visible = true;
+      ringsGroup.visible = true;
+      consoleGroup.visible = true;
+      controls.target.set(0, 1.6, -2.2);
+      controls.update();
+    }
+
+    if (nextState === "memory") {
+      startOverlay.style.display = "none";
+      memoryPanel.style.display = "block";
+      timeline.style.display = "block";
+      timelineLabel.style.display = "block";
+      hud.textContent = `inside memory: ${memories[selectedMemoryId].name}`;
+      scene.fog.color.set(0x24182e);
+      scene.fog.density = 0.055;
+      museumSphere.material.color.set(0x120f1a);
+      framesGroup.visible = false;
+      ringsGroup.visible = false;
+      consoleGroup.visible = true;
+      platform.visible = true;
+      controls.target.set(0, 1.4, -1.3);
+      controls.update();
+    }
+  }
+
   const scene = new THREE.Scene();
   scene.fog = new THREE.FogExp2(0x111122, 0.02);
 
@@ -459,18 +592,25 @@
   layoutFrames();
 
   const hud = document.getElementById("hud");
-  hud.textContent = "memory fragments: curated frames";
-
   const timeline = document.getElementById("timeline");
   const fpsEl = document.getElementById("fps");
 
+  const startOverlay = document.getElementById("startOverlay");
+  const startBtn = document.getElementById("startBtn");
+  const backToMenuBtn = document.getElementById("backToMenuBtn");
+
+  const memoryPanel = document.getElementById("memoryPanel");
   const memoryNameInput = document.getElementById("memoryName");
   const memoryIdText = document.getElementById("memoryIdText");
   const clarityText = document.getElementById("clarityText");
   const toneText = document.getElementById("toneText");
+  const stateText = document.getElementById("stateText");
+
   const saveBtn = document.getElementById("saveBtn");
   const undoBtn = document.getElementById("undoBtn");
   const enterBtn = document.getElementById("enterBtn");
+  const exitBtn = document.getElementById("exitBtn");
+  const resetBtn = document.getElementById("resetBtn");
 
   const raycaster = new THREE.Raycaster();
   const mouse = new THREE.Vector2();
@@ -514,8 +654,6 @@
     memory.name = trimmed;
     saveMemories();
     updateMemoryPanel();
-
-    console.log("Saved new memory name:", memory.name);
   }
 
   function undoMemoryName() {
@@ -524,11 +662,12 @@
       memory.name = memory.history.pop();
       saveMemories();
       updateMemoryPanel();
-      console.log("Undo memory name");
     }
   }
 
   window.addEventListener("click", (event) => {
+    if (appState !== "hub") return;
+
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
@@ -553,7 +692,23 @@
   undoBtn.addEventListener("click", undoMemoryName);
 
   enterBtn.addEventListener("click", () => {
-    alert(`Entering ${memories[selectedMemoryId].name} (memory interior comes next).`);
+    setAppState("memory");
+  });
+
+  exitBtn.addEventListener("click", () => {
+    setAppState("hub");
+  });
+
+  resetBtn.addEventListener("click", () => {
+    setAppState("menu");
+  });
+
+  startBtn.addEventListener("click", () => {
+    setAppState("hub");
+  });
+
+  backToMenuBtn.addEventListener("click", () => {
+    setAppState("menu");
   });
 
   window.addEventListener("keydown", (e) => {
@@ -564,6 +719,10 @@
     if (e.key === "u" || e.key === "U") {
       undoMemoryName();
     }
+
+    if (e.key === "Escape") {
+      setAppState("menu");
+    }
   });
 
   let lastFpsTime = performance.now();
@@ -571,22 +730,36 @@
 
   updateMemoryPanel();
   highlightFrames();
+  setAppState("menu");
 
- 
   function animate() {
     requestAnimationFrame(animate);
 
     const t = Number(timeline.value) / 100;
     const time = performance.now() * 0.001;
 
-    // timeline -> visuals
-    scene.fog.density = 0.01 + t * 0.05;
+    if (appState === "hub") {
+      scene.fog.density = 0.01 + t * 0.05;
+      museumSphere.material.color.set(0x0b0b14);
+      memories[selectedMemoryId].clarity = t;
+      clarityText.textContent = t.toFixed(2);
+    }
 
-    // map timeline to selected memory clarity
-    memories[selectedMemoryId].clarity = t;
-    clarityText.textContent = t.toFixed(2);
+    if (appState === "memory") {
+      scene.fog.density = 0.04 + t * 0.05;
+      museumSphere.material.color.set(0x120f1a);
+      memories[selectedMemoryId].clarity = t;
+      clarityText.textContent = t.toFixed(2);
+
+      // console shifts closer in memory mode
+      consoleGroup.position.z = -1.6;
+    } else {
+      consoleGroup.position.z = -2.6;
+    }
 
     for (const frame of frameMeshes) {
+      if (!framesGroup.visible) break;
+
       const angle = frame.userData.baseAngle + time * frame.userData.ringSpeed;
       const radius = frame.userData.radius;
       const floatY = Math.sin(time * 0.9 + frame.userData.floatOffset) * 0.22;
