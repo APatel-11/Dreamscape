@@ -329,13 +329,97 @@
   let lastFpsTime = performance.now();
   let frames = 0;
 
+
+  const raycaster = new THREE.Raycaster();
+  const mouse = new THREE.Vector2();
+  
+  function selectMemory(id){
+  
+    selectedMemoryId = id;
+  
+    console.log("Selected memory:", memories[id].name);
+  
+    highlightFrames();
+  
+  }
+  
+  function highlightFrames(){
+  
+    for(const frame of frameMeshes){
+  
+      const memId = frame.userData.memoryId;
+      const outer = frame.children[0];
+  
+      if(memId === selectedMemoryId){
+        outer.material.emissiveIntensity = 2;
+      }else{
+        outer.material.emissiveIntensity = 0.75;
+      }
+  
+    }
+  
+  }
+  
+  function saveMemories(){
+  
+    const names = memories.map(m=>m.name);
+    localStorage.setItem("dreamscape_memory_names", JSON.stringify(names));
+  
+  }
+  
+  window.addEventListener("click",(event)=>{
+  
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+  
+    raycaster.setFromCamera(mouse, camera);
+  
+    const intersects = raycaster.intersectObjects(frameMeshes, true);
+  
+    if(intersects.length > 0){
+  
+      let obj = intersects[0].object;
+  
+      while(obj.parent && obj.parent !== framesGroup){
+        obj = obj.parent;
+      }
+  
+      const frame = obj;
+      const memoryId = frame.userData.memoryId;
+  
+      selectMemory(memoryId);
+  
+    }
+  
+  });
+  
+  window.addEventListener("keydown",(e)=>{
+  
+    if(e.key === "r"){
+  
+      const newName = prompt("Rename memory:", memories[selectedMemoryId].name);
+  
+      if(newName){
+  
+        memories[selectedMemoryId].name = newName;
+  
+        saveMemories();
+  
+        console.log("Memory renamed");
+  
+      }
+  
+    }
+  
+  });
+
   function animate() {
+  
     requestAnimationFrame(animate);
   
     const t = Number(timeline.value) / 100;
     const time = performance.now() * 0.001;
   
-    // timeline -> visuals
     scene.fog.density = 0.01 + t * 0.05;
   
     for (const frame of frameMeshes) {
@@ -350,8 +434,9 @@
       frame.rotation.y = -angle + Math.PI / 2;
       frame.rotation.x = frame.userData.tilt + Math.sin(time * 0.7 + frame.userData.floatOffset) * 0.05;
       frame.rotation.z = Math.cos(time * 0.6 + frame.userData.floatOffset) * 0.04;
+  
     }
-
+  
     orbitRing1.rotation.z += 0.0015;
     orbitRing2.rotation.z -= 0.001;
     orbitRing3.rotation.z += 0.0008;
@@ -364,12 +449,16 @@
   
     frames++;
     const now = performance.now();
+  
     if (now - lastFpsTime >= 500) {
       const fps = Math.round((frames * 1000) / (now - lastFpsTime));
       fpsEl.textContent = "fps: " + fps;
+  
       frames = 0;
       lastFpsTime = now;
+  
     }
+  
   }
 
   animate();
