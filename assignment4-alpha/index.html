@@ -2,43 +2,181 @@
 <html>
 <head>
 <meta charset="UTF-8" />
-<title>Dreamscape MVP Mockup</title>
+<title>Dreamscape Alpha Build</title>
 <style>
-  body { margin:0; overflow:hidden; background:black; }
+  body {
+    margin: 0;
+    overflow: hidden;
+    background: black;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  }
+
   #timeline {
-    position:fixed;
-    bottom:20px;
-    left:50%;
-    transform:translateX(-50%);
-    width:60%;
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60%;
     z-index: 10;
+  }
+
+  #hud {
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    color: white;
+    font-family: monospace;
+    z-index: 10;
+  }
+
+  #timelineLabel {
+    position: fixed;
+    top: 40px;
+    left: 12px;
+    color: #aaa;
+    font-family: monospace;
+    font-size: 12px;
+    z-index: 10;
+  }
+
+  #fps {
+    position: fixed;
+    top: 72px;
+    left: 12px;
+    color: white;
+    font-family: monospace;
+    z-index: 10;
+  }
+
+  #memoryPanel {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    width: 280px;
+    background: rgba(5, 8, 20, 0.72);
+    border: 1px solid rgba(122, 188, 255, 0.25);
+    border-radius: 14px;
+    padding: 14px;
+    color: white;
+    z-index: 20;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 0 24px rgba(60, 100, 255, 0.12);
+  }
+
+  #memoryPanel h3 {
+    margin: 0 0 10px 0;
+    font-size: 15px;
+    font-weight: 700;
+    color: #dff4ff;
+  }
+
+  #memoryPanel .label {
+    font-size: 12px;
+    color: #9db6d8;
+    margin-top: 8px;
+    margin-bottom: 4px;
+  }
+
+  #memoryName {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 9px 10px;
+    border-radius: 10px;
+    border: 1px solid rgba(160, 210, 255, 0.18);
+    background: rgba(20, 26, 46, 0.8);
+    color: white;
+    outline: none;
+  }
+
+  #memoryMeta {
+    margin-top: 10px;
+    font-size: 13px;
+    color: #d2e9ff;
+    line-height: 1.5;
+  }
+
+  .btnRow {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .btnRow button {
+    flex: 1;
+    padding: 10px 12px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    color: white;
+    background: linear-gradient(135deg, rgba(84, 113, 255, 0.95), rgba(71, 171, 255, 0.95));
+  }
+
+  .btnRow button.secondary {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.12);
+  }
+
+  #controlsHint {
+    margin-top: 10px;
+    font-size: 11px;
+    color: #9fb8d8;
+    line-height: 1.45;
   }
 </style>
 </head>
 
 <body>
-<input id="timeline" type="range" min="0" max="100" value="50"/>
 
-<div id="hud" style="position:fixed;top:12px;left:12px;color:white;font-family:monospace;z-index:10;">
-  memory fragments: curated frames
-</div>
+<input id="timeline" type="range" min="0" max="100" value="50" />
 
-<div id="fps" style="position:fixed;top:72px;left:12px;color:white;font-family:monospace;z-index:10;">
-  fps: --
-</div>
+<div id="hud">memory fragments: curated frames</div>
+<div id="timelineLabel">timeline = memory clarity</div>
+<div id="fps">fps: --</div>
 
-<div style="position:fixed;top:40px;left:12px;color:#aaa;font-family:monospace;font-size:12px;">
-  timeline = memory clarity
+<div id="memoryPanel">
+  <h3>Dreamscape Memory Console</h3>
+
+  <div class="label">Selected Memory</div>
+  <input id="memoryName" type="text" value="Memory 01" />
+
+  <div id="memoryMeta">
+    <div><strong>ID:</strong> <span id="memoryIdText">0</span></div>
+    <div><strong>Clarity:</strong> <span id="clarityText">0.50</span></div>
+    <div><strong>Tone:</strong> <span id="toneText">neutral</span></div>
+  </div>
+
+  <div class="btnRow">
+    <button id="saveBtn">Save Name</button>
+    <button id="undoBtn" class="secondary">Undo</button>
+  </div>
+
+  <div class="btnRow">
+    <button id="enterBtn">Enter Memory</button>
+  </div>
+
+  <div id="controlsHint">
+    Click a floating memory frame to select it.<br>
+    Rename it here, then Save Name.<br>
+    Undo restores the last saved name.<br>
+    Scroll = zoom, drag = rotate.
+  </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 
 <script>
+  
   const scene = new THREE.Scene();
   scene.fog = new THREE.FogExp2(0x111122, 0.02);
 
-  const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+  const camera = new THREE.PerspectiveCamera(
+    75,
+    window.innerWidth / window.innerHeight,
+    0.1,
+    1000
+  );
   camera.position.set(0, 1.6, 0);
 
   const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -47,7 +185,6 @@
 
   const controls = new THREE.OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
-  
   controls.target.set(0, 1.6, -2.2);
   controls.enablePan = false;
   controls.minDistance = 1.5;
@@ -73,6 +210,7 @@
 
   const MEMORY_COUNT = 6;
   const savedNames = JSON.parse(localStorage.getItem("dreamscape_memory_names") || "null");
+
   const memories = Array.from({ length: MEMORY_COUNT }, (_, i) => ({
     id: i,
     name: savedNames?.[i] || `Memory ${String(i + 1).padStart(2, "0")}`,
@@ -84,10 +222,10 @@
 
   let selectedMemoryId = 0;
 
-  const framesGroup = new THREE.Group();
-  scene.add(framesGroup);
-
-  const frameMeshes = [];
+  function saveMemories() {
+    const names = memories.map(m => m.name);
+    localStorage.setItem("dreamscape_memory_names", JSON.stringify(names));
+  }
 
   const platformGeo = new THREE.CylinderGeometry(1.8, 2.2, 0.4, 48);
   const platformMat = new THREE.MeshStandardMaterial({
@@ -97,7 +235,6 @@
     emissive: 0x101018,
     emissiveIntensity: 0.3
   });
-  
   const platform = new THREE.Mesh(platformGeo, platformMat);
   platform.position.set(0, 0.2, 0);
   scene.add(platform);
@@ -114,7 +251,7 @@
       emissive: color,
       emissiveIntensity: 0.5
     });
-    
+
     const ring = new THREE.Mesh(ringGeo, ringMat);
     ring.rotation.x = Math.PI / 2;
     ring.position.y = y;
@@ -125,7 +262,7 @@
   const orbitRing1 = createOrbitRing(5.2, 1.6, 0x66ccff, 0.35);
   const orbitRing2 = createOrbitRing(6.6, 2.6, 0x88ddff, 0.22);
   const orbitRing3 = createOrbitRing(6.0, 0.6, 0x5577ff, 0.18);
-  
+
   const consoleGroup = new THREE.Group();
 
   const pedestalGeo = new THREE.CylinderGeometry(0.7, 0.95, 1.0, 24);
@@ -136,7 +273,6 @@
     emissive: 0x0c0c18,
     emissiveIntensity: 0.35
   });
-  
   const pedestal = new THREE.Mesh(pedestalGeo, pedestalMat);
   pedestal.position.set(0, 0.5, 0);
   consoleGroup.add(pedestal);
@@ -150,7 +286,6 @@
     emissiveIntensity: 1.15,
     side: THREE.DoubleSide
   });
-  
   const mainScreen = new THREE.Mesh(mainScreenGeo, mainScreenMat);
   mainScreen.position.set(0, 1.55, 0.38);
   mainScreen.rotation.x = -0.32;
@@ -186,38 +321,42 @@
     transparent: true,
     opacity: 0.5
   });
-  
+
   const holoRing = new THREE.Mesh(holoRingGeo, holoRingMat);
   holoRing.position.set(0.48, 1.62, 0.42);
   holoRing.rotation.x = -0.22;
   consoleGroup.add(holoRing);
 
-  const lineMat = new THREE.MeshStandardMaterial({
+  const consoleLineMat = new THREE.MeshStandardMaterial({
     color: 0xb9e4ff,
     emissive: 0x66ccff,
     emissiveIntensity: 1.0
   });
 
-  const uiLine1 = new THREE.Mesh(new THREE.PlaneGeometry(0.9, 0.03), lineMat);
+  const uiLine1 = new THREE.Mesh(new THREE.PlaneGeometry(0.9, 0.03), consoleLineMat);
   uiLine1.position.set(0, 1.76, 0.39);
   uiLine1.rotation.x = -0.32;
   consoleGroup.add(uiLine1);
 
-  const uiLine2 = new THREE.Mesh(new THREE.PlaneGeometry(0.65, 0.03), lineMat);
+  const uiLine2 = new THREE.Mesh(new THREE.PlaneGeometry(0.65, 0.03), consoleLineMat);
   uiLine2.position.set(0, 1.60, 0.39);
   uiLine2.rotation.x = -0.32;
   consoleGroup.add(uiLine2);
 
-  const uiLine3 = new THREE.Mesh(new THREE.PlaneGeometry(0.45, 0.03), lineMat);
+  const uiLine3 = new THREE.Mesh(new THREE.PlaneGeometry(0.45, 0.03), consoleLineMat);
   uiLine3.position.set(-0.22, 1.43, 0.39);
   uiLine3.rotation.x = -0.32;
   consoleGroup.add(uiLine3);
 
   consoleGroup.position.set(0, 0, -2.6);
   const consoleBaseY = 0;
-  
   consoleGroup.lookAt(0, 1.4, 0);
   scene.add(consoleGroup);
+
+  const framesGroup = new THREE.Group();
+  scene.add(framesGroup);
+
+  const frameMeshes = [];
 
   function createFrame() {
     const frame = new THREE.Group();
@@ -230,7 +369,7 @@
       emissive: 0x4ea3ff,
       emissiveIntensity: 0.75
     });
-    
+
     const outer = new THREE.Mesh(outerGeo, outerMat);
     frame.add(outer);
 
@@ -243,26 +382,26 @@
       emissiveIntensity: 0.35,
       side: THREE.DoubleSide
     });
-      
+
     const inner = new THREE.Mesh(innerGeo, innerMat);
     inner.position.z = 0.02;
     frame.add(inner);
 
-    const lineMat = new THREE.MeshStandardMaterial({
+    const frameLineMat = new THREE.MeshStandardMaterial({
       color: 0xc6ecff,
       emissive: 0x66ccff,
       emissiveIntensity: 0.85
     });
 
-    const line1 = new THREE.Mesh(new THREE.PlaneGeometry(0.55, 0.025), lineMat);
+    const line1 = new THREE.Mesh(new THREE.PlaneGeometry(0.55, 0.025), frameLineMat);
     line1.position.set(0, 0.18, 0.03);
     frame.add(line1);
 
-    const line2 = new THREE.Mesh(new THREE.PlaneGeometry(0.42, 0.02), lineMat);
+    const line2 = new THREE.Mesh(new THREE.PlaneGeometry(0.42, 0.02), frameLineMat);
     line2.position.set(-0.08, 0.03, 0.03);
     frame.add(line2);
 
-    const line3 = new THREE.Mesh(new THREE.PlaneGeometry(0.3, 0.02), lineMat);
+    const line3 = new THREE.Mesh(new THREE.PlaneGeometry(0.3, 0.02), frameLineMat);
     line3.position.set(-0.16, -0.12, 0.03);
     frame.add(line3);
 
@@ -271,37 +410,36 @@
 
     return frame;
   }
-  
+
   function layoutFrames() {
     framesGroup.clear();
     frameMeshes.length = 0;
-  
+
     const layouts = [
-      { count: 8, radius: 7.5, y: 1.8, tilt: 0.0, speed: 0.08 },   
-      { count: 6, radius: 6.5, y: 4.5, tilt: 0.35, speed: 0.05 },  
+      { count: 8, radius: 7.5, y: 1.8, tilt: 0.0, speed: 0.08 },
+      { count: 6, radius: 6.5, y: 4.5, tilt: 0.35, speed: 0.05 },
       { count: 6, radius: 6.5, y: -1.0, tilt: -0.35, speed: -0.06 }
     ];
-  
+
     let memoryIndex = 0;
-  
+
     for (let ringIndex = 0; ringIndex < layouts.length; ringIndex++) {
       const ring = layouts[ringIndex];
-  
+
       for (let i = 0; i < ring.count; i++) {
         const frame = createFrame();
         const angle = (i / ring.count) * Math.PI * 2;
-  
+
         frame.position.set(
           Math.cos(angle) * ring.radius,
           ring.y,
           Math.sin(angle) * ring.radius
         );
-  
+
         frame.rotation.y = -angle + Math.PI / 2;
         frame.rotation.x = ring.tilt;
-  
+
         frame.userData.memoryId = memoryIndex % MEMORY_COUNT;
-  
         frame.userData.baseAngle = angle;
         frame.userData.radius = ring.radius;
         frame.userData.baseY = ring.y;
@@ -309,161 +447,182 @@
         frame.userData.ringSpeed = ring.speed;
         frame.userData.floatOffset = Math.random() * Math.PI * 2;
         frame.userData.ringIndex = ringIndex;
-  
+
         memoryIndex++;
-  
+
         framesGroup.add(frame);
         frameMeshes.push(frame);
       }
     }
   }
-  
+
   layoutFrames();
 
   const hud = document.getElementById("hud");
   hud.textContent = "memory fragments: curated frames";
 
   const timeline = document.getElementById("timeline");
-
   const fpsEl = document.getElementById("fps");
-  let lastFpsTime = performance.now();
-  let frames = 0;
 
+  const memoryNameInput = document.getElementById("memoryName");
+  const memoryIdText = document.getElementById("memoryIdText");
+  const clarityText = document.getElementById("clarityText");
+  const toneText = document.getElementById("toneText");
+  const saveBtn = document.getElementById("saveBtn");
+  const undoBtn = document.getElementById("undoBtn");
+  const enterBtn = document.getElementById("enterBtn");
 
   const raycaster = new THREE.Raycaster();
   const mouse = new THREE.Vector2();
-  
-  function selectMemory(id){
-  
-    selectedMemoryId = id;
-  
-    console.log("Selected memory:", memories[id].name);
-  
-    highlightFrames();
-  
+
+  function updateMemoryPanel() {
+    const memory = memories[selectedMemoryId];
+    memoryNameInput.value = memory.name;
+    memoryIdText.textContent = memory.id;
+    clarityText.textContent = memory.clarity.toFixed(2);
+    toneText.textContent = memory.tone;
   }
-  
-  function highlightFrames(){
-  
-    for(const frame of frameMeshes){
-  
+
+  function highlightFrames() {
+    for (const frame of frameMeshes) {
       const memId = frame.userData.memoryId;
       const outer = frame.children[0];
-  
-      if(memId === selectedMemoryId){
-        outer.material.emissiveIntensity = 2;
-      }else{
+
+      if (memId === selectedMemoryId) {
+        outer.material.emissiveIntensity = 2.0;
+        outer.material.opacity = 0.55;
+      } else {
         outer.material.emissiveIntensity = 0.75;
+        outer.material.opacity = 0.28;
       }
-  
     }
-  
   }
-  
-  function saveMemories(){
-  
-    const names = memories.map(m=>m.name);
-    localStorage.setItem("dreamscape_memory_names", JSON.stringify(names));
-  
+
+  function selectMemory(id) {
+    selectedMemoryId = id;
+    updateMemoryPanel();
+    highlightFrames();
+    console.log("Selected memory:", memories[id].name);
   }
-  
-  window.addEventListener("click",(event)=>{
-  
+
+  function saveSelectedMemoryName() {
+    const memory = memories[selectedMemoryId];
+    const trimmed = memoryNameInput.value.trim();
+    if (!trimmed) return;
+
+    memory.history.push(memory.name);
+    memory.name = trimmed;
+    saveMemories();
+    updateMemoryPanel();
+
+    console.log("Saved new memory name:", memory.name);
+  }
+
+  function undoMemoryName() {
+    const memory = memories[selectedMemoryId];
+    if (memory.history.length > 0) {
+      memory.name = memory.history.pop();
+      saveMemories();
+      updateMemoryPanel();
+      console.log("Undo memory name");
+    }
+  }
+
+  window.addEventListener("click", (event) => {
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-  
+
     raycaster.setFromCamera(mouse, camera);
-  
+
     const intersects = raycaster.intersectObjects(frameMeshes, true);
-  
-    if(intersects.length > 0){
-  
+
+    if (intersects.length > 0) {
       let obj = intersects[0].object;
-  
-      while(obj.parent && obj.parent !== framesGroup){
+
+      while (obj.parent && obj.parent !== framesGroup) {
         obj = obj.parent;
       }
-  
+
       const frame = obj;
       const memoryId = frame.userData.memoryId;
-  
       selectMemory(memoryId);
-  
     }
-  
-  });
-  
-  window.addEventListener("keydown",(e)=>{
-  
-    if(e.key === "r"){
-  
-      const newName = prompt("Rename memory:", memories[selectedMemoryId].name);
-  
-      if(newName){
-  
-        memories[selectedMemoryId].name = newName;
-  
-        saveMemories();
-  
-        console.log("Memory renamed");
-  
-      }
-  
-    }
-  
   });
 
+  saveBtn.addEventListener("click", saveSelectedMemoryName);
+  undoBtn.addEventListener("click", undoMemoryName);
+
+  enterBtn.addEventListener("click", () => {
+    alert(`Entering ${memories[selectedMemoryId].name} (memory interior comes next).`);
+  });
+
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "r" || e.key === "R") {
+      saveSelectedMemoryName();
+    }
+
+    if (e.key === "u" || e.key === "U") {
+      undoMemoryName();
+    }
+  });
+
+  let lastFpsTime = performance.now();
+  let frames = 0;
+
+  updateMemoryPanel();
+  highlightFrames();
+
+ 
   function animate() {
-  
     requestAnimationFrame(animate);
-  
+
     const t = Number(timeline.value) / 100;
     const time = performance.now() * 0.001;
-  
+
+    // timeline -> visuals
     scene.fog.density = 0.01 + t * 0.05;
-  
+
+    // map timeline to selected memory clarity
+    memories[selectedMemoryId].clarity = t;
+    clarityText.textContent = t.toFixed(2);
+
     for (const frame of frameMeshes) {
       const angle = frame.userData.baseAngle + time * frame.userData.ringSpeed;
       const radius = frame.userData.radius;
       const floatY = Math.sin(time * 0.9 + frame.userData.floatOffset) * 0.22;
-  
+
       frame.position.x = Math.cos(angle) * radius;
       frame.position.z = Math.sin(angle) * radius;
       frame.position.y = frame.userData.baseY + floatY;
-  
+
       frame.rotation.y = -angle + Math.PI / 2;
       frame.rotation.x = frame.userData.tilt + Math.sin(time * 0.7 + frame.userData.floatOffset) * 0.05;
       frame.rotation.z = Math.cos(time * 0.6 + frame.userData.floatOffset) * 0.04;
-  
     }
-  
+
     orbitRing1.rotation.z += 0.0015;
     orbitRing2.rotation.z -= 0.001;
     orbitRing3.rotation.z += 0.0008;
-  
+
     consoleGroup.position.y = consoleBaseY + Math.sin(time * 1.2) * 0.04;
     consoleGroup.rotation.y = Math.sin(time * 0.35) * 0.05;
-  
+
     controls.update();
     renderer.render(scene, camera);
-  
+
     frames++;
     const now = performance.now();
-  
     if (now - lastFpsTime >= 500) {
       const fps = Math.round((frames * 1000) / (now - lastFpsTime));
       fpsEl.textContent = "fps: " + fps;
-  
       frames = 0;
       lastFpsTime = now;
-  
     }
-  
   }
 
   animate();
 
-  window.addEventListener('resize', () => {
+  window.addEventListener("resize", () => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
