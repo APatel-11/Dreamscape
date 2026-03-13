@@ -194,7 +194,7 @@
       Select a memory, rename it, adjust its clarity, and enter a focused memory state.
     </p>
     <p>
-      This build restores the stable interaction loop while keeping the project ready for visual upgrades.
+      This build restores the stable interaction loop while moving the composition toward the mockup.
     </p>
     <div class="menuRow">
       <button id="startBtn">Start Dreamscape</button>
@@ -248,6 +248,180 @@
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 
 <script>
+  function clamp(v, a, b) {
+    return Math.max(a, Math.min(b, v));
+  }
+
+  function createMemoryTexture(seed) {
+    const c = document.createElement("canvas");
+    c.width = 512;
+    c.height = 768;
+    const g = c.getContext("2d");
+
+    g.fillStyle = "#171c23";
+    g.fillRect(0, 0, c.width, c.height);
+
+    g.fillStyle = "rgba(255,255,255,0.03)";
+    for (let i = 0; i < 90; i++) {
+      const x = Math.random() * c.width;
+      const y = Math.random() * c.height;
+      const r = Math.random() * 2 + 0.5;
+      g.beginPath();
+      g.arc(x, y, r, 0, Math.PI * 2);
+      g.fill();
+    }
+
+    g.strokeStyle = "rgba(225,230,235,0.75)";
+    g.lineWidth = 5;
+    g.lineCap = "round";
+
+    const type = seed % 5;
+
+    if (type === 0) {
+      g.beginPath();
+      g.arc(256, 190, 85, 0, Math.PI * 2);
+      g.stroke();
+
+      g.beginPath();
+      g.moveTo(256, 275);
+      g.lineTo(256, 505);
+      g.moveTo(185, 370);
+      g.lineTo(327, 370);
+      g.moveTo(205, 520);
+      g.lineTo(256, 445);
+      g.lineTo(307, 520);
+      g.stroke();
+    } else if (type === 1) {
+      g.beginPath();
+      g.moveTo(95, 560);
+      g.lineTo(155, 430);
+      g.lineTo(230, 510);
+      g.lineTo(310, 290);
+      g.lineTo(420, 565);
+      g.stroke();
+
+      g.strokeRect(125, 120, 250, 170);
+
+      g.beginPath();
+      g.moveTo(145, 165);
+      g.lineTo(235, 165);
+      g.moveTo(145, 195);
+      g.lineTo(345, 195);
+      g.moveTo(145, 225);
+      g.lineTo(290, 225);
+      g.stroke();
+    } else if (type === 2) {
+      g.beginPath();
+      g.arc(260, 265, 150, 0, Math.PI * 2);
+      g.stroke();
+
+      g.beginPath();
+      g.arc(260, 265, 60, 0, Math.PI * 2);
+      g.stroke();
+
+      g.beginPath();
+      g.moveTo(110, 265);
+      g.lineTo(410, 265);
+      g.moveTo(260, 115);
+      g.lineTo(260, 415);
+      g.stroke();
+
+      g.beginPath();
+      g.moveTo(150, 560);
+      g.lineTo(360, 560);
+      g.stroke();
+    } else if (type === 3) {
+      g.strokeRect(105, 135, 300, 460);
+
+      g.beginPath();
+      g.moveTo(150, 210);
+      g.lineTo(360, 210);
+      g.moveTo(150, 280);
+      g.lineTo(320, 280);
+      g.moveTo(150, 350);
+      g.lineTo(345, 350);
+      g.moveTo(150, 420);
+      g.lineTo(290, 420);
+      g.moveTo(150, 490);
+      g.lineTo(350, 490);
+      g.stroke();
+    } else {
+      g.beginPath();
+      g.moveTo(120, 560);
+      g.lineTo(256, 160);
+      g.lineTo(392, 560);
+      g.closePath();
+      g.stroke();
+
+      g.beginPath();
+      g.moveTo(170, 450);
+      g.lineTo(340, 450);
+      g.moveTo(200, 360);
+      g.lineTo(312, 360);
+      g.moveTo(225, 280);
+      g.lineTo(287, 280);
+      g.stroke();
+    }
+
+    const tex = new THREE.CanvasTexture(c);
+    tex.needsUpdate = true;
+    return tex;
+  }
+
+  function createConsoleTexture() {
+    const c = document.createElement("canvas");
+    c.width = 1200;
+    c.height = 620;
+    const g = c.getContext("2d");
+
+    g.clearRect(0, 0, c.width, c.height);
+
+    g.strokeStyle = "rgba(150,220,255,0.85)";
+    g.lineWidth = 4;
+    g.strokeRect(18, 18, c.width - 36, c.height - 36);
+
+    g.strokeStyle = "rgba(150,220,255,0.45)";
+    g.lineWidth = 2;
+    g.strokeRect(48, 56, 360, 180);
+    g.strokeRect(450, 64, 230, 160);
+    g.strokeRect(90, 310, 260, 170);
+    g.strokeRect(430, 280, 320, 200);
+    g.strokeRect(800, 80, 250, 160);
+
+    g.fillStyle = "rgba(160,230,255,0.9)";
+    g.fillRect(80, 92, 180, 10);
+    g.fillRect(80, 122, 145, 8);
+    g.fillRect(80, 148, 220, 8);
+    g.fillRect(80, 174, 110, 8);
+
+    g.strokeStyle = "rgba(165,235,255,0.95)";
+    g.lineWidth = 4;
+    g.beginPath();
+    g.arc(928, 170, 62, 0, Math.PI * 2);
+    g.stroke();
+
+    g.beginPath();
+    g.arc(928, 170, 34, 0, Math.PI * 2);
+    g.stroke();
+
+    g.beginPath();
+    g.moveTo(475, 420);
+    g.lineTo(540, 360);
+    g.lineTo(620, 410);
+    g.lineTo(715, 320);
+    g.stroke();
+
+    g.lineWidth = 2;
+    for (let i = 0; i < 5; i++) {
+      g.beginPath();
+      g.moveTo(120, 355 + i * 24);
+      g.lineTo(280, 355 + i * 24);
+      g.stroke();
+    }
+
+    return new THREE.CanvasTexture(c);
+  }
+
   let appState = "menu";
 
   const scene = new THREE.Scene();
@@ -262,6 +436,7 @@
   camera.position.set(0, 3.6, 10.2);
 
   const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.setSize(window.innerWidth, window.innerHeight);
   document.body.appendChild(renderer.domElement);
 
@@ -274,11 +449,17 @@
   controls.target.set(0, 1.6, 0);
   controls.update();
 
-  const light = new THREE.PointLight(0xffffff, 1);
-  light.position.set(5, 10, 5);
-  scene.add(light);
+  const keyLight = new THREE.SpotLight(0xffffff, 2.1, 50, Math.PI / 6, 0.4, 1.2);
+  keyLight.position.set(0, 15, 4);
+  keyLight.target.position.set(0, 1.4, 0);
+  scene.add(keyLight);
+  scene.add(keyLight.target);
 
-  const ambient = new THREE.AmbientLight(0xffffff, 0.28);
+  const fillLight = new THREE.PointLight(0x89aaff, 0.6, 30);
+  fillLight.position.set(-8, 5, -8);
+  scene.add(fillLight);
+
+  const ambient = new THREE.AmbientLight(0xffffff, 0.18);
   scene.add(ambient);
 
   const sphereGeo = new THREE.SphereGeometry(30, 64, 64);
@@ -311,147 +492,138 @@
     localStorage.setItem("dreamscape_memory_names", JSON.stringify(names));
   }
 
-  const platformGeo = new THREE.CylinderGeometry(1.85, 2.25, 0.28, 48);
-  const platformMat = new THREE.MeshStandardMaterial({
-    color: 0x1a1a24,
-    roughness: 0.7,
-    metalness: 0.2,
-    emissive: 0x101018,
-    emissiveIntensity: 0.3
-  });
-  const platform = new THREE.Mesh(platformGeo, platformMat);
-  platform.position.set(0, 0.14, 0);
-  scene.add(platform);
+  const platformGroup = new THREE.Group();
+
+  const topDisk = new THREE.Mesh(
+    new THREE.CylinderGeometry(1.9, 2.35, 0.34, 52),
+    new THREE.MeshStandardMaterial({
+      color: 0x524c54,
+      roughness: 0.95,
+      metalness: 0.02
+    })
+  );
+  topDisk.position.y = 0.2;
+  platformGroup.add(topDisk);
+
+  const lowerCone = new THREE.Mesh(
+    new THREE.ConeGeometry(1.55, 1.95, 52),
+    new THREE.MeshStandardMaterial({
+      color: 0x403b42,
+      roughness: 0.98,
+      metalness: 0.01
+    })
+  );
+  lowerCone.position.y = -0.95;
+  platformGroup.add(lowerCone);
+
+  platformGroup.position.set(0, 0.45, 0);
+  scene.add(platformGroup);
 
   const avatarGroup = new THREE.Group();
 
   const avatarMat = new THREE.MeshStandardMaterial({
-    color: 0x202437,
-    roughness: 0.82,
-    metalness: 0.04,
-    emissive: 0x0f1220,
+    color: 0x25293a,
+    roughness: 0.86,
+    metalness: 0.03,
+    emissive: 0x121522,
     emissiveIntensity: 0.12
   });
 
-  const legGeo = new THREE.CylinderGeometry(0.09, 0.09, 0.82, 14);
+  const legGeo = new THREE.CylinderGeometry(0.07, 0.07, 0.95, 14);
   const legLeft = new THREE.Mesh(legGeo, avatarMat);
-  legLeft.position.set(-0.11, 0.52, 0);
+  legLeft.position.set(-0.11, 0.55, 0);
   avatarGroup.add(legLeft);
 
   const legRight = new THREE.Mesh(legGeo, avatarMat);
-  legRight.position.set(0.11, 0.52, 0);
+  legRight.position.set(0.11, 0.55, 0);
   avatarGroup.add(legRight);
 
-  const torsoGeo = new THREE.CylinderGeometry(0.23, 0.28, 1.05, 18);
+  const torsoGeo = new THREE.CylinderGeometry(0.19, 0.23, 1.25, 18);
   const torso = new THREE.Mesh(torsoGeo, avatarMat);
-  torso.position.set(0, 1.17, 0);
+  torso.position.set(0, 1.38, 0);
   avatarGroup.add(torso);
 
   const shoulders = new THREE.Mesh(
-    new THREE.SphereGeometry(0.24, 18, 18),
+    new THREE.SphereGeometry(0.2, 18, 18),
     avatarMat
   );
-  shoulders.position.set(0, 1.54, 0);
-  shoulders.scale.set(1.55, 0.85, 1.0);
+  shoulders.position.set(0, 1.82, 0);
+  shoulders.scale.set(1.45, 0.75, 0.9);
   avatarGroup.add(shoulders);
 
   const head = new THREE.Mesh(
-    new THREE.SphereGeometry(0.17, 18, 18),
+    new THREE.SphereGeometry(0.16, 18, 18),
     avatarMat
   );
-  head.position.set(0, 1.88, 0);
+  head.position.set(0, 2.12, 0.02);
   avatarGroup.add(head);
 
-  avatarGroup.position.set(0, 0.08, 0.22);
+  const armGeo = new THREE.CylinderGeometry(0.055, 0.06, 1.0, 12);
+
+  const armLeft = new THREE.Mesh(armGeo, avatarMat);
+  armLeft.position.set(-0.46, 1.58, 0);
+  armLeft.rotation.z = -1.15;
+  avatarGroup.add(armLeft);
+
+  const armRight = new THREE.Mesh(armGeo, avatarMat);
+  armRight.position.set(0.46, 1.58, 0);
+  armRight.rotation.z = 1.15;
+  avatarGroup.add(armRight);
+
+  avatarGroup.position.set(0, 0.54, 0.02);
   scene.add(avatarGroup);
 
   const consoleGroup = new THREE.Group();
 
-  const pedestalGeo = new THREE.CylinderGeometry(0.68, 0.92, 1.0, 24);
-  const pedestalMat = new THREE.MeshStandardMaterial({
-    color: 0x171724,
-    roughness: 0.45,
-    metalness: 0.35,
-    emissive: 0x0c0c18,
-    emissiveIntensity: 0.35
-  });
-  const pedestal = new THREE.Mesh(pedestalGeo, pedestalMat);
-  pedestal.position.set(0, 0.5, 0);
-  consoleGroup.add(pedestal);
+  const consoleTexture = createConsoleTexture();
 
-  const mainScreenGeo = new THREE.PlaneGeometry(1.6, 0.95);
-  const mainScreenMat = new THREE.MeshStandardMaterial({
-    color: 0x9ad8ff,
+  const mainScreenGeo = new THREE.PlaneGeometry(2.7, 1.38);
+  const mainScreenMat = new THREE.MeshBasicMaterial({
+    map: consoleTexture,
     transparent: true,
-    opacity: 0.20,
-    emissive: 0x4c8cff,
-    emissiveIntensity: 1.15,
-    side: THREE.DoubleSide
+    opacity: 0.92
   });
   const mainScreen = new THREE.Mesh(mainScreenGeo, mainScreenMat);
-  mainScreen.position.set(0, 1.55, 0.38);
-  mainScreen.rotation.x = -0.32;
+  mainScreen.position.set(0, 1.72, 0);
   consoleGroup.add(mainScreen);
 
-  const sideGeo = new THREE.PlaneGeometry(0.6, 0.42);
-  const sideMat = new THREE.MeshStandardMaterial({
-    color: 0xaee2ff,
-    transparent: true,
-    opacity: 0.15,
-    emissive: 0x5f9dff,
-    emissiveIntensity: 0.9,
-    side: THREE.DoubleSide
-  });
+  const glowScreen = new THREE.Mesh(
+    new THREE.PlaneGeometry(2.92, 1.55),
+    new THREE.MeshBasicMaterial({
+      color: 0x87d7ff,
+      transparent: true,
+      opacity: 0.08
+    })
+  );
+  glowScreen.position.set(0, 1.72, -0.03);
+  consoleGroup.add(glowScreen);
 
-  const leftPane = new THREE.Mesh(sideGeo, sideMat.clone());
-  leftPane.position.set(-0.95, 1.45, 0.18);
-  leftPane.rotation.y = 0.28;
-  leftPane.rotation.x = -0.15;
-  consoleGroup.add(leftPane);
+  const sidePanelL = new THREE.Mesh(
+    new THREE.PlaneGeometry(0.72, 0.4),
+    new THREE.MeshBasicMaterial({
+      color: 0x9ddfff,
+      transparent: true,
+      opacity: 0.13
+    })
+  );
+  sidePanelL.position.set(-1.55, 1.8, 0.04);
+  sidePanelL.rotation.y = 0.34;
+  consoleGroup.add(sidePanelL);
 
-  const rightPane = new THREE.Mesh(sideGeo, sideMat.clone());
-  rightPane.position.set(0.95, 1.45, 0.18);
-  rightPane.rotation.y = -0.28;
-  rightPane.rotation.x = -0.15;
-  consoleGroup.add(rightPane);
+  const sidePanelR = new THREE.Mesh(
+    new THREE.PlaneGeometry(0.86, 0.46),
+    new THREE.MeshBasicMaterial({
+      color: 0x9ddfff,
+      transparent: true,
+      opacity: 0.13
+    })
+  );
+  sidePanelR.position.set(1.48, 1.58, 0.04);
+  sidePanelR.rotation.y = -0.28;
+  consoleGroup.add(sidePanelR);
 
-  const holoRingGeo = new THREE.TorusGeometry(0.24, 0.015, 12, 64);
-  const holoRingMat = new THREE.MeshStandardMaterial({
-    color: 0x9be7ff,
-    emissive: 0x66ccff,
-    emissiveIntensity: 1.0,
-    transparent: true,
-    opacity: 0.5
-  });
-  const holoRing = new THREE.Mesh(holoRingGeo, holoRingMat);
-  holoRing.position.set(0.48, 1.62, 0.42);
-  holoRing.rotation.x = -0.22;
-  consoleGroup.add(holoRing);
-
-  const consoleLineMat = new THREE.MeshStandardMaterial({
-    color: 0xb9e4ff,
-    emissive: 0x66ccff,
-    emissiveIntensity: 1.0
-  });
-
-  const uiLine1 = new THREE.Mesh(new THREE.PlaneGeometry(0.9, 0.03), consoleLineMat);
-  uiLine1.position.set(0, 1.76, 0.39);
-  uiLine1.rotation.x = -0.32;
-  consoleGroup.add(uiLine1);
-
-  const uiLine2 = new THREE.Mesh(new THREE.PlaneGeometry(0.65, 0.03), consoleLineMat);
-  uiLine2.position.set(0, 1.60, 0.39);
-  uiLine2.rotation.x = -0.32;
-  consoleGroup.add(uiLine2);
-
-  const uiLine3 = new THREE.Mesh(new THREE.PlaneGeometry(0.45, 0.03), consoleLineMat);
-  uiLine3.position.set(-0.22, 1.43, 0.39);
-  uiLine3.rotation.x = -0.32;
-  consoleGroup.add(uiLine3);
-
-  consoleGroup.position.set(0, 0, -2.6);
-  const consoleBaseY = 0;
-  consoleGroup.lookAt(0, 1.4, 0);
+  consoleGroup.position.set(0, 0.15, -1.35);
+  const consoleBaseY = consoleGroup.position.y;
   scene.add(consoleGroup);
 
   const framesGroup = new THREE.Group();
@@ -459,55 +631,62 @@
 
   const frameMeshes = [];
 
-  function createFrame() {
+  function createFrame(seed) {
     const frame = new THREE.Group();
 
-    const outerGeo = new THREE.BoxGeometry(1.45, 0.9, 0.025);
-    const outerMat = new THREE.MeshStandardMaterial({
-      color: 0x87cfff,
-      transparent: true,
-      opacity: 0.28,
-      emissive: 0x4ea3ff,
-      emissiveIntensity: 0.75
+    const bronzeMat = new THREE.MeshStandardMaterial({
+      color: 0x9a7b57,
+      roughness: 0.8,
+      metalness: 0.08,
+      emissive: 0x3d2819,
+      emissiveIntensity: 0.15
     });
 
-    const outer = new THREE.Mesh(outerGeo, outerMat);
-    frame.add(outer);
+    const w = 0.96 + (seed % 3) * 0.28;
+    const h = 1.22 + ((seed + 1) % 3) * 0.34;
 
-    const innerGeo = new THREE.PlaneGeometry(1.28, 0.76);
-    const innerMat = new THREE.MeshStandardMaterial({
-      color: 0x1a2440,
-      transparent: true,
-      opacity: 0.22,
-      emissive: 0x224477,
-      emissiveIntensity: 0.35,
-      side: THREE.DoubleSide
-    });
+    const topBar = new THREE.Mesh(new THREE.BoxGeometry(w + 0.18, 0.08, 0.05), bronzeMat.clone());
+    topBar.position.set(0, h / 2, 0);
+    frame.add(topBar);
 
-    const inner = new THREE.Mesh(innerGeo, innerMat);
-    inner.position.z = 0.02;
+    const bottomBar = new THREE.Mesh(new THREE.BoxGeometry(w + 0.18, 0.08, 0.05), bronzeMat.clone());
+    bottomBar.position.set(0, -h / 2, 0);
+    frame.add(bottomBar);
+
+    const leftBar = new THREE.Mesh(new THREE.BoxGeometry(0.08, h + 0.16, 0.05), bronzeMat.clone());
+    leftBar.position.set(-w / 2, 0, 0);
+    frame.add(leftBar);
+
+    const rightBar = new THREE.Mesh(new THREE.BoxGeometry(0.08, h + 0.16, 0.05), bronzeMat.clone());
+    rightBar.position.set(w / 2, 0, 0);
+    frame.add(rightBar);
+
+    const inner = new THREE.Mesh(
+      new THREE.PlaneGeometry(w, h),
+      new THREE.MeshBasicMaterial({
+        map: createMemoryTexture(seed),
+        transparent: true,
+        opacity: 0.94
+      })
+    );
+    inner.position.z = 0.03;
     frame.add(inner);
 
-    const frameLineMat = new THREE.MeshStandardMaterial({
-      color: 0xc6ecff,
-      emissive: 0x66ccff,
-      emissiveIntensity: 0.85
-    });
+    const glass = new THREE.Mesh(
+      new THREE.PlaneGeometry(w + 0.02, h + 0.02),
+      new THREE.MeshBasicMaterial({
+        color: 0xffffff,
+        transparent: true,
+        opacity: 0.05
+      })
+    );
+    glass.position.z = 0.04;
+    frame.add(glass);
 
-    const line1 = new THREE.Mesh(new THREE.PlaneGeometry(0.55, 0.025), frameLineMat);
-    line1.position.set(0, 0.18, 0.03);
-    frame.add(line1);
-
-    const line2 = new THREE.Mesh(new THREE.PlaneGeometry(0.42, 0.02), frameLineMat);
-    line2.position.set(-0.08, 0.03, 0.03);
-    frame.add(line2);
-
-    const line3 = new THREE.Mesh(new THREE.PlaneGeometry(0.3, 0.02), frameLineMat);
-    line3.position.set(-0.16, -0.12, 0.03);
-    frame.add(line3);
-
-    frame.userData.outerMat = outerMat;
-    frame.userData.innerMat = innerMat;
+    frame.userData.borderBars = [topBar, bottomBar, leftBar, rightBar];
+    frame.userData.inner = inner;
+    frame.userData.width = w;
+    frame.userData.height = h;
 
     return frame;
   }
@@ -516,47 +695,58 @@
     framesGroup.clear();
     frameMeshes.length = 0;
 
-    const layouts = [
-      { count: 8, radius: 7.4, y: 1.8, tilt: 0.0, speed: 0.08, phase: 0.0 },
-      { count: 6, radius: 6.5, y: 4.4, tilt: 0.28, speed: 0.05, phase: 0.45 },
-      { count: 6, radius: 6.5, y: -0.8, tilt: -0.28, speed: -0.06, phase: 0.9 }
-    ];
+    const count = 72;
+    const goldenAngle = Math.PI * (3 - Math.sqrt(5));
 
-    let memoryIndex = 0;
+    for (let i = 0; i < count; i++) {
+      const yN = 1 - (i / (count - 1)) * 2;
+      const radiusAtY = Math.sqrt(1 - yN * yN);
+      const theta = goldenAngle * i;
 
-    for (let ringIndex = 0; ringIndex < layouts.length; ringIndex++) {
-      const ring = layouts[ringIndex];
+      const shellRadius = 6.25 + (i % 3) * 0.22;
+      const x = Math.cos(theta) * radiusAtY * shellRadius;
+      const y = yN * 6.25 + 2.05;
+      const z = Math.sin(theta) * radiusAtY * shellRadius;
 
-      for (let i = 0; i < ring.count; i++) {
-        const frame = createFrame();
-        const angle = ((i / ring.count) * Math.PI * 2) + ring.phase;
+      const frame = createFrame(i + 1);
+      frame.position.set(x, y, z);
+      frame.lookAt(0, 2.1, 0);
 
-        frame.position.set(
-          Math.cos(angle) * ring.radius,
-          ring.y,
-          Math.sin(angle) * ring.radius
-        );
+      frame.userData.memoryId = i % MEMORY_COUNT;
+      frame.userData.baseTheta = theta;
+      frame.userData.baseYN = yN;
+      frame.userData.shellRadius = shellRadius;
+      frame.userData.angularSpeed = (i % 2 === 0 ? 1 : -1) * (0.022 + (i % 5) * 0.0025);
+      frame.userData.floatOffset = Math.random() * Math.PI * 2;
 
-        frame.rotation.y = -angle + Math.PI / 2;
-        frame.rotation.x = ring.tilt;
-
-        frame.userData.memoryId = memoryIndex % MEMORY_COUNT;
-        frame.userData.baseAngle = angle;
-        frame.userData.radius = ring.radius;
-        frame.userData.baseY = ring.y;
-        frame.userData.tilt = ring.tilt;
-        frame.userData.ringSpeed = ring.speed;
-        frame.userData.floatOffset = Math.random() * Math.PI * 2;
-
-        memoryIndex++;
-
-        framesGroup.add(frame);
-        frameMeshes.push(frame);
-      }
+      framesGroup.add(frame);
+      frameMeshes.push(frame);
     }
   }
 
   layoutFrames();
+
+  const dustGroup = new THREE.Group();
+  scene.add(dustGroup);
+
+  for (let i = 0; i < 140; i++) {
+    const dot = new THREE.Mesh(
+      new THREE.SphereGeometry(0.03 + Math.random() * 0.03, 8, 8),
+      new THREE.MeshBasicMaterial({
+        color: 0xd9ecff,
+        transparent: true,
+        opacity: 0.35
+      })
+    );
+    dot.position.set(
+      (Math.random() - 0.5) * 18,
+      Math.random() * 10 - 1,
+      (Math.random() - 0.5) * 18
+    );
+    dot.userData.baseY = dot.position.y;
+    dot.userData.offset = Math.random() * Math.PI * 2;
+    dustGroup.add(dot);
+  }
 
   const hud = document.getElementById("hud");
   const timeline = document.getElementById("timeline");
@@ -593,16 +783,12 @@
 
   function highlightFrames() {
     for (const frame of frameMeshes) {
-      const outer = frame.children[0];
       const isSelected = frame === selectedFrame;
-
-      if (isSelected) {
-        outer.material.emissiveIntensity = 2.0;
-        outer.material.opacity = 0.55;
-      } else {
-        outer.material.emissiveIntensity = 0.75;
-        outer.material.opacity = 0.28;
+      for (const bar of frame.userData.borderBars) {
+        bar.material.emissiveIntensity = isSelected ? 0.65 : 0.15;
+        bar.material.color.set(isSelected ? 0xe0b78d : 0x9a7b57);
       }
+      frame.userData.inner.material.opacity = isSelected ? 1.0 : 0.94;
     }
   }
 
@@ -645,11 +831,9 @@
 
     if (intersects.length > 0) {
       let obj = intersects[0].object;
-
       while (obj.parent && obj.parent !== framesGroup) {
         obj = obj.parent;
       }
-
       selectMemoryFrame(obj);
     }
   });
@@ -713,10 +897,10 @@
       museumSphere.material.color.set(0x0b0b14);
       scene.fog.density = 0.02;
       framesGroup.visible = true;
-      platform.visible = true;
+      platformGroup.visible = true;
       avatarGroup.visible = true;
       consoleGroup.visible = true;
-      controls.target.set(0, 1.6, 0);
+      controls.target.set(0, 1.95, 0);
       controls.update();
 
       if (!selectedFrame && frameMeshes.length > 0) {
@@ -731,13 +915,13 @@
       timelineLabel.style.display = "block";
       hud.textContent = `inside memory: ${memories[selectedMemoryId].name}`;
       scene.fog.color.set(0x24182e);
-      scene.fog.density = 0.055;
+      scene.fog.density = 0.05;
       museumSphere.material.color.set(0x120f1a);
-      framesGroup.visible = false;
-      platform.visible = true;
+      framesGroup.visible = true;
+      platformGroup.visible = true;
       avatarGroup.visible = true;
       consoleGroup.visible = true;
-      controls.target.set(0, 1.55, -0.9);
+      controls.target.set(0, 1.95, -0.5);
       controls.update();
     }
   }
@@ -755,8 +939,8 @@
     const time = performance.now() * 0.001;
 
     const targetDistance = appState === "memory"
-      ? 5.2 - t * 2.6
-      : 10.8 - t * 7.6;
+      ? 6.2 - t * 2.5
+      : 12.0 - t * 8.2;
 
     const dir = camera.position.clone().sub(controls.target);
     if (dir.lengthSq() < 0.0001) {
@@ -766,41 +950,47 @@
     const desiredPos = controls.target.clone().add(dir.multiplyScalar(targetDistance));
     camera.position.lerp(desiredPos, 0.08);
 
+    if (t > 0.93) {
+      avatarGroup.visible = false;
+    } else if (appState !== "menu") {
+      avatarGroup.visible = true;
+    }
+
     if (appState === "hub") {
-      scene.fog.density = 0.012 + t * 0.028;
+      scene.fog.density = 0.011 + t * 0.026;
       museumSphere.material.color.set(0x0b0b14);
       memories[selectedMemoryId].clarity = t;
       clarityText.textContent = t.toFixed(2);
     }
 
     if (appState === "memory") {
-      scene.fog.density = 0.035 + t * 0.04;
+      scene.fog.density = 0.03 + t * 0.035;
       museumSphere.material.color.set(0x120f1a);
       memories[selectedMemoryId].clarity = t;
       clarityText.textContent = t.toFixed(2);
-      consoleGroup.position.z = -1.75;
-    } else {
-      consoleGroup.position.z = -2.6;
     }
 
     if (framesGroup.visible) {
-      for (const frame of frameMeshes) {
-        const angle = frame.userData.baseAngle + time * frame.userData.ringSpeed;
-        const radius = frame.userData.radius;
-        const floatY = Math.sin(time * 0.9 + frame.userData.floatOffset) * 0.22;
+      for (let i = 0; i < frameMeshes.length; i++) {
+        const frame = frameMeshes[i];
+        const theta = frame.userData.baseTheta + time * frame.userData.angularSpeed;
+        const yN = frame.userData.baseYN + Math.sin(time * 0.35 + frame.userData.floatOffset) * 0.015;
+        const rAtY = Math.sqrt(Math.max(0.0001, 1 - yN * yN));
+        const shellRadius = frame.userData.shellRadius;
 
-        frame.position.x = Math.cos(angle) * radius;
-        frame.position.z = Math.sin(angle) * radius;
-        frame.position.y = frame.userData.baseY + floatY;
+        frame.position.x = Math.cos(theta) * rAtY * shellRadius;
+        frame.position.y = yN * 6.25 + 2.05;
+        frame.position.z = Math.sin(theta) * rAtY * shellRadius;
 
-        frame.rotation.y = -angle + Math.PI / 2;
-        frame.rotation.x = frame.userData.tilt + Math.sin(time * 0.7 + frame.userData.floatOffset) * 0.05;
-        frame.rotation.z = Math.cos(time * 0.6 + frame.userData.floatOffset) * 0.04;
+        frame.lookAt(0, 2.05, 0);
       }
     }
 
-    consoleGroup.position.y = consoleBaseY + Math.sin(time * 1.2) * 0.04;
-    consoleGroup.rotation.y = Math.sin(time * 0.35) * 0.05;
+    for (const dot of dustGroup.children) {
+      dot.position.y = dot.userData.baseY + Math.sin(time + dot.userData.offset) * 0.05;
+    }
+
+    consoleGroup.position.y = consoleBaseY + Math.sin(time * 1.15) * 0.025;
 
     controls.update();
     renderer.render(scene, camera);
