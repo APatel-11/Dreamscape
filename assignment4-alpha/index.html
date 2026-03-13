@@ -194,7 +194,7 @@
       Select a memory, rename it, adjust its clarity, and enter a focused memory state.
     </p>
     <p>
-      This pass locks the composition toward the mockup: centered pedestal, user, console, and archive sphere.
+      This pass upgrades the hologram console with layered screens and animated interface elements.
     </p>
     <div class="menuRow">
       <button id="startBtn">Start Dreamscape</button>
@@ -290,61 +290,66 @@
 
   function createConsoleTexture() {
     const c = document.createElement("canvas");
-    c.width = 1400;
-    c.height = 700;
+    c.width = 1600;
+    c.height = 820;
     const g = c.getContext("2d");
 
     g.clearRect(0, 0, c.width, c.height);
 
     g.strokeStyle = "rgba(150,220,255,0.95)";
     g.lineWidth = 4;
-    g.strokeRect(24, 24, c.width - 48, c.height - 48);
+    g.strokeRect(20, 20, c.width - 40, c.height - 40);
 
-    g.strokeStyle = "rgba(150,220,255,0.4)";
+    g.strokeStyle = "rgba(150,220,255,0.24)";
     g.lineWidth = 2;
-    g.strokeRect(60, 70, 380, 210);
-    g.strokeRect(470, 76, 270, 185);
-    g.strokeRect(85, 360, 290, 210);
-    g.strokeRect(430, 335, 390, 215);
-    g.strokeRect(900, 90, 320, 190);
+    g.strokeRect(70, 80, 430, 245);
+    g.strokeRect(560, 84, 310, 210);
+    g.strokeRect(90, 430, 340, 235);
+    g.strokeRect(500, 405, 470, 250);
+    g.strokeRect(1060, 90, 360, 220);
+    g.strokeRect(1090, 390, 250, 170);
 
-    g.fillStyle = "rgba(170,235,255,0.92)";
-    g.fillRect(88, 110, 200, 11);
-    g.fillRect(88, 143, 155, 8);
-    g.fillRect(88, 168, 240, 8);
-    g.fillRect(88, 194, 120, 8);
+    g.fillStyle = "rgba(175,235,255,0.92)";
+    g.fillRect(105, 118, 220, 12);
+    g.fillRect(105, 154, 180, 8);
+    g.fillRect(105, 182, 270, 8);
+    g.fillRect(105, 210, 130, 8);
 
-    g.strokeStyle = "rgba(170,235,255,0.98)";
+    g.strokeStyle = "rgba(175,235,255,0.98)";
     g.lineWidth = 4;
     g.beginPath();
-    g.arc(1080, 185, 72, 0, Math.PI * 2);
+    g.arc(1240, 200, 82, 0, Math.PI * 2);
     g.stroke();
 
     g.beginPath();
-    g.arc(1080, 185, 40, 0, Math.PI * 2);
+    g.arc(1240, 200, 46, 0, Math.PI * 2);
     g.stroke();
 
     g.beginPath();
-    g.moveTo(495, 505);
-    g.lineTo(580, 420);
-    g.lineTo(660, 470);
-    g.lineTo(790, 360);
+    g.moveTo(585, 595);
+    g.lineTo(690, 485);
+    g.lineTo(800, 555);
+    g.lineTo(945, 410);
     g.stroke();
 
     g.lineWidth = 2;
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 6; i++) {
       g.beginPath();
-      g.moveTo(118, 405 + i * 24);
-      g.lineTo(315, 405 + i * 24);
+      g.moveTo(125, 470 + i * 24);
+      g.lineTo(350, 470 + i * 24);
       g.stroke();
     }
 
-    g.strokeStyle = "rgba(170,235,255,0.5)";
-    g.strokeRect(930, 355, 200, 135);
+    g.strokeStyle = "rgba(170,235,255,0.36)";
+    g.strokeRect(1110, 430, 180, 100);
 
     const tex = new THREE.CanvasTexture(c);
     tex.needsUpdate = true;
     return tex;
+  }
+
+  function getAdaptiveFrameScale(totalFrames) {
+    return Math.max(0.52, 1.02 - totalFrames * 0.0022);
   }
 
   let appState = "menu";
@@ -370,7 +375,7 @@
   controls.enablePan = false;
   controls.enableZoom = false;
   controls.minDistance = 1.5;
-  controls.maxDistance = 22;
+  controls.maxDistance = 24;
   controls.target.set(0, 2.1, 0);
   controls.update();
 
@@ -387,6 +392,10 @@
   const rimLight = new THREE.PointLight(0xc6d7ff, 0.4, 30);
   rimLight.position.set(7, 6, 8);
   scene.add(rimLight);
+
+  const consoleLight = new THREE.PointLight(0x7fd7ff, 0.8, 20);
+  consoleLight.position.set(0, 3.1, -1.8);
+  scene.add(consoleLight);
 
   const ambient = new THREE.AmbientLight(0xffffff, 0.16);
   scene.add(ambient);
@@ -518,61 +527,105 @@
 
   const consoleTexture = createConsoleTexture();
 
-  const mainScreenGeo = new THREE.PlaneGeometry(3.35, 1.72);
+  const mainScreenGeo = new THREE.PlaneGeometry(3.65, 1.9);
   const mainScreenMat = new THREE.MeshBasicMaterial({
     map: consoleTexture,
     transparent: true,
-    opacity: 0.93
+    opacity: 0.95
   });
   const mainScreen = new THREE.Mesh(mainScreenGeo, mainScreenMat);
-  mainScreen.position.set(0, 2.05, 0);
+  mainScreen.position.set(0, 2.15, 0);
   consoleGroup.add(mainScreen);
 
   const glowScreen = new THREE.Mesh(
-    new THREE.PlaneGeometry(3.6, 1.95),
+    new THREE.PlaneGeometry(3.95, 2.15),
     new THREE.MeshBasicMaterial({
       color: 0x87d7ff,
       transparent: true,
       opacity: 0.08
     })
   );
-  glowScreen.position.set(0, 2.05, -0.03);
+  glowScreen.position.set(0, 2.15, -0.04);
   consoleGroup.add(glowScreen);
 
   const sidePanelL = new THREE.Mesh(
-    new THREE.PlaneGeometry(0.9, 0.52),
+    new THREE.PlaneGeometry(1.05, 0.6),
     new THREE.MeshBasicMaterial({
       color: 0x9ddfff,
       transparent: true,
-      opacity: 0.12
+      opacity: 0.13
     })
   );
-  sidePanelL.position.set(-1.95, 2.15, 0.03);
-  sidePanelL.rotation.y = 0.35;
+  sidePanelL.position.set(-2.15, 2.2, 0.02);
+  sidePanelL.rotation.y = 0.38;
   consoleGroup.add(sidePanelL);
 
   const sidePanelR = new THREE.Mesh(
-    new THREE.PlaneGeometry(0.98, 0.58),
+    new THREE.PlaneGeometry(1.16, 0.7),
     new THREE.MeshBasicMaterial({
       color: 0x9ddfff,
       transparent: true,
-      opacity: 0.12
+      opacity: 0.13
     })
   );
-  sidePanelR.position.set(1.88, 1.9, 0.03);
-  sidePanelR.rotation.y = -0.3;
+  sidePanelR.position.set(2.1, 1.92, 0.02);
+  sidePanelR.rotation.y = -0.34;
   consoleGroup.add(sidePanelR);
 
-  const halo = new THREE.Mesh(
-    new THREE.TorusGeometry(0.22, 0.012, 12, 64),
+  const haloLeft = new THREE.Mesh(
+    new THREE.TorusGeometry(0.18, 0.01, 12, 64),
     new THREE.MeshBasicMaterial({
       color: 0x96dcff,
       transparent: true,
-      opacity: 0.65
+      opacity: 0.7
     })
   );
-  halo.position.set(1.18, 2.16, 0.02);
-  consoleGroup.add(halo);
+  haloLeft.position.set(1.42, 2.22, 0.02);
+  consoleGroup.add(haloLeft);
+
+  const haloRight = new THREE.Mesh(
+    new THREE.TorusGeometry(0.27, 0.012, 12, 64),
+    new THREE.MeshBasicMaterial({
+      color: 0x96dcff,
+      transparent: true,
+      opacity: 0.72
+    })
+  );
+  haloRight.position.set(1.78, 1.96, 0.02);
+  consoleGroup.add(haloRight);
+
+  const scanlineBar = new THREE.Mesh(
+    new THREE.PlaneGeometry(3.55, 0.05),
+    new THREE.MeshBasicMaterial({
+      color: 0xb8efff,
+      transparent: true,
+      opacity: 0.18
+    })
+  );
+  scanlineBar.position.set(0, 2.15, 0.03);
+  consoleGroup.add(scanlineBar);
+
+  const pulseBar = new THREE.Mesh(
+    new THREE.PlaneGeometry(1.15, 0.07),
+    new THREE.MeshBasicMaterial({
+      color: 0xc7f3ff,
+      transparent: true,
+      opacity: 0.24
+    })
+  );
+  pulseBar.position.set(-1.02, 2.42, 0.03);
+  consoleGroup.add(pulseBar);
+
+  const chartGlow = new THREE.Mesh(
+    new THREE.PlaneGeometry(1.15, 0.6),
+    new THREE.MeshBasicMaterial({
+      color: 0x75d6ff,
+      transparent: true,
+      opacity: 0.06
+    })
+  );
+  chartGlow.position.set(0.08, 1.82, 0.03);
+  consoleGroup.add(chartGlow);
 
   consoleGroup.position.set(0, 0.24, -1.88);
   const consoleBaseY = consoleGroup.position.y;
@@ -583,13 +636,9 @@
 
   const frameMeshes = [];
 
-  function getAdaptiveFrameScale(totalFrames) {
-    return Math.max(0.52, 1.02 - totalFrames * 0.0022);
-  }
-
   function createFrame(seed, totalFrames) {
     const frame = new THREE.Group();
-  
+
     const bronzeMat = new THREE.MeshStandardMaterial({
       color: 0x9a7b57,
       roughness: 0.8,
@@ -597,28 +646,28 @@
       emissive: 0x3d2819,
       emissiveIntensity: 0.15
     });
-  
+
     const densityScale = getAdaptiveFrameScale(totalFrames);
-  
+
     const w = (0.78 + (seed % 3) * 0.13) * densityScale;
     const h = (0.98 + ((seed + 1) % 3) * 0.16) * densityScale;
-  
+
     const topBar = new THREE.Mesh(new THREE.BoxGeometry(w + 0.18, 0.08, 0.05), bronzeMat.clone());
     topBar.position.set(0, h / 2, 0);
     frame.add(topBar);
-  
+
     const bottomBar = new THREE.Mesh(new THREE.BoxGeometry(w + 0.18, 0.08, 0.05), bronzeMat.clone());
     bottomBar.position.set(0, -h / 2, 0);
     frame.add(bottomBar);
-  
+
     const leftBar = new THREE.Mesh(new THREE.BoxGeometry(0.08, h + 0.16, 0.05), bronzeMat.clone());
     leftBar.position.set(-w / 2, 0, 0);
     frame.add(leftBar);
-  
+
     const rightBar = new THREE.Mesh(new THREE.BoxGeometry(0.08, h + 0.16, 0.05), bronzeMat.clone());
     rightBar.position.set(w / 2, 0, 0);
     frame.add(rightBar);
-  
+
     const backing = new THREE.Mesh(
       new THREE.PlaneGeometry(w, h),
       new THREE.MeshStandardMaterial({
@@ -630,7 +679,7 @@
     );
     backing.position.z = 0.015;
     frame.add(backing);
-  
+
     const inner = new THREE.Mesh(
       new THREE.PlaneGeometry(w - 0.06, h - 0.06),
       new THREE.MeshBasicMaterial({
@@ -641,61 +690,61 @@
     );
     inner.position.z = 0.03;
     frame.add(inner);
-  
+
     frame.userData.borderBars = [topBar, bottomBar, leftBar, rightBar];
     frame.userData.backing = backing;
     frame.userData.inner = inner;
-  
+
     return frame;
   }
 
   function layoutFrames() {
     framesGroup.clear();
     frameMeshes.length = 0;
-  
+
     const totalFrames = Math.max(memories.length * 12, 48);
-  
+
     let shellCount = 1;
     if (totalFrames > 70) shellCount = 2;
     if (totalFrames > 140) shellCount = 3;
     if (totalFrames > 240) shellCount = 4;
-  
+
     const framesPerShell = [];
     let remaining = totalFrames;
-  
+
     for (let i = 0; i < shellCount; i++) {
       const shellsLeft = shellCount - i;
       const countForThisShell = Math.ceil(remaining / shellsLeft);
       framesPerShell.push(countForThisShell);
       remaining -= countForThisShell;
     }
-  
+
     const baseRadius = 7.4;
     const shellGap = 1.9;
     const baseYScale = 6.9;
     const yGap = 1.05;
-  
+
     let frameIndex = 0;
     const goldenAngle = Math.PI * (3 - Math.sqrt(5));
-  
+
     for (let layerIndex = 0; layerIndex < shellCount; layerIndex++) {
       const count = framesPerShell[layerIndex];
       const shellRadius = baseRadius + layerIndex * shellGap;
       const yScale = baseYScale + layerIndex * yGap;
-  
+
       for (let i = 0; i < count; i++) {
         const yN = 1 - (i / Math.max(1, count - 1)) * 2;
         const radiusAtY = Math.sqrt(Math.max(0.0001, 1 - yN * yN));
         const theta = goldenAngle * i + layerIndex * 0.55;
-  
+
         const x = Math.cos(theta) * radiusAtY * shellRadius;
         const y = yN * yScale + 2.55;
         const z = Math.sin(theta) * radiusAtY * shellRadius;
-  
+
         const frame = createFrame(frameIndex + 1, totalFrames);
         frame.position.set(x, y, z);
         frame.lookAt(0, 2.55, 0);
-  
+
         frame.userData.memoryId = frameIndex % MEMORY_COUNT;
         frame.userData.baseTheta = theta;
         frame.userData.baseYN = yN;
@@ -704,14 +753,14 @@
         frame.userData.angularSpeed = (frameIndex % 2 === 0 ? 1 : -1) * (0.010 + (frameIndex % 5) * 0.0012);
         frame.userData.floatOffset = Math.random() * Math.PI * 2;
         frame.userData.layerIndex = layerIndex;
-  
+
         framesGroup.add(frame);
         frameMeshes.push(frame);
         frameIndex++;
       }
     }
   }
-  
+
   layoutFrames();
 
   const dustGroup = new THREE.Group();
@@ -980,6 +1029,17 @@
     }
 
     consoleGroup.position.y = consoleBaseY + Math.sin(time * 1.15) * 0.025;
+
+    scanlineBar.position.y = 1.45 + ((Math.sin(time * 1.6) + 1) * 0.45) + 0.45;
+    scanlineBar.material.opacity = 0.12 + ((Math.sin(time * 1.6) + 1) * 0.08);
+    pulseBar.scale.x = 0.92 + Math.sin(time * 2.4) * 0.08;
+    pulseBar.material.opacity = 0.16 + ((Math.sin(time * 2.4) + 1) * 0.07);
+    chartGlow.material.opacity = 0.04 + ((Math.sin(time * 1.8) + 1) * 0.025);
+    haloLeft.rotation.z += 0.01;
+    haloRight.rotation.z -= 0.008;
+    sidePanelL.material.opacity = 0.1 + ((Math.sin(time * 1.3) + 1) * 0.02);
+    sidePanelR.material.opacity = 0.1 + ((Math.cos(time * 1.1) + 1) * 0.02);
+    consoleLight.intensity = 0.65 + ((Math.sin(time * 1.7) + 1) * 0.14);
 
     controls.update();
     renderer.render(scene, camera);
