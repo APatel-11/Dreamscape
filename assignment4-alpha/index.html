@@ -2,868 +2,396 @@
 <html>
 <head>
 <meta charset="UTF-8" />
-<title>Dreamscape Alpha Build</title>
+<title>Dreamscape</title>
+
 <style>
-  body {
-    margin: 0;
-    overflow: hidden;
-    background: black;
-    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  }
+body{
+margin:0;
+overflow:hidden;
+background:#02030a;
+font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
+}
 
-  #timeline {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 60%;
-    z-index: 10;
-  }
+#timeline{
+position:fixed;
+bottom:20px;
+left:50%;
+transform:translateX(-50%);
+width:60%;
+z-index:10;
+}
 
-  #hud {
-    position: fixed;
-    top: 12px;
-    left: 12px;
-    color: white;
-    font-family: monospace;
-    z-index: 10;
-  }
+#hud{
+position:fixed;
+top:12px;
+left:12px;
+color:white;
+font-family:monospace;
+z-index:10;
+}
 
-  #timelineLabel {
-    position: fixed;
-    top: 40px;
-    left: 12px;
-    color: #aaa;
-    font-family: monospace;
-    font-size: 12px;
-    z-index: 10;
-  }
+#timelineLabel{
+position:fixed;
+top:40px;
+left:12px;
+color:#aaa;
+font-family:monospace;
+font-size:12px;
+z-index:10;
+}
 
-  #fps {
-    position: fixed;
-    top: 72px;
-    left: 12px;
-    color: white;
-    font-family: monospace;
-    z-index: 10;
-  }
+#fps{
+position:fixed;
+top:72px;
+left:12px;
+color:white;
+font-family:monospace;
+z-index:10;
+}
 
-  #memoryPanel {
-    position: fixed;
-    top: 16px;
-    right: 16px;
-    width: 280px;
-    background: rgba(5, 8, 20, 0.72);
-    border: 1px solid rgba(122, 188, 255, 0.25);
-    border-radius: 14px;
-    padding: 14px;
-    color: white;
-    z-index: 20;
-    backdrop-filter: blur(8px);
-    box-shadow: 0 0 24px rgba(60, 100, 255, 0.12);
-  }
+#memoryPanel{
+position:fixed;
+top:16px;
+right:16px;
+width:280px;
+background:rgba(5,8,20,.72);
+border:1px solid rgba(122,188,255,.25);
+border-radius:14px;
+padding:14px;
+color:white;
+z-index:20;
+backdrop-filter:blur(8px);
+box-shadow:0 0 24px rgba(60,100,255,.12);
+}
 
-  #memoryPanel h3 {
-    margin: 0 0 10px 0;
-    font-size: 15px;
-    font-weight: 700;
-    color: #dff4ff;
-  }
+#memoryPanel h3{
+margin:0 0 10px 0;
+font-size:15px;
+font-weight:700;
+color:#dff4ff;
+}
 
-  #memoryPanel .label {
-    font-size: 12px;
-    color: #9db6d8;
-    margin-top: 8px;
-    margin-bottom: 4px;
-  }
+#memoryName{
+width:100%;
+box-sizing:border-box;
+padding:9px 10px;
+border-radius:10px;
+border:1px solid rgba(160,210,255,.18);
+background:rgba(20,26,46,.8);
+color:white;
+}
 
-  #memoryName {
-    width: 100%;
-    box-sizing: border-box;
-    padding: 9px 10px;
-    border-radius: 10px;
-    border: 1px solid rgba(160, 210, 255, 0.18);
-    background: rgba(20, 26, 46, 0.8);
-    color: white;
-    outline: none;
-  }
+.btnRow{
+display:flex;
+gap:8px;
+margin-top:12px;
+}
 
-  #memoryMeta {
-    margin-top: 10px;
-    font-size: 13px;
-    color: #d2e9ff;
-    line-height: 1.5;
-  }
+.btnRow button{
+flex:1;
+padding:10px;
+border:none;
+border-radius:10px;
+cursor:pointer;
+font-weight:600;
+color:white;
+background:linear-gradient(135deg,#5471ff,#47abff);
+}
 
-  .btnRow {
-    display: flex;
-    gap: 8px;
-    margin-top: 12px;
-  }
+.btnRow button.secondary{
+background:rgba(255,255,255,.1);
+border:1px solid rgba(255,255,255,.12);
+}
 
-  .btnRow button {
-    flex: 1;
-    padding: 10px 12px;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    font-weight: 600;
-    color: white;
-    background: linear-gradient(135deg, rgba(84, 113, 255, 0.95), rgba(71, 171, 255, 0.95));
-  }
+#startOverlay{
+position:fixed;
+inset:0;
+z-index:100;
+display:flex;
+align-items:center;
+justify-content:center;
+background:radial-gradient(circle at center,rgba(36,46,92,.35),rgba(4,6,16,.92));
+}
 
-  .btnRow button.secondary {
-    background: rgba(255,255,255,0.1);
-    border: 1px solid rgba(255,255,255,0.12);
-  }
+#startCard{
+width:min(540px,88vw);
+padding:28px;
+border-radius:18px;
+background:rgba(10,14,28,.82);
+border:1px solid rgba(145,198,255,.18);
+box-shadow:0 0 40px rgba(78,123,255,.14);
+color:white;
+backdrop-filter:blur(12px);
+}
 
-  #controlsHint {
-    margin-top: 10px;
-    font-size: 11px;
-    color: #9fb8d8;
-    line-height: 1.45;
-  }
+#startCard h1{
+margin:0 0 10px 0;
+font-size:28px;
+color:#e7f5ff;
+}
 
-  #startOverlay {
-    position: fixed;
-    inset: 0;
-    z-index: 100;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background:
-      radial-gradient(circle at center, rgba(36,46,92,0.35), rgba(4,6,16,0.92)),
-      rgba(0,0,0,0.86);
-  }
+#startCard p{
+margin:0 0 18px 0;
+color:#bed4ec;
+line-height:1.55;
+font-size:14px;
+}
 
-  #startCard {
-    width: min(540px, 88vw);
-    padding: 28px;
-    border-radius: 18px;
-    background: rgba(10, 14, 28, 0.82);
-    border: 1px solid rgba(145, 198, 255, 0.18);
-    box-shadow: 0 0 40px rgba(78, 123, 255, 0.14);
-    color: white;
-    backdrop-filter: blur(12px);
-  }
+#startCard .menuRow{
+display:flex;
+gap:10px;
+margin-top:12px;
+}
 
-  #startCard h1 {
-    margin: 0 0 10px 0;
-    font-size: 28px;
-    color: #e7f5ff;
-  }
+#startCard button{
+flex:1;
+padding:12px 14px;
+border:none;
+border-radius:12px;
+cursor:pointer;
+font-weight:700;
+color:white;
+background:linear-gradient(135deg,#506eff,#4db6ff);
+}
 
-  #startCard p {
-    margin: 0 0 18px 0;
-    color: #bed4ec;
-    line-height: 1.55;
-    font-size: 14px;
-  }
-
-  #startCard .menuRow {
-    display: flex;
-    gap: 10px;
-    margin-top: 12px;
-  }
-
-  #startCard button {
-    flex: 1;
-    padding: 12px 14px;
-    border: none;
-    border-radius: 12px;
-    cursor: pointer;
-    font-weight: 700;
-    color: white;
-    background: linear-gradient(135deg, rgba(80,110,255,0.96), rgba(77,182,255,0.96));
-  }
-
-  #startCard button.secondary {
-    background: rgba(255,255,255,0.09);
-    border: 1px solid rgba(255,255,255,0.12);
-  }
 </style>
 </head>
 
 <body>
 
 <div id="startOverlay">
-  <div id="startCard">
-    <h1>Dreamscape</h1>
-    <p>
-      Enter a curated memory sphere where framed memory fragments orbit around you.
-      Select a memory, rename it, and shift the point of view from archival overview
-      to an immersive closer perspective.
-    </p>
-    <div class="menuRow">
-      <button id="startBtn">Start Dreamscape</button>
-      <button id="backToMenuBtn" class="secondary">Return to Menu</button>
-    </div>
-  </div>
+<div id="startCard">
+<h1>Dreamscape</h1>
+<p>Enter a curated memory sphere where framed memories orbit around you.</p>
+<div class="menuRow">
+<button id="startBtn">Start Dreamscape</button>
+</div>
+</div>
 </div>
 
-<input id="timeline" type="range" min="0" max="100" value="15" />
+<input id="timeline" type="range" min="0" max="100" value="15"/>
 
 <div id="hud">memory fragments: curated frames</div>
-<div id="timelineLabel">timeline = point of view + memory clarity</div>
+<div id="timelineLabel">timeline = point of view</div>
 <div id="fps">fps: --</div>
 
 <div id="memoryPanel">
-  <h3>Dreamscape Memory Console</h3>
-
-  <div class="label">Selected Memory</div>
-  <input id="memoryName" type="text" value="Memory 01" />
-
-  <div id="memoryMeta">
-    <div><strong>ID:</strong> <span id="memoryIdText">0</span></div>
-    <div><strong>Clarity:</strong> <span id="clarityText">0.50</span></div>
-    <div><strong>Tone:</strong> <span id="toneText">neutral</span></div>
-    <div><strong>State:</strong> <span id="stateText">hub</span></div>
-  </div>
-
-  <div class="btnRow">
-    <button id="saveBtn">Save Name</button>
-    <button id="undoBtn" class="secondary">Undo</button>
-  </div>
-
-  <div class="btnRow">
-    <button id="enterBtn">Enter Memory</button>
-    <button id="exitBtn" class="secondary">Exit Memory</button>
-  </div>
-
-  <div class="btnRow">
-    <button id="resetBtn" class="secondary">Reset Experience</button>
-  </div>
-
-  <div id="controlsHint">
-    Click a floating memory frame to select it.<br>
-    Rename it here, then Save Name.<br>
-    Undo restores the last saved name.<br>
-    Slider changes the point of view from wide archive view to first-person.
-  </div>
+<h3>Dreamscape Console</h3>
+<input id="memoryName" value="Memory 01"/>
+<div class="btnRow">
+<button id="saveBtn">Save</button>
+<button id="undoBtn" class="secondary">Undo</button>
+</div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 
 <script>
-  let appState = "menu";
-
-  const scene = new THREE.Scene();
-  scene.fog = new THREE.FogExp2(0x111122, 0.02);
-
-  const camera = new THREE.PerspectiveCamera(
-    75,
-    window.innerWidth / window.innerHeight,
-    0.1,
-    1000
-  );
-  camera.position.set(0, 4.2, 11.2);
-
-  const renderer = new THREE.WebGLRenderer({ antialias: true });
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  document.body.appendChild(renderer.domElement);
-
-  const controls = new THREE.OrbitControls(camera, renderer.domElement);
-  controls.enableDamping = true;
-  controls.enablePan = false;
-  controls.enableZoom = false;
-  controls.target.set(0, 1.7, 0);
-  controls.minPolarAngle = 0.35;
-  controls.maxPolarAngle = 2.6;
-  controls.enableRotate = true;
-  controls.update();
-
-  const light = new THREE.PointLight(0xffffff, 1.2);
-  light.position.set(5, 10, 5);
-  scene.add(light);
-
-  const ambient = new THREE.AmbientLight(0xffffff, 0.25);
-  scene.add(ambient);
-
-  const sphereGeo = new THREE.SphereGeometry(30, 64, 64);
-  const sphereMat = new THREE.MeshStandardMaterial({
-    color: 0x0b0b14,
-    side: THREE.BackSide,
-    roughness: 1,
-    metalness: 0
-  });
-  const museumSphere = new THREE.Mesh(sphereGeo, sphereMat);
-  scene.add(museumSphere);
-
-  const MEMORY_COUNT = 6;
-  const savedNames = JSON.parse(localStorage.getItem("dreamscape_memory_names") || "null");
-
-  const memories = Array.from({ length: MEMORY_COUNT }, (_, i) => ({
-    id: i,
-    name: savedNames?.[i] || `Memory ${String(i + 1).padStart(2, "0")}`,
-    clarity: 0.5,
-    tone: "neutral",
-    edited: false,
-    history: []
-  }));
-
-  let selectedMemoryId = 0;
-  let selectedFrame = null;
-
-  function saveMemories() {
-    const names = memories.map(m => m.name);
-    localStorage.setItem("dreamscape_memory_names", JSON.stringify(names));
-  }
-
-  const platformGeo = new THREE.CylinderGeometry(2.25, 2.55, 0.12, 64);
-  const platformMat = new THREE.MeshStandardMaterial({
-    color: 0x14141f,
-    roughness: 0.85,
-    metalness: 0.08,
-    emissive: 0x0f1022,
-    emissiveIntensity: 0.18
-  });
-  const platform = new THREE.Mesh(platformGeo, platformMat);
-  platform.position.set(0, 0.06, 0);
-  scene.add(platform);
-
-  const avatarGroup = new THREE.Group();
-
-  const avatarMat = new THREE.MeshStandardMaterial({
-    color: 0x23283d,
-    roughness: 0.82,
-    metalness: 0.04,
-    emissive: 0x101427,
-    emissiveIntensity: 0.15
-  });
-
-  const body = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.26, 1.05, 18), avatarMat);
-  body.position.set(0, 1.02, 0);
-  avatarGroup.add(body);
-
-  const head = new THREE.Mesh(new THREE.SphereGeometry(0.17, 20, 20), avatarMat);
-  head.position.set(0, 1.75, 0);
-  avatarGroup.add(head);
-
-  avatarGroup.position.set(0, 0.06, 0.15);
-  scene.add(avatarGroup);
-
-  const consoleGroup = new THREE.Group();
-
-  const mainPanelGeo = new THREE.PlaneGeometry(2.6, 1.35);
-  const mainPanelMat = new THREE.MeshStandardMaterial({
-    color: 0x9ddcff,
-    transparent: true,
-    opacity: 0.12,
-    emissive: 0x4b93ff,
-    emissiveIntensity: 1.2,
-    side: THREE.DoubleSide
-  });
-  const mainPanel = new THREE.Mesh(mainPanelGeo, mainPanelMat);
-  mainPanel.position.set(0, 1.75, 0);
-  consoleGroup.add(mainPanel);
-
-  const glowPanelGeo = new THREE.PlaneGeometry(2.8, 1.5);
-  const glowPanelMat = new THREE.MeshStandardMaterial({
-    color: 0x6fb7ff,
-    transparent: true,
-    opacity: 0.05,
-    emissive: 0x3d73ff,
-    emissiveIntensity: 0.9,
-    side: THREE.DoubleSide
-  });
-  const glowPanel = new THREE.Mesh(glowPanelGeo, glowPanelMat);
-  glowPanel.position.set(0, 1.75, -0.02);
-  consoleGroup.add(glowPanel);
-
-  const auxPanelGeo = new THREE.PlaneGeometry(0.8, 0.52);
-  const auxPanelMat = new THREE.MeshStandardMaterial({
-    color: 0xb3e8ff,
-    transparent: true,
-    opacity: 0.1,
-    emissive: 0x69b5ff,
-    emissiveIntensity: 0.95,
-    side: THREE.DoubleSide
-  });
-
-  const leftPanel = new THREE.Mesh(auxPanelGeo, auxPanelMat.clone());
-  leftPanel.position.set(-1.45, 1.62, 0.08);
-  leftPanel.rotation.y = 0.26;
-  leftPanel.rotation.x = -0.08;
-  consoleGroup.add(leftPanel);
-
-  const rightPanel = new THREE.Mesh(auxPanelGeo, auxPanelMat.clone());
-  rightPanel.position.set(1.45, 1.66, 0.08);
-  rightPanel.rotation.y = -0.26;
-  rightPanel.rotation.x = -0.08;
-  consoleGroup.add(rightPanel);
-
-  const circleRingGeo = new THREE.TorusGeometry(0.22, 0.012, 16, 80);
-  const circleRingMat = new THREE.MeshStandardMaterial({
-    color: 0xbdeaff,
-    transparent: true,
-    opacity: 0.55,
-    emissive: 0x73ccff,
-    emissiveIntensity: 1.0
-  });
-  const circleRing = new THREE.Mesh(circleRingGeo, circleRingMat);
-  circleRing.position.set(0.78, 1.82, 0.03);
-  consoleGroup.add(circleRing);
-
-  const panelLineMat = new THREE.MeshStandardMaterial({
-    color: 0xdff5ff,
-    emissive: 0x7acfff,
-    emissiveIntensity: 1.0,
-    transparent: true,
-    opacity: 0.9
-  });
-
-  const uiBlock1 = new THREE.Mesh(new THREE.PlaneGeometry(0.62, 0.04), panelLineMat);
-  uiBlock1.position.set(-0.55, 2.0, 0.01);
-  consoleGroup.add(uiBlock1);
-
-  const uiBlock2 = new THREE.Mesh(new THREE.PlaneGeometry(0.48, 0.03), panelLineMat);
-  uiBlock2.position.set(-0.64, 1.87, 0.01);
-  consoleGroup.add(uiBlock2);
-
-  const uiBlock3 = new THREE.Mesh(new THREE.PlaneGeometry(0.38, 0.03), panelLineMat);
-  uiBlock3.position.set(-0.69, 1.74, 0.01);
-  consoleGroup.add(uiBlock3);
-
-  const chartLine1 = new THREE.Mesh(new THREE.PlaneGeometry(0.42, 0.02), panelLineMat);
-  chartLine1.position.set(1.02, 1.62, 0.01);
-  chartLine1.rotation.z = 0.38;
-  consoleGroup.add(chartLine1);
-
-  const chartLine2 = new THREE.Mesh(new THREE.PlaneGeometry(0.28, 0.02), panelLineMat);
-  chartLine2.position.set(1.18, 1.76, 0.01);
-  chartLine2.rotation.z = -0.45;
-  consoleGroup.add(chartLine2);
-
-  const chartLine3 = new THREE.Mesh(new THREE.PlaneGeometry(0.22, 0.02), panelLineMat);
-  chartLine3.position.set(0.95, 1.9, 0.01);
-  chartLine3.rotation.z = 0.52;
-  consoleGroup.add(chartLine3);
-
-  const infoCardGeo = new THREE.PlaneGeometry(0.78, 0.42);
-  const infoCardMat = new THREE.MeshStandardMaterial({
-    color: 0xa9e1ff,
-    transparent: true,
-    opacity: 0.11,
-    emissive: 0x4e97ff,
-    emissiveIntensity: 0.85,
-    side: THREE.DoubleSide
-  });
-  const infoCard = new THREE.Mesh(infoCardGeo, infoCardMat);
-  infoCard.position.set(-0.7, 1.35, 0.03);
-  consoleGroup.add(infoCard);
-
-  const infoLine1 = new THREE.Mesh(new THREE.PlaneGeometry(0.34, 0.025), panelLineMat);
-  infoLine1.position.set(-0.8, 1.41, 0.04);
-  consoleGroup.add(infoLine1);
-
-  const infoLine2 = new THREE.Mesh(new THREE.PlaneGeometry(0.24, 0.02), panelLineMat);
-  infoLine2.position.set(-0.86, 1.31, 0.04);
-  consoleGroup.add(infoLine2);
-
-  consoleGroup.position.set(0, 0, -2.35);
-  const consoleBaseY = 0;
-  scene.add(consoleGroup);
-
-  const framesGroup = new THREE.Group();
-  scene.add(framesGroup);
-
-  const frameMeshes = [];
-
-  function createFrame() {
-    const frame = new THREE.Group();
-
-    const borderMat = new THREE.MeshStandardMaterial({
-      color: 0x9e8367,
-      roughness: 0.8,
-      metalness: 0.08,
-      emissive: 0x402516,
-      emissiveIntensity: 0.16
-    });
-
-    const topBar = new THREE.Mesh(new THREE.BoxGeometry(1.48, 0.08, 0.05), borderMat.clone());
-    topBar.position.set(0, 0.43, 0);
-    frame.add(topBar);
-
-    const bottomBar = new THREE.Mesh(new THREE.BoxGeometry(1.48, 0.08, 0.05), borderMat.clone());
-    bottomBar.position.set(0, -0.43, 0);
-    frame.add(bottomBar);
-
-    const leftBar = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.94, 0.05), borderMat.clone());
-    leftBar.position.set(-0.70, 0, 0);
-    frame.add(leftBar);
-
-    const rightBar = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.94, 0.05), borderMat.clone());
-    rightBar.position.set(0.70, 0, 0);
-    frame.add(rightBar);
-
-    const innerGeo = new THREE.PlaneGeometry(1.28, 0.76);
-    const innerMat = new THREE.MeshStandardMaterial({
-      color: 0x3a2a3c,
-      transparent: true,
-      opacity: 0.34,
-      emissive: 0x8f5b7a,
-      emissiveIntensity: 0.42,
-      side: THREE.DoubleSide
-    });
-
-    const inner = new THREE.Mesh(innerGeo, innerMat);
-    inner.position.z = 0.02;
-    frame.add(inner);
-
-    const frameLineMat = new THREE.MeshStandardMaterial({
-      color: 0xfce8d8,
-      emissive: 0xf7b17c,
-      emissiveIntensity: 0.65,
-      transparent: true,
-      opacity: 0.92
-    });
-
-    const line1 = new THREE.Mesh(new THREE.PlaneGeometry(0.55, 0.025), frameLineMat);
-    line1.position.set(0, 0.18, 0.03);
-    frame.add(line1);
-
-    const line2 = new THREE.Mesh(new THREE.PlaneGeometry(0.42, 0.02), frameLineMat);
-    line2.position.set(-0.08, 0.03, 0.03);
-    frame.add(line2);
-
-    const line3 = new THREE.Mesh(new THREE.PlaneGeometry(0.3, 0.02), frameLineMat);
-    line3.position.set(-0.16, -0.12, 0.03);
-    frame.add(line3);
-
-    frame.userData.borderBars = [topBar, bottomBar, leftBar, rightBar];
-    frame.userData.innerMat = innerMat;
-
-    return frame;
-  }
-
-  function layoutFrames() {
-    framesGroup.clear();
-    frameMeshes.length = 0;
-
-    const layouts = [
-      { count: 8, radius: 7.5, y: 1.8, tilt: 0.0, speed: 0.08 },
-      { count: 6, radius: 6.5, y: 4.5, tilt: 0.35, speed: 0.05 },
-      { count: 6, radius: 6.5, y: -1.0, tilt: -0.35, speed: -0.06 }
-    ];
-
-    let memoryIndex = 0;
-
-    for (let ringIndex = 0; ringIndex < layouts.length; ringIndex++) {
-      const ring = layouts[ringIndex];
-
-      for (let i = 0; i < ring.count; i++) {
-        const frame = createFrame();
-        const angle = (i / ring.count) * Math.PI * 2;
-
-        frame.position.set(
-          Math.cos(angle) * ring.radius,
-          ring.y,
-          Math.sin(angle) * ring.radius
-        );
-
-        frame.rotation.y = -angle + Math.PI / 2;
-        frame.rotation.x = ring.tilt;
-
-        frame.userData.memoryId = memoryIndex % MEMORY_COUNT;
-        frame.userData.baseAngle = angle;
-        frame.userData.radius = ring.radius;
-        frame.userData.baseY = ring.y;
-        frame.userData.tilt = ring.tilt;
-        frame.userData.ringSpeed = ring.speed;
-        frame.userData.floatOffset = Math.random() * Math.PI * 2;
-        frame.userData.ringIndex = ringIndex;
-
-        memoryIndex++;
-
-        framesGroup.add(frame);
-        frameMeshes.push(frame);
-      }
-    }
-  }
-
-  layoutFrames();
-
-  const hud = document.getElementById("hud");
-  const timeline = document.getElementById("timeline");
-  const timelineLabel = document.getElementById("timelineLabel");
-  const fpsEl = document.getElementById("fps");
-
-  const startOverlay = document.getElementById("startOverlay");
-  const startBtn = document.getElementById("startBtn");
-  const backToMenuBtn = document.getElementById("backToMenuBtn");
-
-  const memoryPanel = document.getElementById("memoryPanel");
-  const memoryNameInput = document.getElementById("memoryName");
-  const memoryIdText = document.getElementById("memoryIdText");
-  const clarityText = document.getElementById("clarityText");
-  const toneText = document.getElementById("toneText");
-  const stateText = document.getElementById("stateText");
-
-  const saveBtn = document.getElementById("saveBtn");
-  const undoBtn = document.getElementById("undoBtn");
-  const enterBtn = document.getElementById("enterBtn");
-  const exitBtn = document.getElementById("exitBtn");
-  const resetBtn = document.getElementById("resetBtn");
-
-  const raycaster = new THREE.Raycaster();
-  const mouse = new THREE.Vector2();
-
-  function updateMemoryPanel() {
-    const memory = memories[selectedMemoryId];
-    memoryNameInput.value = memory.name;
-    memoryIdText.textContent = memory.id;
-    clarityText.textContent = memory.clarity.toFixed(2);
-    toneText.textContent = memory.tone;
-  }
-
-  function highlightFrames() {
-    for (const frame of frameMeshes) {
-      const isSelected = frame === selectedFrame;
-
-      for (const bar of frame.userData.borderBars) {
-        bar.material.emissiveIntensity = isSelected ? 0.85 : 0.16;
-        bar.material.color.set(isSelected ? 0xe0b186 : 0x9e8367);
-      }
-
-      frame.userData.innerMat.emissiveIntensity = isSelected ? 0.9 : 0.42;
-      frame.userData.innerMat.opacity = isSelected ? 0.50 : 0.34;
-    }
-  }
-
-  function selectFrame(frame) {
-    selectedFrame = frame;
-    selectedMemoryId = frame.userData.memoryId;
-    updateMemoryPanel();
-    highlightFrames();
-  }
-
-  function saveSelectedMemoryName() {
-    const memory = memories[selectedMemoryId];
-    const trimmed = memoryNameInput.value.trim();
-    if (!trimmed) return;
-
-    memory.history.push(memory.name);
-    memory.name = trimmed;
-    saveMemories();
-    updateMemoryPanel();
-  }
-
-  function undoMemoryName() {
-    const memory = memories[selectedMemoryId];
-    if (memory.history.length > 0) {
-      memory.name = memory.history.pop();
-      saveMemories();
-      updateMemoryPanel();
-    }
-  }
-
-  window.addEventListener("click", (event) => {
-    if (appState !== "hub") return;
-
-    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-    raycaster.setFromCamera(mouse, camera);
-
-    const intersects = raycaster.intersectObjects(frameMeshes, true);
-
-    if (intersects.length > 0) {
-      let obj = intersects[0].object;
-
-      while (obj.parent && obj.parent !== framesGroup) {
-        obj = obj.parent;
-      }
-
-      selectFrame(obj);
-    }
-  });
-
-  saveBtn.addEventListener("click", saveSelectedMemoryName);
-  undoBtn.addEventListener("click", undoMemoryName);
-
-  enterBtn.addEventListener("click", () => {
-    setAppState("memory");
-  });
-
-  exitBtn.addEventListener("click", () => {
-    setAppState("hub");
-  });
-
-  resetBtn.addEventListener("click", () => {
-    setAppState("menu");
-  });
-
-  startBtn.addEventListener("click", () => {
-    setAppState("hub");
-  });
-
-  backToMenuBtn.addEventListener("click", () => {
-    setAppState("menu");
-  });
-
-  window.addEventListener("keydown", (e) => {
-    if (e.key === "r" || e.key === "R") {
-      saveSelectedMemoryName();
-    }
-
-    if (e.key === "u" || e.key === "U") {
-      undoMemoryName();
-    }
-
-    if (e.key === "Escape") {
-      setAppState("menu");
-    }
-  });
-
-  function setAppState(nextState) {
-    appState = nextState;
-    stateText.textContent = nextState;
-
-    if (nextState === "menu") {
-      startOverlay.style.display = "flex";
-      memoryPanel.style.display = "none";
-      timeline.style.display = "none";
-      timelineLabel.style.display = "none";
-      hud.textContent = "memory fragments: waiting";
-      controls.enableRotate = false;
-    }
-
-    if (nextState === "hub") {
-      startOverlay.style.display = "none";
-      memoryPanel.style.display = "block";
-      timeline.style.display = "block";
-      timelineLabel.style.display = "block";
-      hud.textContent = "memory fragments: curated frames";
-
-      scene.fog.color.set(0x111122);
-      museumSphere.material.color.set(0x0b0b14);
-
-      framesGroup.visible = true;
-      platform.visible = true;
-      avatarGroup.visible = true;
-      consoleGroup.visible = true;
-      controls.enableRotate = true;
-
-      if (!selectedFrame && frameMeshes.length > 0) {
-        selectFrame(frameMeshes[0]);
-      }
-    }
-
-    if (nextState === "memory") {
-      startOverlay.style.display = "none";
-      memoryPanel.style.display = "block";
-      timeline.style.display = "block";
-      timelineLabel.style.display = "block";
-      hud.textContent = `inside memory: ${memories[selectedMemoryId].name}`;
-
-      scene.fog.color.set(0x24182e);
-      museumSphere.material.color.set(0x120f1a);
-
-      framesGroup.visible = true;
-      platform.visible = true;
-      avatarGroup.visible = true;
-      consoleGroup.visible = true;
-      controls.enableRotate = true;
-    }
-  }
-
-  const wideCameraPos = new THREE.Vector3(0, 4.2, 11.2);
-  const closeCameraPos = new THREE.Vector3(0, 1.78, 0.05);
-
-  const wideTarget = new THREE.Vector3(0, 1.7, 0);
-  const closeTarget = new THREE.Vector3(0, 1.78, -2.1);
-
-  let lastFpsTime = performance.now();
-  let frames = 0;
-
-  updateMemoryPanel();
-  if (frameMeshes.length > 0) {
-    selectFrame(frameMeshes[0]);
-  }
-  setAppState("menu");
-
-  function animate() {
-    requestAnimationFrame(animate);
-
-    const t = Number(timeline.value) / 100;
-    const time = performance.now() * 0.001;
-
-    const desiredPos = wideCameraPos.clone().lerp(closeCameraPos, t);
-    const desiredTarget = wideTarget.clone().lerp(closeTarget, t);
-
-    if (controls.enableRotate && t < 0.88) {
-      const baseOffset = camera.position.clone().sub(controls.target);
-      const desiredOffset = desiredPos.clone().sub(desiredTarget);
-      baseOffset.lerp(desiredOffset, 0.08);
-      controls.target.lerp(desiredTarget, 0.08);
-      camera.position.copy(controls.target.clone().add(baseOffset));
-    } else {
-      camera.position.lerp(desiredPos, 0.08);
-      controls.target.lerp(desiredTarget, 0.08);
-    }
-
-    if (appState === "hub") {
-      scene.fog.density = 0.012 + t * 0.03;
-      museumSphere.material.color.set(0x0b0b14);
-      memories[selectedMemoryId].clarity = t;
-      clarityText.textContent = t.toFixed(2);
-    }
-
-    if (appState === "memory") {
-      scene.fog.density = 0.04 + t * 0.045;
-      museumSphere.material.color.set(0x120f1a);
-      memories[selectedMemoryId].clarity = t;
-      clarityText.textContent = t.toFixed(2);
-    }
-
-    if (framesGroup.visible) {
-      for (const frame of frameMeshes) {
-        const angle = frame.userData.baseAngle + time * frame.userData.ringSpeed;
-        const radius = frame.userData.radius;
-        const floatY = Math.sin(time * 0.9 + frame.userData.floatOffset) * 0.22;
-
-        frame.position.x = Math.cos(angle) * radius;
-        frame.position.z = Math.sin(angle) * radius;
-        frame.position.y = frame.userData.baseY + floatY;
-
-        frame.rotation.y = -angle + Math.PI / 2;
-        frame.rotation.x = frame.userData.tilt + Math.sin(time * 0.7 + frame.userData.floatOffset) * 0.05;
-        frame.rotation.z = Math.cos(time * 0.6 + frame.userData.floatOffset) * 0.04;
-      }
-    }
-
-    if (t > 0.9) {
-      avatarGroup.visible = false;
-    } else {
-      avatarGroup.visible = true;
-    }
-
-    consoleGroup.position.y = consoleBaseY + Math.sin(time * 1.25) * 0.035;
-    consoleGroup.rotation.y = Math.sin(time * 0.22) * 0.025;
-    consoleGroup.rotation.x = Math.sin(time * 0.16) * 0.01;
-
-    controls.update();
-    renderer.render(scene, camera);
-
-    frames++;
-    const now = performance.now();
-    if (now - lastFpsTime >= 500) {
-      const fps = Math.round((frames * 1000) / (now - lastFpsTime));
-      fpsEl.textContent = "fps: " + fps;
-      frames = 0;
-      lastFpsTime = now;
-    }
-  }
-
-  animate();
-
-  window.addEventListener("resize", () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-  });
+
+const scene=new THREE.Scene()
+scene.fog=new THREE.FogExp2(0x0c1025,.025)
+
+const camera=new THREE.PerspectiveCamera(75,innerWidth/innerHeight,.1,1000)
+camera.position.set(0,4,11)
+
+const renderer=new THREE.WebGLRenderer({antialias:true})
+renderer.setSize(innerWidth,innerHeight)
+document.body.appendChild(renderer.domElement)
+
+const controls=new THREE.OrbitControls(camera,renderer.domElement)
+controls.enableDamping=true
+controls.enableZoom=false
+controls.target.set(0,1.7,0)
+
+const light=new THREE.PointLight(0xffffff,1.2)
+light.position.set(5,10,5)
+scene.add(light)
+
+scene.add(new THREE.AmbientLight(0xffffff,.25))
+
+const skyGeo=new THREE.SphereGeometry(60,64,64)
+const skyMat=new THREE.MeshBasicMaterial({
+color:0x070b1f,
+side:THREE.BackSide
+})
+scene.add(new THREE.Mesh(skyGeo,skyMat))
+
+const platform=new THREE.Mesh(
+new THREE.CylinderGeometry(2.4,2.6,.2,64),
+new THREE.MeshStandardMaterial({color:0x161a2d})
+)
+platform.position.y=.05
+scene.add(platform)
+
+const avatar=new THREE.Group()
+
+const body=new THREE.Mesh(
+new THREE.CylinderGeometry(.23,.26,1.1,20),
+new THREE.MeshStandardMaterial({color:0x1c2038})
+)
+body.position.y=1.05
+avatar.add(body)
+
+const head=new THREE.Mesh(
+new THREE.SphereGeometry(.18,24,24),
+new THREE.MeshStandardMaterial({color:0x262a44})
+)
+head.position.y=1.8
+avatar.add(head)
+
+scene.add(avatar)
+
+const consoleGroup=new THREE.Group()
+
+const consoleMain=new THREE.Mesh(
+new THREE.PlaneGeometry(3.2,1.6),
+new THREE.MeshStandardMaterial({
+color:0x9ddcff,
+transparent:true,
+opacity:.12,
+emissive:0x4b93ff,
+emissiveIntensity:1.4,
+side:THREE.DoubleSide
+})
+)
+
+consoleMain.position.set(0,1.7,-2.4)
+consoleMain.rotation.x=-.05
+consoleGroup.add(consoleMain)
+
+scene.add(consoleGroup)
+
+const framesGroup=new THREE.Group()
+scene.add(framesGroup)
+
+const frameMeshes=[]
+
+function createFrame(){
+
+const frame=new THREE.Group()
+
+const mat=new THREE.MeshStandardMaterial({
+color:0xfce8d8,
+emissive:0xf7b17c,
+emissiveIntensity:.7,
+transparent:true,
+opacity:.9
+})
+
+const inner=new THREE.Mesh(
+new THREE.PlaneGeometry(1.3,.8),
+new THREE.MeshStandardMaterial({
+color:0x402830,
+transparent:true,
+opacity:.4,
+emissive:0x8f5b7a,
+emissiveIntensity:.5
+})
+)
+
+frame.add(inner)
+
+frame.userData.innerMat=inner.material
+
+return frame
+}
+
+const layouts=[
+{count:8,radius:7.5,y:1.8,tilt:0,speed:.08},
+{count:6,radius:6.5,y:4.5,tilt:.35,speed:.05},
+{count:6,radius:6.5,y:-1,tilt:-.35,speed:-.06}
+]
+
+let memoryIndex=0
+
+for(let r=0;r<layouts.length;r++){
+
+const ring=layouts[r]
+
+for(let i=0;i<ring.count;i++){
+
+const frame=createFrame()
+const angle=i/ring.count*Math.PI*2
+
+frame.position.set(
+Math.cos(angle)*ring.radius,
+ring.y,
+Math.sin(angle)*ring.radius
+)
+
+frame.userData.baseAngle=angle
+frame.userData.radius=ring.radius
+frame.userData.baseY=ring.y
+frame.userData.ringSpeed=ring.speed
+frame.userData.tilt=ring.tilt
+frame.userData.floatOffset=Math.random()*Math.PI*2
+
+framesGroup.add(frame)
+frameMeshes.push(frame)
+
+memoryIndex++
+}
+}
+
+const timeline=document.getElementById("timeline")
+
+let lastFpsTime=performance.now()
+let frames=0
+
+function animate(){
+
+requestAnimationFrame(animate)
+
+const t=timeline.value/100
+const time=performance.now()*.001
+
+const widePos=new THREE.Vector3(0,4,11)
+const firstPerson=new THREE.Vector3(0,1.78,.08)
+
+const desired=widePos.clone().lerp(firstPerson,t)
+
+camera.position.lerp(desired,.08)
+
+for(const frame of frameMeshes){
+
+const angle=frame.userData.baseAngle+time*frame.userData.ringSpeed
+
+frame.position.x=Math.cos(angle)*frame.userData.radius
+frame.position.z=Math.sin(angle)*frame.userData.radius
+
+frame.rotation.y=-angle+Math.PI/2
+}
+
+controls.update()
+renderer.render(scene,camera)
+
+frames++
+const now=performance.now()
+
+if(now-lastFpsTime>500){
+
+document.getElementById("fps").textContent="fps: "+Math.round(frames*1000/(now-lastFpsTime))
+
+frames=0
+lastFpsTime=now
+}
+}
+
+animate()
+
+document.getElementById("startBtn").onclick=()=>{
+document.getElementById("startOverlay").style.display="none"
+}
+
+window.addEventListener("resize",()=>{
+
+camera.aspect=innerWidth/innerHeight
+camera.updateProjectionMatrix()
+renderer.setSize(innerWidth,innerHeight)
+
+})
+
 </script>
-
 </body>
 </html>
