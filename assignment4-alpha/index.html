@@ -238,7 +238,7 @@
     Click a floating memory frame to select it.<br>
     Rename it here, then Save Name.<br>
     Undo restores the last saved name.<br>
-    Slider changes the point of view from wide archive view to immersive close view.
+    Slider changes the point of view from wide archive view to first-person.
   </div>
 </div>
 
@@ -257,7 +257,7 @@
     0.1,
     1000
   );
-  camera.position.set(0, 3.8, 10.5);
+  camera.position.set(0, 4.2, 11.2);
 
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
@@ -268,6 +268,9 @@
   controls.enablePan = false;
   controls.enableZoom = false;
   controls.target.set(0, 1.7, 0);
+  controls.minPolarAngle = 0.35;
+  controls.maxPolarAngle = 2.6;
+  controls.enableRotate = true;
   controls.update();
 
   const light = new THREE.PointLight(0xffffff, 1.2);
@@ -315,48 +318,26 @@
     emissive: 0x0f1022,
     emissiveIntensity: 0.18
   });
-
   const platform = new THREE.Mesh(platformGeo, platformMat);
   platform.position.set(0, 0.06, 0);
   scene.add(platform);
 
   const avatarGroup = new THREE.Group();
 
-  const bodyMat = new THREE.MeshStandardMaterial({
-    color: 0x1f2235,
-    roughness: 0.8,
-    metalness: 0.05,
-    emissive: 0x0f1020,
-    emissiveIntensity: 0.2
+  const avatarMat = new THREE.MeshStandardMaterial({
+    color: 0x23283d,
+    roughness: 0.82,
+    metalness: 0.04,
+    emissive: 0x101427,
+    emissiveIntensity: 0.15
   });
 
-  const legGeo = new THREE.CylinderGeometry(0.08, 0.08, 0.7, 16);
-  const legLeft = new THREE.Mesh(legGeo, bodyMat);
-  legLeft.position.set(-0.12, 0.45, 0);
-  avatarGroup.add(legLeft);
+  const body = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.26, 1.05, 18), avatarMat);
+  body.position.set(0, 1.02, 0);
+  avatarGroup.add(body);
 
-  const legRight = new THREE.Mesh(legGeo, bodyMat);
-  legRight.position.set(0.12, 0.45, 0);
-  avatarGroup.add(legRight);
-
-  const torsoGeo = new THREE.CylinderGeometry(0.17, 0.2, 0.95, 18);
-  const torso = new THREE.Mesh(torsoGeo, bodyMat);
-  torso.position.set(0, 1.08, 0);
-  avatarGroup.add(torso);
-
-  const shoulderGeo = new THREE.SphereGeometry(0.19, 20, 20);
-  const shoulder = new THREE.Mesh(shoulderGeo, bodyMat);
-  shoulder.position.set(0, 1.5, 0);
-  avatarGroup.add(shoulder);
-
-  const headGeo = new THREE.SphereGeometry(0.16, 24, 24);
-  const headMat = new THREE.MeshStandardMaterial({
-    color: 0x2b2f45,
-    roughness: 0.75,
-    metalness: 0.05
-  });
-  const head = new THREE.Mesh(headGeo, headMat);
-  head.position.set(0, 1.78, 0);
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.17, 20, 20), avatarMat);
+  head.position.set(0, 1.75, 0);
   avatarGroup.add(head);
 
   avatarGroup.position.set(0, 0.06, 0.15);
@@ -745,6 +726,7 @@
       timeline.style.display = "none";
       timelineLabel.style.display = "none";
       hud.textContent = "memory fragments: waiting";
+      controls.enableRotate = false;
     }
 
     if (nextState === "hub") {
@@ -761,6 +743,7 @@
       platform.visible = true;
       avatarGroup.visible = true;
       consoleGroup.visible = true;
+      controls.enableRotate = true;
 
       if (!selectedFrame && frameMeshes.length > 0) {
         selectFrame(frameMeshes[0]);
@@ -781,14 +764,15 @@
       platform.visible = true;
       avatarGroup.visible = true;
       consoleGroup.visible = true;
+      controls.enableRotate = true;
     }
   }
 
   const wideCameraPos = new THREE.Vector3(0, 4.2, 11.2);
-  const closeCameraPos = new THREE.Vector3(0, 1.75, 1.55);
+  const closeCameraPos = new THREE.Vector3(0, 1.78, 0.05);
 
   const wideTarget = new THREE.Vector3(0, 1.7, 0);
-  const closeTarget = new THREE.Vector3(0, 1.75, -2.15);
+  const closeTarget = new THREE.Vector3(0, 1.78, -2.1);
 
   let lastFpsTime = performance.now();
   let frames = 0;
@@ -808,8 +792,16 @@
     const desiredPos = wideCameraPos.clone().lerp(closeCameraPos, t);
     const desiredTarget = wideTarget.clone().lerp(closeTarget, t);
 
-    camera.position.lerp(desiredPos, 0.08);
-    controls.target.lerp(desiredTarget, 0.08);
+    if (controls.enableRotate && t < 0.88) {
+      const baseOffset = camera.position.clone().sub(controls.target);
+      const desiredOffset = desiredPos.clone().sub(desiredTarget);
+      baseOffset.lerp(desiredOffset, 0.08);
+      controls.target.lerp(desiredTarget, 0.08);
+      camera.position.copy(controls.target.clone().add(baseOffset));
+    } else {
+      camera.position.lerp(desiredPos, 0.08);
+      controls.target.lerp(desiredTarget, 0.08);
+    }
 
     if (appState === "hub") {
       scene.fog.density = 0.012 + t * 0.03;
@@ -839,6 +831,12 @@
         frame.rotation.x = frame.userData.tilt + Math.sin(time * 0.7 + frame.userData.floatOffset) * 0.05;
         frame.rotation.z = Math.cos(time * 0.6 + frame.userData.floatOffset) * 0.04;
       }
+    }
+
+    if (t > 0.9) {
+      avatarGroup.visible = false;
+    } else {
+      avatarGroup.visible = true;
     }
 
     consoleGroup.position.y = consoleBaseY + Math.sin(time * 1.25) * 0.035;
