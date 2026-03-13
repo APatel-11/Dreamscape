@@ -1,15 +1,16 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8" />
+<meta charset="UTF-8"/>
 <title>Dreamscape</title>
 
 <style>
+
 body{
 margin:0;
 overflow:hidden;
-background:#02030a;
-font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
+background:black;
+font-family:system-ui,-apple-system,Segoe UI,Roboto;
 }
 
 #timeline{
@@ -49,11 +50,11 @@ font-family:monospace;
 z-index:10;
 }
 
-#memoryPanel{
+#console{
 position:fixed;
 top:16px;
 right:16px;
-width:280px;
+width:260px;
 background:rgba(5,8,20,.72);
 border:1px solid rgba(122,188,255,.25);
 border-radius:14px;
@@ -64,32 +65,19 @@ backdrop-filter:blur(8px);
 box-shadow:0 0 24px rgba(60,100,255,.12);
 }
 
-#memoryPanel h3{
-margin:0 0 10px 0;
-font-size:15px;
-font-weight:700;
-color:#dff4ff;
-}
-
-#memoryName{
+#console input{
 width:100%;
-box-sizing:border-box;
-padding:9px 10px;
+padding:8px;
 border-radius:10px;
 border:1px solid rgba(160,210,255,.18);
 background:rgba(20,26,46,.8);
 color:white;
+margin-bottom:10px;
 }
 
-.btnRow{
-display:flex;
-gap:8px;
-margin-top:12px;
-}
-
-.btnRow button{
-flex:1;
-padding:10px;
+#console button{
+width:48%;
+padding:9px;
 border:none;
 border-radius:10px;
 cursor:pointer;
@@ -98,60 +86,14 @@ color:white;
 background:linear-gradient(135deg,#5471ff,#47abff);
 }
 
-.btnRow button.secondary{
+#console button.secondary{
 background:rgba(255,255,255,.1);
 border:1px solid rgba(255,255,255,.12);
 }
 
-#startOverlay{
-position:fixed;
-inset:0;
-z-index:100;
+#console .row{
 display:flex;
-align-items:center;
-justify-content:center;
-background:radial-gradient(circle at center,rgba(36,46,92,.35),rgba(4,6,16,.92));
-}
-
-#startCard{
-width:min(540px,88vw);
-padding:28px;
-border-radius:18px;
-background:rgba(10,14,28,.82);
-border:1px solid rgba(145,198,255,.18);
-box-shadow:0 0 40px rgba(78,123,255,.14);
-color:white;
-backdrop-filter:blur(12px);
-}
-
-#startCard h1{
-margin:0 0 10px 0;
-font-size:28px;
-color:#e7f5ff;
-}
-
-#startCard p{
-margin:0 0 18px 0;
-color:#bed4ec;
-line-height:1.55;
-font-size:14px;
-}
-
-#startCard .menuRow{
-display:flex;
-gap:10px;
-margin-top:12px;
-}
-
-#startCard button{
-flex:1;
-padding:12px 14px;
-border:none;
-border-radius:12px;
-cursor:pointer;
-font-weight:700;
-color:white;
-background:linear-gradient(135deg,#506eff,#4db6ff);
+gap:6px;
 }
 
 </style>
@@ -159,26 +101,16 @@ background:linear-gradient(135deg,#506eff,#4db6ff);
 
 <body>
 
-<div id="startOverlay">
-<div id="startCard">
-<h1>Dreamscape</h1>
-<p>Enter a curated memory sphere where framed memories orbit around you.</p>
-<div class="menuRow">
-<button id="startBtn">Start Dreamscape</button>
-</div>
-</div>
-</div>
-
-<input id="timeline" type="range" min="0" max="100" value="15"/>
+<input id="timeline" type="range" min="0" max="100" value="10"/>
 
 <div id="hud">memory fragments: curated frames</div>
 <div id="timelineLabel">timeline = point of view</div>
 <div id="fps">fps: --</div>
 
-<div id="memoryPanel">
-<h3>Dreamscape Console</h3>
+<div id="console">
+<b>Dreamscape Console</b><br><br>
 <input id="memoryName" value="Memory 01"/>
-<div class="btnRow">
+<div class="row">
 <button id="saveBtn">Save</button>
 <button id="undoBtn" class="secondary">Undo</button>
 </div>
@@ -190,205 +122,224 @@ background:linear-gradient(135deg,#506eff,#4db6ff);
 <script>
 
 const scene=new THREE.Scene()
-scene.fog=new THREE.FogExp2(0x0c1025,.025)
+scene.fog=new THREE.FogExp2(0x111122,.02)
 
-const camera=new THREE.PerspectiveCamera(75,innerWidth/innerHeight,.1,1000)
+const camera=new THREE.PerspectiveCamera(75,window.innerWidth/window.innerHeight,.1,1000)
 camera.position.set(0,4,11)
 
 const renderer=new THREE.WebGLRenderer({antialias:true})
-renderer.setSize(innerWidth,innerHeight)
+renderer.setSize(window.innerWidth,window.innerHeight)
 document.body.appendChild(renderer.domElement)
 
 const controls=new THREE.OrbitControls(camera,renderer.domElement)
 controls.enableDamping=true
-controls.enableZoom=false
-controls.target.set(0,1.7,0)
+controls.enablePan=false
+controls.target.set(0,1.6,0)
+controls.update()
 
-const light=new THREE.PointLight(0xffffff,1.2)
+const light=new THREE.PointLight(0xffffff,1)
 light.position.set(5,10,5)
 scene.add(light)
 
-scene.add(new THREE.AmbientLight(0xffffff,.25))
+scene.add(new THREE.AmbientLight(0xffffff,.3))
 
-const skyGeo=new THREE.SphereGeometry(60,64,64)
-const skyMat=new THREE.MeshBasicMaterial({
-color:0x070b1f,
+/* sphere environment */
+
+const sphere=new THREE.Mesh(
+new THREE.SphereGeometry(30,64,64),
+new THREE.MeshStandardMaterial({
+color:0x0b0b14,
 side:THREE.BackSide
 })
-scene.add(new THREE.Mesh(skyGeo,skyMat))
+)
+scene.add(sphere)
+
+/* platform */
 
 const platform=new THREE.Mesh(
-new THREE.CylinderGeometry(2.4,2.6,.2,64),
-new THREE.MeshStandardMaterial({color:0x161a2d})
+new THREE.CylinderGeometry(2.4,2.6,.3,48),
+new THREE.MeshStandardMaterial({color:0x1a1a24})
 )
-platform.position.y=.05
+platform.position.y=.1
 scene.add(platform)
 
-const avatar=new THREE.Group()
+/* user placeholder */
+
+const user=new THREE.Group()
 
 const body=new THREE.Mesh(
-new THREE.CylinderGeometry(.23,.26,1.1,20),
+new THREE.CylinderGeometry(.25,.25,1.2,16),
 new THREE.MeshStandardMaterial({color:0x1c2038})
 )
-body.position.y=1.05
-avatar.add(body)
+body.position.y=1
+user.add(body)
 
 const head=new THREE.Mesh(
-new THREE.SphereGeometry(.18,24,24),
+new THREE.SphereGeometry(.18,20,20),
 new THREE.MeshStandardMaterial({color:0x262a44})
 )
 head.position.y=1.8
-avatar.add(head)
+user.add(head)
 
-scene.add(avatar)
+scene.add(user)
 
-const consoleGroup=new THREE.Group()
+/* console */
 
-const consoleMain=new THREE.Mesh(
-new THREE.PlaneGeometry(3.2,1.6),
+const consolePanel=new THREE.Mesh(
+new THREE.PlaneGeometry(2.6,1.4),
 new THREE.MeshStandardMaterial({
-color:0x9ddcff,
+color:0x9ad8ff,
 transparent:true,
-opacity:.12,
-emissive:0x4b93ff,
-emissiveIntensity:1.4,
-side:THREE.DoubleSide
+opacity:.15,
+emissive:0x4c8cff,
+emissiveIntensity:1
 })
 )
 
-consoleMain.position.set(0,1.7,-2.4)
-consoleMain.rotation.x=-.05
-consoleGroup.add(consoleMain)
+consolePanel.position.set(0,1.6,-2.4)
+scene.add(consolePanel)
 
-scene.add(consoleGroup)
+/* frames */
 
-const framesGroup=new THREE.Group()
-scene.add(framesGroup)
+const frameGroup=new THREE.Group()
+scene.add(frameGroup)
 
-const frameMeshes=[]
+const frames=[]
 
 function createFrame(){
 
-const frame=new THREE.Group()
-
-const mat=new THREE.MeshStandardMaterial({
-color:0xfce8d8,
-emissive:0xf7b17c,
-emissiveIntensity:.7,
-transparent:true,
-opacity:.9
-})
-
-const inner=new THREE.Mesh(
+const frame=new THREE.Mesh(
 new THREE.PlaneGeometry(1.3,.8),
 new THREE.MeshStandardMaterial({
 color:0x402830,
 transparent:true,
-opacity:.4,
+opacity:.7,
 emissive:0x8f5b7a,
-emissiveIntensity:.5
+emissiveIntensity:.4
 })
 )
-
-frame.add(inner)
-
-frame.userData.innerMat=inner.material
 
 return frame
 }
 
-const layouts=[
-{count:8,radius:7.5,y:1.8,tilt:0,speed:.08},
-{count:6,radius:6.5,y:4.5,tilt:.35,speed:.05},
-{count:6,radius:6.5,y:-1,tilt:-.35,speed:-.06}
-]
+/* place frames in a sphere */
 
-let memoryIndex=0
+const FRAME_COUNT=12
 
-for(let r=0;r<layouts.length;r++){
-
-const ring=layouts[r]
-
-for(let i=0;i<ring.count;i++){
+for(let i=0;i<FRAME_COUNT;i++){
 
 const frame=createFrame()
-const angle=i/ring.count*Math.PI*2
+
+const angle=(i/FRAME_COUNT)*Math.PI*2
+const radius=7
 
 frame.position.set(
-Math.cos(angle)*ring.radius,
-ring.y,
-Math.sin(angle)*ring.radius
+Math.cos(angle)*radius,
+1.6+(Math.random()-.5)*3,
+Math.sin(angle)*radius
 )
 
-frame.userData.baseAngle=angle
-frame.userData.radius=ring.radius
-frame.userData.baseY=ring.y
-frame.userData.ringSpeed=ring.speed
-frame.userData.tilt=ring.tilt
-frame.userData.floatOffset=Math.random()*Math.PI*2
+frame.lookAt(0,1.6,0)
 
-framesGroup.add(frame)
-frameMeshes.push(frame)
+frame.userData.angle=angle
+frame.userData.radius=radius
+frame.userData.speed=.04+(Math.random()*.03)
 
-memoryIndex++
+frameGroup.add(frame)
+frames.push(frame)
+
 }
+
+/* raycasting */
+
+const raycaster=new THREE.Raycaster()
+const mouse=new THREE.Vector2()
+let selected=null
+
+window.addEventListener("click",(e)=>{
+
+mouse.x=(e.clientX/window.innerWidth)*2-1
+mouse.y=-(e.clientY/window.innerHeight)*2+1
+
+raycaster.setFromCamera(mouse,camera)
+const hit=raycaster.intersectObjects(frames)
+
+if(hit.length>0){
+
+if(selected)selected.material.emissiveIntensity=.4
+
+selected=hit[0].object
+selected.material.emissiveIntensity=1.5
+
 }
+
+})
+
+/* timeline */
 
 const timeline=document.getElementById("timeline")
 
-let lastFpsTime=performance.now()
-let frames=0
+/* fps */
+
+const fpsEl=document.getElementById("fps")
+let lastTime=performance.now()
+let frameCount=0
 
 function animate(){
 
 requestAnimationFrame(animate)
 
 const t=timeline.value/100
+
+/* slider only changes camera distance */
+
+const desiredZ=11-(t*8)
+camera.position.z+= (desiredZ-camera.position.z)*.05
+
+/* orbit frames */
+
 const time=performance.now()*.001
 
-const widePos=new THREE.Vector3(0,4,11)
-const firstPerson=new THREE.Vector3(0,1.78,.08)
+for(const frame of frames){
 
-const desired=widePos.clone().lerp(firstPerson,t)
+frame.userData.angle+=frame.userData.speed*.01
 
-camera.position.lerp(desired,.08)
+const a=frame.userData.angle
+const r=frame.userData.radius
 
-for(const frame of frameMeshes){
+frame.position.x=Math.cos(a)*r
+frame.position.z=Math.sin(a)*r
 
-const angle=frame.userData.baseAngle+time*frame.userData.ringSpeed
+frame.lookAt(0,1.6,0)
 
-frame.position.x=Math.cos(angle)*frame.userData.radius
-frame.position.z=Math.sin(angle)*frame.userData.radius
-
-frame.rotation.y=-angle+Math.PI/2
 }
 
 controls.update()
 renderer.render(scene,camera)
 
-frames++
+/* fps */
+
+frameCount++
 const now=performance.now()
 
-if(now-lastFpsTime>500){
+if(now-lastTime>500){
 
-document.getElementById("fps").textContent="fps: "+Math.round(frames*1000/(now-lastFpsTime))
+fpsEl.textContent="fps: "+Math.round(frameCount*1000/(now-lastTime))
 
-frames=0
-lastFpsTime=now
+frameCount=0
+lastTime=now
+
 }
+
 }
 
 animate()
 
-document.getElementById("startBtn").onclick=()=>{
-document.getElementById("startOverlay").style.display="none"
-}
-
 window.addEventListener("resize",()=>{
 
-camera.aspect=innerWidth/innerHeight
+camera.aspect=window.innerWidth/window.innerHeight
 camera.updateProjectionMatrix()
-renderer.setSize(innerWidth,innerHeight)
+renderer.setSize(window.innerWidth,window.innerHeight)
 
 })
 
