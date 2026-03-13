@@ -246,7 +246,6 @@
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 
 <script>
-  
   let appState = "menu";
 
   const scene = new THREE.Scene();
@@ -267,7 +266,7 @@
   const controls = new THREE.OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
   controls.enablePan = false;
-  controls.enableZoom = false; 
+  controls.enableZoom = false;
   controls.target.set(0, 1.7, 0);
   controls.update();
 
@@ -340,10 +339,15 @@
   legRight.position.set(0.12, 0.45, 0);
   avatarGroup.add(legRight);
 
-  const torsoGeo = new THREE.CapsuleGeometry(0.18, 0.85, 4, 8);
+  const torsoGeo = new THREE.CylinderGeometry(0.17, 0.2, 0.95, 18);
   const torso = new THREE.Mesh(torsoGeo, bodyMat);
-  torso.position.set(0, 1.1, 0);
+  torso.position.set(0, 1.08, 0);
   avatarGroup.add(torso);
+
+  const shoulderGeo = new THREE.SphereGeometry(0.19, 20, 20);
+  const shoulder = new THREE.Mesh(shoulderGeo, bodyMat);
+  shoulder.position.set(0, 1.5, 0);
+  avatarGroup.add(shoulder);
 
   const headGeo = new THREE.SphereGeometry(0.16, 24, 24);
   const headMat = new THREE.MeshStandardMaterial({
@@ -651,7 +655,6 @@
     selectedMemoryId = frame.userData.memoryId;
     updateMemoryPanel();
     highlightFrames();
-    console.log("Selected memory:", memories[selectedMemoryId].name);
   }
 
   function saveSelectedMemoryName() {
@@ -774,7 +777,7 @@
       scene.fog.color.set(0x24182e);
       museumSphere.material.color.set(0x120f1a);
 
-      framesGroup.visible = true; 
+      framesGroup.visible = true;
       platform.visible = true;
       avatarGroup.visible = true;
       consoleGroup.visible = true;
