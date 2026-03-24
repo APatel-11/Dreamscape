@@ -469,6 +469,21 @@
     localStorage.setItem("dreamscape_memory_names", JSON.stringify(names));
   }
 
+  function getArchiveStats() {
+    const totalFrames = Math.max(memories.length * 12, 48);
+
+    let shellCount = 1;
+    if (totalFrames > 70) shellCount = 2;
+    if (totalFrames > 140) shellCount = 3;
+    if (totalFrames > 240) shellCount = 4;
+
+    return {
+      memoryCount: memories.length,
+      totalFrames,
+      shellCount
+    };
+  }
+
   const platformGroup = new THREE.Group();
 
   const topDisk = new THREE.Mesh(
@@ -886,6 +901,21 @@
   const raycaster = new THREE.Raycaster();
   const mouse = new THREE.Vector2();
 
+  function updateHud() {
+    if (appState === "menu") {
+      hud.textContent = "memory fragments: waiting";
+      return;
+    }
+
+    if (appState === "memory") {
+      hud.textContent = `inside memory: ${memories[selectedMemoryId].name}`;
+      return;
+    }
+
+    const archive = getArchiveStats();
+    hud.textContent = `memory fragments: ${archive.totalFrames} | memories: ${archive.memoryCount} | shells: ${archive.shellCount}`;
+  }
+
   function updateMemoryPanel() {
     const memory = memories[selectedMemoryId];
     memoryNameInput.value = memory.name;
@@ -910,6 +940,7 @@
     selectedMemoryId = frame.userData.memoryId;
     updateMemoryPanel();
     highlightFrames();
+    updateHud();
   }
 
   function saveSelectedMemoryName() {
@@ -921,6 +952,7 @@
     memory.name = trimmed;
     saveMemories();
     updateMemoryPanel();
+    updateHud();
   }
 
   function undoMemoryName() {
@@ -929,6 +961,7 @@
       memory.name = memory.history.pop();
       saveMemories();
       updateMemoryPanel();
+      updateHud();
     }
   }
 
@@ -951,6 +984,7 @@
 
     updateMemoryPanel();
     highlightFrames();
+    updateHud();
   }
 
   togglePanelBtn.addEventListener("click", () => {
@@ -1027,7 +1061,7 @@
       memoryPanel.style.display = "none";
       timeline.style.display = "none";
       timelineLabel.style.display = "none";
-      hud.textContent = "memory fragments: waiting";
+      updateHud();
     }
 
     if (nextState === "hub") {
@@ -1035,7 +1069,7 @@
       memoryPanel.style.display = "block";
       timeline.style.display = "block";
       timelineLabel.style.display = "block";
-      hud.textContent = "memory fragments: curated frames";
+      updateHud();
       scene.fog.color.set(0x111122);
       museumSphere.material.color.set(0x0b0b14);
       scene.fog.density = 0.02;
@@ -1056,7 +1090,7 @@
       memoryPanel.style.display = "block";
       timeline.style.display = "block";
       timelineLabel.style.display = "block";
-      hud.textContent = `inside memory: ${memories[selectedMemoryId].name}`;
+      updateHud();
       scene.fog.color.set(0x24182e);
       scene.fog.density = 0.05;
       museumSphere.material.color.set(0x120f1a);
@@ -1073,6 +1107,7 @@
   let frames = 0;
 
   updateMemoryPanel();
+  updateHud();
   setAppState("menu");
 
   function animate() {
