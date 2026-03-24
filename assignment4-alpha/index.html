@@ -250,9 +250,7 @@
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 
 <script>
-  // -----------------------------
-  // App state
-  // -----------------------------
+  
   let appState = "menu"; // menu | hub | memory
 
   function setAppState(nextState) {
@@ -304,9 +302,6 @@
     }
   }
 
-  // -----------------------------
-  // Scene setup
-  // -----------------------------
   const scene = new THREE.Scene();
   scene.fog = new THREE.FogExp2(0x111122, 0.02);
 
@@ -337,9 +332,6 @@
   const ambient = new THREE.AmbientLight(0xffffff, 0.25);
   scene.add(ambient);
 
-  // -----------------------------
-  // Environment sphere
-  // -----------------------------
   const sphereGeo = new THREE.SphereGeometry(30, 64, 64);
   const sphereMat = new THREE.MeshStandardMaterial({
     color: 0x0b0b14,
@@ -350,9 +342,6 @@
   const museumSphere = new THREE.Mesh(sphereGeo, sphereMat);
   scene.add(museumSphere);
 
-  // -----------------------------
-  // Memory data
-  // -----------------------------
   const MEMORY_COUNT = 6;
   const savedNames = JSON.parse(localStorage.getItem("dreamscape_memory_names") || "null");
 
@@ -372,9 +361,6 @@
     localStorage.setItem("dreamscape_memory_names", JSON.stringify(names));
   }
 
-  // -----------------------------
-  // Platform
-  // -----------------------------
   const platformGeo = new THREE.CylinderGeometry(1.8, 2.2, 0.4, 48);
   const platformMat = new THREE.MeshStandardMaterial({
     color: 0x1a1a24,
@@ -387,9 +373,6 @@
   platform.position.set(0, 0.2, 0);
   scene.add(platform);
 
-  // -----------------------------
-  // Orbit rings
-  // -----------------------------
   const ringsGroup = new THREE.Group();
   scene.add(ringsGroup);
 
@@ -414,9 +397,6 @@
   const orbitRing2 = createOrbitRing(6.6, 2.6, 0x88ddff, 0.22);
   const orbitRing3 = createOrbitRing(6.0, 0.6, 0x5577ff, 0.18);
 
-  // -----------------------------
-  // Holographic console object
-  // -----------------------------
   const consoleGroup = new THREE.Group();
 
   const pedestalGeo = new THREE.CylinderGeometry(0.7, 0.95, 1.0, 24);
@@ -507,9 +487,6 @@
   consoleGroup.lookAt(0, 1.4, 0);
   scene.add(consoleGroup);
 
-  // -----------------------------
-  // Memory frames
-  // -----------------------------
   const framesGroup = new THREE.Group();
   scene.add(framesGroup);
 
@@ -615,9 +592,6 @@
 
   layoutFrames();
 
-  // -----------------------------
-  // UI refs
-  // -----------------------------
   const hud = document.getElementById("hud");
   const timeline = document.getElementById("timeline");
   const fpsEl = document.getElementById("fps");
@@ -639,9 +613,6 @@
   const exitBtn = document.getElementById("exitBtn");
   const resetBtn = document.getElementById("resetBtn");
 
-  // -----------------------------
-  // Interaction system
-  // -----------------------------
   const raycaster = new THREE.Raycaster();
   const mouse = new THREE.Vector2();
 
@@ -755,20 +726,13 @@
     }
   });
 
-  // -----------------------------
-  // FPS tracking
-  // -----------------------------
   let lastFpsTime = performance.now();
   let frames = 0;
 
-  // initial UI sync
   updateMemoryPanel();
   highlightFrames();
   setAppState("menu");
 
-  // -----------------------------
-  // Animation loop
-  // -----------------------------
   function animate() {
     requestAnimationFrame(animate);
 
@@ -788,7 +752,6 @@
       memories[selectedMemoryId].clarity = t;
       clarityText.textContent = t.toFixed(2);
 
-      // console shifts closer in memory mode
       consoleGroup.position.z = -1.6;
     } else {
       consoleGroup.position.z = -2.6;
@@ -832,9 +795,6 @@
 
   animate();
 
-  // -----------------------------
-  // Resize handling
-  // -----------------------------
   window.addEventListener("resize", () => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
