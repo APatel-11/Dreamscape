@@ -226,9 +226,6 @@
       Enter a curated memory sphere where framed fragments orbit around you.
       Select a memory, rename it, adjust its clarity, and enter a focused memory state.
     </p>
-    <p>
-      This pass restores the stable centered composition so the platform, avatar, console, and zoom behavior stay aligned.
-    </p>
     <div class="menuRow">
       <button id="startBtn">Start Dreamscape</button>
       <button id="backToMenuBtn" class="secondary">Return to Menu</button>
@@ -270,6 +267,7 @@
     </div>
 
     <div class="btnRow">
+      <button id="addMemoryBtn">Add Memory</button>
       <button id="resetBtn" class="secondary">Reset Experience</button>
     </div>
 
@@ -451,10 +449,10 @@
   const museumSphere = new THREE.Mesh(sphereGeo, sphereMat);
   scene.add(museumSphere);
 
-  const MEMORY_COUNT = 6;
   const savedNames = JSON.parse(localStorage.getItem("dreamscape_memory_names") || "null");
+  const initialMemoryCount = savedNames && savedNames.length > 0 ? savedNames.length : 6;
 
-  const memories = Array.from({ length: MEMORY_COUNT }, (_, i) => ({
+  const memories = Array.from({ length: initialMemoryCount }, (_, i) => ({
     id: i,
     name: savedNames?.[i] || `Memory ${String(i + 1).padStart(2, "0")}`,
     clarity: 0.5,
@@ -821,7 +819,7 @@
         frame.position.set(x, y, z);
         frame.lookAt(0, 2.55, 0);
 
-        frame.userData.memoryId = frameIndex % MEMORY_COUNT;
+        frame.userData.memoryId = frameIndex % memories.length;
         frame.userData.baseTheta = theta;
         frame.userData.baseYN = yN;
         frame.userData.shellRadius = shellRadius;
@@ -882,6 +880,7 @@
   const undoBtn = document.getElementById("undoBtn");
   const enterBtn = document.getElementById("enterBtn");
   const exitBtn = document.getElementById("exitBtn");
+  const addMemoryBtn = document.getElementById("addMemoryBtn");
   const resetBtn = document.getElementById("resetBtn");
 
   const raycaster = new THREE.Raycaster();
@@ -933,6 +932,27 @@
     }
   }
 
+  function addMemory() {
+    const nextId = memories.length;
+    memories.push({
+      id: nextId,
+      name: `Memory ${String(nextId + 1).padStart(2, "0")}`,
+      clarity: 0.5,
+      tone: "neutral",
+      edited: false,
+      history: []
+    });
+
+    saveMemories();
+    layoutFrames();
+
+    selectedMemoryId = nextId;
+    selectedFrame = frameMeshes.find(frame => frame.userData.memoryId === selectedMemoryId) || frameMeshes[0] || null;
+
+    updateMemoryPanel();
+    highlightFrames();
+  }
+
   togglePanelBtn.addEventListener("click", () => {
     memoryPanel.classList.toggle("minimized");
     togglePanelBtn.textContent = memoryPanel.classList.contains("minimized") ? "Expand" : "Minimize";
@@ -966,6 +986,10 @@
 
   exitBtn.addEventListener("click", () => {
     setAppState("hub");
+  });
+
+  addMemoryBtn.addEventListener("click", () => {
+    addMemory();
   });
 
   resetBtn.addEventListener("click", () => {
