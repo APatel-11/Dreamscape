@@ -4,233 +4,233 @@
 <meta charset="UTF-8" />
 <title>Dreamscape Beta Build</title>
 <style>
-  body {
-    margin: 0;
-    overflow: hidden;
-    background: black;
-    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  }
+  body {
+    margin: 0;
+    overflow: hidden;
+    background: black;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  }
 
-  #timeline {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 60%;
-    z-index: 10;
-  }
+  #timeline {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60%;
+    z-index: 10;
+  }
 
-  #hud {
-    position: fixed;
-    top: 12px;
-    left: 12px;
-    color: white;
-    font-family: monospace;
-    z-index: 10;
-  }
+  #hud {
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    color: white;
+    font-family: monospace;
+    z-index: 10;
+  }
 
-  #timelineLabel {
-    position: fixed;
-    top: 40px;
-    left: 12px;
-    color: #aaa;
-    font-family: monospace;
-    font-size: 12px;
-    z-index: 10;
-  }
+  #timelineLabel {
+    position: fixed;
+    top: 40px;
+    left: 12px;
+    color: #aaa;
+    font-family: monospace;
+    font-size: 12px;
+    z-index: 10;
+  }
 
-  #fps {
-    position: fixed;
-    top: 72px;
-    left: 12px;
-    color: white;
-    font-family: monospace;
-    z-index: 10;
-  }
+  #fps {
+    position: fixed;
+    top: 72px;
+    left: 12px;
+    color: white;
+    font-family: monospace;
+    z-index: 10;
+  }
 
-  #memoryPanel {
-    position: fixed;
-    top: 16px;
-    right: 16px;
-    width: 300px;
-    background: rgba(5, 8, 20, 0.74);
-    border: 1px solid rgba(122, 188, 255, 0.25);
-    border-radius: 14px;
-    padding: 14px;
-    color: white;
-    z-index: 20;
-    backdrop-filter: blur(8px);
-    box-shadow: 0 0 24px rgba(60, 100, 255, 0.12);
-    transition: width 0.22s ease, padding 0.22s ease;
-    overflow: hidden;
-  }
+  #memoryPanel {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    width: 300px;
+    background: rgba(5, 8, 20, 0.74);
+    border: 1px solid rgba(122, 188, 255, 0.25);
+    border-radius: 14px;
+    padding: 14px;
+    color: white;
+    z-index: 20;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 0 24px rgba(60, 100, 255, 0.12);
+    transition: width 0.22s ease, padding 0.22s ease;
+    overflow: hidden;
+  }
 
-  #memoryPanel.minimized {
-    width: 168px;
-    padding: 12px;
-  }
+  #memoryPanel.minimized {
+    width: 168px;
+    padding: 12px;
+  }
 
-  #memoryPanelTop {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    margin-bottom: 8px;
-  }
+  #memoryPanelTop {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
 
-  #memoryPanel h3 {
-    margin: 0;
-    font-size: 15px;
-    font-weight: 700;
-    color: #dff4ff;
-  }
+  #memoryPanel h3 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 700;
+    color: #dff4ff;
+  }
 
-  #togglePanelBtn {
-    border: 1px solid rgba(160, 210, 255, 0.18);
-    background: rgba(20, 26, 46, 0.8);
-    color: white;
-    border-radius: 10px;
-    padding: 7px 10px;
-    cursor: pointer;
-    font-weight: 600;
-  }
+  #togglePanelBtn {
+    border: 1px solid rgba(160, 210, 255, 0.18);
+    background: rgba(20, 26, 46, 0.8);
+    color: white;
+    border-radius: 10px;
+    padding: 7px 10px;
+    cursor: pointer;
+    font-weight: 600;
+  }
 
-  #memoryPanelBody {
-    display: block;
-  }
+  #memoryPanelBody {
+    display: block;
+  }
 
-  #memoryPanel.minimized #memoryPanelBody {
-    display: none;
-  }
+  #memoryPanel.minimized #memoryPanelBody {
+    display: none;
+  }
 
-  #memoryPanel .label {
-    font-size: 12px;
-    color: #9db6d8;
-    margin-top: 8px;
-    margin-bottom: 4px;
-  }
+  #memoryPanel .label {
+    font-size: 12px;
+    color: #9db6d8;
+    margin-top: 8px;
+    margin-bottom: 4px;
+  }
 
-  #memoryName {
-    width: 100%;
-    box-sizing: border-box;
-    padding: 9px 10px;
-    border-radius: 10px;
-    border: 1px solid rgba(160, 210, 255, 0.18);
-    background: rgba(20, 26, 46, 0.8);
-    color: white;
-    outline: none;
-  }
+  #memoryName {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 9px 10px;
+    border-radius: 10px;
+    border: 1px solid rgba(160, 210, 255, 0.18);
+    background: rgba(20, 26, 46, 0.8);
+    color: white;
+    outline: none;
+  }
 
-  #memoryMeta {
-    margin-top: 10px;
-    font-size: 13px;
-    color: #d2e9ff;
-    line-height: 1.5;
-  }
+  #memoryMeta {
+    margin-top: 10px;
+    font-size: 13px;
+    color: #d2e9ff;
+    line-height: 1.5;
+  }
 
-  .btnRow {
-    display: flex;
-    gap: 8px;
-    margin-top: 12px;
-  }
+  .btnRow {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+  }
 
-  .btnRow button {
-    flex: 1;
-    padding: 10px 12px;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    font-weight: 600;
-    color: white;
-    background: linear-gradient(135deg, rgba(84, 113, 255, 0.95), rgba(71, 171, 255, 0.95));
-  }
+  .btnRow button {
+    flex: 1;
+    padding: 10px 12px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    color: white;
+    background: linear-gradient(135deg, rgba(84, 113, 255, 0.95), rgba(71, 171, 255, 0.95));
+  }
 
-  .btnRow button.secondary {
-    background: rgba(255,255,255,0.1);
-    border: 1px solid rgba(255,255,255,0.12);
-  }
+  .btnRow button.secondary {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.12);
+  }
 
-  #controlsHint {
-    margin-top: 10px;
-    font-size: 11px;
-    color: #9fb8d8;
-    line-height: 1.45;
-  }
+  #controlsHint {
+    margin-top: 10px;
+    font-size: 11px;
+    color: #9fb8d8;
+    line-height: 1.45;
+  }
 
-  #startOverlay {
-    position: fixed;
-    inset: 0;
-    z-index: 100;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background:
-      radial-gradient(circle at center, rgba(36,46,92,0.35), rgba(4,6,16,0.92)),
-      rgba(0,0,0,0.86);
-  }
+  #startOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background:
+      radial-gradient(circle at center, rgba(36,46,92,0.35), rgba(4,6,16,0.92)),
+      rgba(0,0,0,0.86);
+  }
 
-  #startCard {
-    width: min(540px, 88vw);
-    padding: 28px;
-    border-radius: 18px;
-    background: rgba(10, 14, 28, 0.82);
-    border: 1px solid rgba(145, 198, 255, 0.18);
-    box-shadow: 0 0 40px rgba(78, 123, 255, 0.14);
-    color: white;
-    backdrop-filter: blur(12px);
-  }
+  #startCard {
+    width: min(540px, 88vw);
+    padding: 28px;
+    border-radius: 18px;
+    background: rgba(10, 14, 28, 0.82);
+    border: 1px solid rgba(145, 198, 255, 0.18);
+    box-shadow: 0 0 40px rgba(78, 123, 255, 0.14);
+    color: white;
+    backdrop-filter: blur(12px);
+  }
 
-  #startCard h1 {
-    margin: 0 0 10px 0;
-    font-size: 28px;
-    color: #e7f5ff;
-  }
+  #startCard h1 {
+    margin: 0 0 10px 0;
+    font-size: 28px;
+    color: #e7f5ff;
+  }
 
-  #startCard p {
-    margin: 0 0 18px 0;
-    color: #bed4ec;
-    line-height: 1.55;
-    font-size: 14px;
-  }
+  #startCard p {
+    margin: 0 0 18px 0;
+    color: #bed4ec;
+    line-height: 1.55;
+    font-size: 14px;
+  }
 
-  #startCard .menuRow {
-    display: flex;
-    gap: 10px;
-    margin-top: 12px;
-  }
+  #startCard .menuRow {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+  }
 
-  #startCard button {
-    flex: 1;
-    padding: 12px 14px;
-    border: none;
-    border-radius: 12px;
-    cursor: pointer;
-    font-weight: 700;
-    color: white;
-    background: linear-gradient(135deg, rgba(80,110,255,0.96), rgba(77,182,255,0.96));
-  }
+  #startCard button {
+    flex: 1;
+    padding: 12px 14px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 700;
+    color: white;
+    background: linear-gradient(135deg, rgba(80,110,255,0.96), rgba(77,182,255,0.96));
+  }
 
-  #startCard button.secondary {
-    background: rgba(255,255,255,0.09);
-    border: 1px solid rgba(255,255,255,0.12);
-  }
+  #startCard button.secondary {
+    background: rgba(255,255,255,0.09);
+    border: 1px solid rgba(255,255,255,0.12);
+  }
 </style>
 </head>
 
 <body>
 
 <div id="startOverlay">
-  <div id="startCard">
-    <h1>Dreamscape</h1>
-    <p>
-      Enter a curated memory sphere where framed fragments orbit around you.
-      Select a memory, rename it, adjust its clarity, and enter a focused memory state.
-    </p>
-    <div class="menuRow">
-      <button id="startBtn">Start Dreamscape</button>
-      <button id="backToMenuBtn" class="secondary">Return to Menu</button>
-    </div>
-  </div>
+  <div id="startCard">
+    <h1>Dreamscape</h1>
+    <p>
+      Enter a curated memory sphere where framed fragments orbit around you.
+      Select a memory, rename it, adjust its clarity, and enter a focused memory state.
+    </p>
+    <div class="menuRow">
+      <button id="startBtn">Start Dreamscape</button>
+      <button id="backToMenuBtn" class="secondary">Return to Menu</button>
+    </div>
+  </div>
 </div>
 
 <input id="timeline" type="range" min="0" max="100" value="18" />
@@ -240,987 +240,1030 @@
 <div id="fps">fps: --</div>
 
 <div id="memoryPanel">
-  <div id="memoryPanelTop">
-    <h3>Dreamscape Memory Console</h3>
-    <button id="togglePanelBtn">Minimize</button>
-  </div>
+  <div id="memoryPanelTop">
+    <h3>Dreamscape Memory Console</h3>
+    <button id="togglePanelBtn">Minimize</button>
+  </div>
 
-  <div id="memoryPanelBody">
-    <div class="label">Selected Memory</div>
-    <input id="memoryName" type="text" value="Memory 01" />
+  <div id="memoryPanelBody">
+    <div class="label">Selected Memory</div>
+    <input id="memoryName" type="text" value="Memory 01" />
 
-    <div id="memoryMeta">
-      <div><strong>ID:</strong> <span id="memoryIdText">0</span></div>
-      <div><strong>Clarity:</strong> <span id="clarityText">0.50</span></div>
-      <div><strong>Tone:</strong> <span id="toneText">neutral</span></div>
-      <div><strong>State:</strong> <span id="stateText">hub</span></div>
-    </div>
+    <div id="memoryMeta">
+      <div><strong>ID:</strong> <span id="memoryIdText">0</span></div>
+      <div><strong>Clarity:</strong> <span id="clarityText">0.50</span></div>
+      <div><strong>Tone:</strong> <span id="toneText">neutral</span></div>
+      <div><strong>State:</strong> <span id="stateText">hub</span></div>
+    </div>
 
-    <div class="btnRow">
-      <button id="saveBtn">Save Name</button>
-      <button id="undoBtn" class="secondary">Undo</button>
-    </div>
+    <div class="btnRow">
+      <button id="saveBtn">Save Name</button>
+      <button id="undoBtn" class="secondary">Undo</button>
+    </div>
 
-    <div class="btnRow">
-      <button id="enterBtn">Enter Memory</button>
-      <button id="exitBtn" class="secondary">Exit Memory</button>
-    </div>
+    <div class="btnRow">
+      <button id="enterBtn">Enter Memory</button>
+      <button id="exitBtn" class="secondary">Exit Memory</button>
+    </div>
 
-    <div class="btnRow">
-      <button id="addMemoryBtn">Add Memory</button>
-      <button id="resetBtn" class="secondary">Reset Experience</button>
-    </div>
+    <div class="btnRow">
+      <button id="addMemoryBtn">Add Memory</button>
+      <button id="resetBtn" class="secondary">Reset Experience</button>
+    </div>
 
-    <div id="controlsHint">
-      Click a floating memory frame to select it.<br>
-      Rename it here, then Save Name.<br>
-      Undo restores the last saved name.<br>
-      Drag to orbit. Slider changes point of view and clarity.
-    </div>
-  </div>
+    <div id="controlsHint">
+      Click a floating memory frame to select it.<br>
+      Rename it here, then Save Name.<br>
+      Undo restores the last saved name.<br>
+      Drag to orbit. Slider changes point of view and clarity.
+    </div>
+  </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 
 <script>
-  function createBlankCanvasTexture(seed) {
-    const c = document.createElement("canvas");
-    c.width = 512;
-    c.height = 768;
-    const g = c.getContext("2d");
-
-    const tones = [
-      ["#1d2128", "#2b313b"],
-      ["#242129", "#36313c"],
-      ["#1b2427", "#2d383d"],
-      ["#26211f", "#39302d"],
-      ["#1e2026", "#2f3440"]
-    ];
-    const pair = tones[seed % tones.length];
-
-    const grad = g.createLinearGradient(0, 0, 0, c.height);
-    grad.addColorStop(0, pair[0]);
-    grad.addColorStop(1, pair[1]);
-    g.fillStyle = grad;
-    g.fillRect(0, 0, c.width, c.height);
-
-    g.fillStyle = "rgba(255,255,255,0.018)";
-    for (let i = 0; i < 120; i++) {
-      const x = Math.random() * c.width;
-      const y = Math.random() * c.height;
-      const r = Math.random() * 2 + 0.5;
-      g.beginPath();
-      g.arc(x, y, r, 0, Math.PI * 2);
-      g.fill();
-    }
-
-    g.strokeStyle = "rgba(255,255,255,0.03)";
-    g.lineWidth = 2;
-    g.strokeRect(24, 24, c.width - 48, c.height - 48);
-
-    const tex = new THREE.CanvasTexture(c);
-    tex.needsUpdate = true;
-    return tex;
-  }
-
-  function createConsoleTexture() {
-    const c = document.createElement("canvas");
-    c.width = 1800;
-    c.height = 900;
-    const g = c.getContext("2d");
-
-    g.clearRect(0, 0, c.width, c.height);
-
-    g.strokeStyle = "rgba(165,235,255,0.95)";
-    g.lineWidth = 4;
-    g.strokeRect(36, 36, c.width - 72, c.height - 72);
-
-    g.strokeStyle = "rgba(160,230,255,0.16)";
-    g.lineWidth = 2;
-    g.strokeRect(120, 170, 460, 250);
-    g.strokeRect(720, 170, 460, 280);
-    g.strokeRect(1260, 140, 500, 320);
-    g.strokeRect(170, 570, 460, 260);
-    g.strokeRect(760, 560, 600, 300);
-
-    g.fillStyle = "rgba(185,242,255,0.95)";
-    g.fillRect(190, 240, 260, 12);
-    g.fillRect(190, 288, 210, 10);
-    g.fillRect(190, 326, 300, 10);
-    g.fillRect(190, 364, 165, 10);
-
-    g.strokeStyle = "rgba(185,242,255,0.98)";
-    g.lineWidth = 4;
-    g.beginPath();
-    g.arc(1470, 300, 100, 0, Math.PI * 2);
-    g.stroke();
-    g.beginPath();
-    g.arc(1470, 300, 58, 0, Math.PI * 2);
-    g.stroke();
-
-    g.beginPath();
-    g.arc(1315, 430, 74, 0, Math.PI * 2);
-    g.stroke();
-
-    g.beginPath();
-    g.moveTo(880, 770);
-    g.lineTo(1010, 645);
-    g.lineTo(1135, 735);
-    g.lineTo(1320, 560);
-    g.stroke();
-
-    g.lineWidth = 2;
-    for (let i = 0; i < 6; i++) {
-      g.beginPath();
-      g.moveTo(230, 645 + i * 28);
-      g.lineTo(505, 645 + i * 28);
-      g.stroke();
-    }
-
-    g.strokeStyle = "rgba(173,237,255,0.26)";
-    g.strokeRect(1260, 600, 240, 130);
-    g.strokeRect(1210, 170, 150, 180);
-
-    const tex = new THREE.CanvasTexture(c);
-    tex.needsUpdate = true;
-    return tex;
-  }
-
-  function getAdaptiveFrameScale(totalFrames) {
-    if (totalFrames <= 72) return 0.92;
-    if (totalFrames <= 132) return 0.78;
-    if (totalFrames <= 192) return 0.66;
-    if (totalFrames <= 260) return 0.58;
-    return 0.52;
-  }
-
-  let appState = "menu";
-
-  const scene = new THREE.Scene();
-  scene.fog = new THREE.FogExp2(0x111122, 0.02);
-
-  const camera = new THREE.PerspectiveCamera(
-    75,
-    window.innerWidth / window.innerHeight,
-    0.1,
-    1000
-  );
-  camera.position.set(0, 4.2, 11.8);
-
-  const renderer = new THREE.WebGLRenderer({ antialias: true });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  document.body.appendChild(renderer.domElement);
-
-  const controls = new THREE.OrbitControls(camera, renderer.domElement);
-  controls.enableDamping = true;
-  controls.enablePan = false;
-  controls.enableZoom = false;
-  controls.minDistance = 1.5;
-  controls.maxDistance = 24;
-  controls.target.set(0, 2.1, 0);
-  controls.update();
-
-  const keyLight = new THREE.SpotLight(0xffffff, 2.6, 65, Math.PI / 6, 0.45, 1.15);
-  keyLight.position.set(0, 17, 5);
-  keyLight.target.position.set(0, 2.2, 0);
-  scene.add(keyLight);
-  scene.add(keyLight.target);
-
-  const fillLight = new THREE.PointLight(0x87a9ff, 0.7, 35);
-  fillLight.position.set(-8, 6, -8);
-  scene.add(fillLight);
-
-  const rimLight = new THREE.PointLight(0xc6d7ff, 0.4, 30);
-  rimLight.position.set(7, 6, 8);
-  scene.add(rimLight);
-
-  const consoleLight = new THREE.PointLight(0x7fd7ff, 1.05, 22);
-  consoleLight.position.set(0, 3.25, -1.75);
-  scene.add(consoleLight);
-
-  const ambient = new THREE.AmbientLight(0xffffff, 0.16);
-  scene.add(ambient);
-
-  const sphereGeo = new THREE.SphereGeometry(30, 64, 64);
-  const sphereMat = new THREE.MeshStandardMaterial({
-    color: 0x0b0b14,
-    side: THREE.BackSide,
-    roughness: 1,
-    metalness: 0
-  });
-  const museumSphere = new THREE.Mesh(sphereGeo, sphereMat);
-  scene.add(museumSphere);
-
-  const savedNames = JSON.parse(localStorage.getItem("dreamscape_memory_names") || "null");
-  const initialMemoryCount = savedNames && savedNames.length > 0 ? savedNames.length : 6;
-
-  const memories = Array.from({ length: initialMemoryCount }, (_, i) => ({
-    id: i,
-    name: savedNames?.[i] || `Memory ${String(i + 1).padStart(2, "0")}`,
-    clarity: 0.5,
-    tone: "neutral",
-    edited: false,
-    history: []
-  }));
-
-  let selectedMemoryId = 0;
-  let selectedFrame = null;
-
-  function saveMemories() {
-    const names = memories.map(m => m.name);
-    localStorage.setItem("dreamscape_memory_names", JSON.stringify(names));
-  }
-
-  function getArchiveStats() {
-    const totalFrames = Math.max(memories.length * 12, 48);
-
-    let shellCount = 1;
-    if (totalFrames > 70) shellCount = 2;
-    if (totalFrames > 140) shellCount = 3;
-    if (totalFrames > 240) shellCount = 4;
-
-    return {
-      memoryCount: memories.length,
-      totalFrames,
-      shellCount
-    };
-  }
-
-  const platformGroup = new THREE.Group();
-
-  const topDisk = new THREE.Mesh(
-    new THREE.CylinderGeometry(2.15, 2.7, 0.38, 56),
-    new THREE.MeshStandardMaterial({
-      color: 0x5a535d,
-      roughness: 0.96,
-      metalness: 0.02
-    })
-  );
-  topDisk.position.y = 0.28;
-  platformGroup.add(topDisk);
-
-  const lowerCone = new THREE.Mesh(
-    new THREE.ConeGeometry(1.7, 2.35, 56),
-    new THREE.MeshStandardMaterial({
-      color: 0x454049,
-      roughness: 0.99,
-      metalness: 0.01
-    })
-  );
-  lowerCone.position.y = -1.15;
-  platformGroup.add(lowerCone);
-
-  const undersideRing = new THREE.Mesh(
-    new THREE.TorusGeometry(1.5, 0.05, 12, 80),
-    new THREE.MeshStandardMaterial({
-      color: 0x7b727f,
-      roughness: 0.9,
-      metalness: 0.02
-    })
-  );
-  undersideRing.rotation.x = Math.PI / 2;
-  undersideRing.position.y = -0.22;
-  platformGroup.add(undersideRing);
-
-  platformGroup.position.set(0, 0.55, 0);
-  scene.add(platformGroup);
-
-  const avatarGroup = new THREE.Group();
-
-  const avatarMat = new THREE.MeshStandardMaterial({
-    color: 0x262b3d,
-    roughness: 0.88,
-    metalness: 0.03,
-    emissive: 0x101421,
-    emissiveIntensity: 0.12
-  });
-
-  const legGeo = new THREE.CylinderGeometry(0.06, 0.06, 1.02, 14);
-  const legLeft = new THREE.Mesh(legGeo, avatarMat);
-  legLeft.position.set(-0.11, 0.58, 0);
-  avatarGroup.add(legLeft);
-
-  const legRight = new THREE.Mesh(legGeo, avatarMat);
-  legRight.position.set(0.11, 0.58, 0);
-  avatarGroup.add(legRight);
-
-  const torsoGeo = new THREE.CylinderGeometry(0.18, 0.22, 1.35, 18);
-  const torso = new THREE.Mesh(torsoGeo, avatarMat);
-  torso.position.set(0, 1.48, 0);
-  avatarGroup.add(torso);
-
-  const shoulders = new THREE.Mesh(
-    new THREE.SphereGeometry(0.2, 18, 18),
-    avatarMat
-  );
-  shoulders.position.set(0, 1.95, 0);
-  shoulders.scale.set(1.5, 0.72, 0.9);
-  avatarGroup.add(shoulders);
-
-  const head = new THREE.Mesh(
-    new THREE.SphereGeometry(0.155, 18, 18),
-    avatarMat
-  );
-  head.position.set(0, 2.26, 0.02);
-  avatarGroup.add(head);
-
-  const armGeo = new THREE.CylinderGeometry(0.05, 0.055, 1.08, 12);
-
-  const armLeft = new THREE.Mesh(armGeo, avatarMat);
-  armLeft.position.set(-0.5, 1.72, 0.02);
-  armLeft.rotation.z = -1.08;
-  avatarGroup.add(armLeft);
-
-  const armRight = new THREE.Mesh(armGeo, avatarMat);
-  armRight.position.set(0.5, 1.72, 0.02);
-  armRight.rotation.z = 1.08;
-  avatarGroup.add(armRight);
-
-  avatarGroup.position.set(0, 0.72, 0.02);
-  scene.add(avatarGroup);
-
-  const consoleGroup = new THREE.Group();
-
-  const consoleTexture = createConsoleTexture();
-
-  const consoleGlass = new THREE.Mesh(
-    new THREE.PlaneGeometry(4.35, 2.2),
-    new THREE.MeshBasicMaterial({
-      color: 0x83d7ff,
-      transparent: true,
-      opacity: 0.06
-    })
-  );
-  consoleGlass.position.set(0, 2.12, -0.04);
-  consoleGroup.add(consoleGlass);
-
-  const mainScreen = new THREE.Mesh(
-    new THREE.PlaneGeometry(4.05, 2.02),
-    new THREE.MeshBasicMaterial({
-      map: consoleTexture,
-      transparent: true,
-      opacity: 0.97
-    })
-  );
-  mainScreen.position.set(0, 2.12, 0);
-  consoleGroup.add(mainScreen);
-
-  const innerFrame = new THREE.Mesh(
-    new THREE.PlaneGeometry(3.65, 1.78),
-    new THREE.MeshBasicMaterial({
-      color: 0x90deff,
-      transparent: true,
-      opacity: 0.045
-    })
-  );
-  innerFrame.position.set(0, 2.12, 0.02);
-  consoleGroup.add(innerFrame);
-
-  const lowerPlate = new THREE.Mesh(
-    new THREE.PlaneGeometry(4.25, 0.26),
-    new THREE.MeshBasicMaterial({
-      color: 0x7fd7ff,
-      transparent: true,
-      opacity: 0.09
-    })
-  );
-  lowerPlate.position.set(0, 1.47, 0.01);
-  consoleGroup.add(lowerPlate);
-
-  const sidePanelL = new THREE.Mesh(
-    new THREE.PlaneGeometry(0.82, 0.48),
-    new THREE.MeshBasicMaterial({
-      color: 0x9ddfff,
-      transparent: true,
-      opacity: 0.1
-    })
-  );
-  sidePanelL.position.set(-2.22, 2.02, 0.01);
-  sidePanelL.rotation.y = 0.32;
-  consoleGroup.add(sidePanelL);
-
-  const sidePanelR = new THREE.Mesh(
-    new THREE.PlaneGeometry(0.92, 0.58),
-    new THREE.MeshBasicMaterial({
-      color: 0x9ddfff,
-      transparent: true,
-      opacity: 0.1
-    })
-  );
-  sidePanelR.position.set(2.16, 1.88, 0.01);
-  sidePanelR.rotation.y = -0.28;
-  consoleGroup.add(sidePanelR);
-
-  const orbitCircle1 = new THREE.Mesh(
-    new THREE.TorusGeometry(0.17, 0.008, 12, 64),
-    new THREE.MeshBasicMaterial({
-      color: 0x96dcff,
-      transparent: true,
-      opacity: 0.72
-    })
-  );
-  orbitCircle1.position.set(1.2, 2.2, 0.02);
-  consoleGroup.add(orbitCircle1);
-
-  const orbitCircle2 = new THREE.Mesh(
-    new THREE.TorusGeometry(0.28, 0.01, 12, 64),
-    new THREE.MeshBasicMaterial({
-      color: 0x96dcff,
-      transparent: true,
-      opacity: 0.72
-    })
-  );
-  orbitCircle2.position.set(1.65, 1.98, 0.02);
-  consoleGroup.add(orbitCircle2);
-
-  const scanlineBar = new THREE.Mesh(
-    new THREE.PlaneGeometry(4.05, 0.05),
-    new THREE.MeshBasicMaterial({
-      color: 0xb8efff,
-      transparent: true,
-      opacity: 0.18
-    })
-  );
-  scanlineBar.position.set(0, 2.1, 0.03);
-  consoleGroup.add(scanlineBar);
-
-  const pulseBar = new THREE.Mesh(
-    new THREE.PlaneGeometry(1.05, 0.06),
-    new THREE.MeshBasicMaterial({
-      color: 0xc7f3ff,
-      transparent: true,
-      opacity: 0.24
-    })
-  );
-  pulseBar.position.set(-1.25, 2.3, 0.03);
-  consoleGroup.add(pulseBar);
-
-  const chartGlow = new THREE.Mesh(
-    new THREE.PlaneGeometry(1.25, 0.7),
-    new THREE.MeshBasicMaterial({
-      color: 0x75d6ff,
-      transparent: true,
-      opacity: 0.055
-    })
-  );
-  chartGlow.position.set(-0.05, 1.92, 0.03);
-  consoleGroup.add(chartGlow);
-
-  const centerGlow = new THREE.Mesh(
-    new THREE.PlaneGeometry(2.25, 1.22),
-    new THREE.MeshBasicMaterial({
-      color: 0x92e5ff,
-      transparent: true,
-      opacity: 0.035
-    })
-  );
-  centerGlow.position.set(0.02, 2.02, 0.025);
-  consoleGroup.add(centerGlow);
-
-  consoleGroup.position.set(0, 0.22, -1.82);
-  consoleGroup.rotation.y = 0;
-  const consoleBaseY = consoleGroup.position.y;
-  scene.add(consoleGroup);
-
-  const framesGroup = new THREE.Group();
-  scene.add(framesGroup);
-
-  const frameMeshes = [];
-
-  function createFrame(seed, totalFrames) {
-    const frame = new THREE.Group();
-
-    const bronzeMat = new THREE.MeshStandardMaterial({
-      color: 0x9a7b57,
-      roughness: 0.8,
-      metalness: 0.08,
-      emissive: 0x3d2819,
-      emissiveIntensity: 0.15
-    });
-
-    const densityScale = getAdaptiveFrameScale(totalFrames);
-
-    const w = (0.78 + (seed % 3) * 0.13) * densityScale;
-    const h = (0.98 + ((seed + 1) % 3) * 0.16) * densityScale;
-
-    const topBar = new THREE.Mesh(new THREE.BoxGeometry(w + 0.18, 0.08, 0.05), bronzeMat.clone());
-    topBar.position.set(0, h / 2, 0);
-    frame.add(topBar);
-
-    const bottomBar = new THREE.Mesh(new THREE.BoxGeometry(w + 0.18, 0.08, 0.05), bronzeMat.clone());
-    bottomBar.position.set(0, -h / 2, 0);
-    frame.add(bottomBar);
-
-    const leftBar = new THREE.Mesh(new THREE.BoxGeometry(0.08, h + 0.16, 0.05), bronzeMat.clone());
-    leftBar.position.set(-w / 2, 0, 0);
-    frame.add(leftBar);
-
-    const rightBar = new THREE.Mesh(new THREE.BoxGeometry(0.08, h + 0.16, 0.05), bronzeMat.clone());
-    rightBar.position.set(w / 2, 0, 0);
-    frame.add(rightBar);
-
-    const backing = new THREE.Mesh(
-      new THREE.PlaneGeometry(w, h),
-      new THREE.MeshStandardMaterial({
-        color: 0x2f3440,
-        roughness: 0.95,
-        metalness: 0.01,
-        side: THREE.DoubleSide
-      })
-    );
-    backing.position.z = 0.015;
-    frame.add(backing);
-
-    const inner = new THREE.Mesh(
-      new THREE.PlaneGeometry(w - 0.06, h - 0.06),
-      new THREE.MeshBasicMaterial({
-        map: createBlankCanvasTexture(seed),
-        transparent: false,
-        opacity: 1
-      })
-    );
-    inner.position.z = 0.03;
-    frame.add(inner);
-
-    frame.userData.borderBars = [topBar, bottomBar, leftBar, rightBar];
-    frame.userData.backing = backing;
-    frame.userData.inner = inner;
-
-    return frame;
-  }
-
-  function layoutFrames() {
-    framesGroup.clear();
-    frameMeshes.length = 0;
-  
-    const totalFrames = Math.max(memories.length * 12, 48);
-  
-    let shellCount = 1;
-    if (totalFrames > 60) shellCount = 2;
-    if (totalFrames > 120) shellCount = 3;
-    if (totalFrames > 210) shellCount = 4;
-  
-    const framesPerShell = [];
-    let remaining = totalFrames;
-  
-    for (let i = 0; i < shellCount; i++) {
-      const shellsLeft = shellCount - i;
-      const countForThisShell = Math.ceil(remaining / shellsLeft);
-      framesPerShell.push(countForThisShell);
-      remaining -= countForThisShell;
-    }
-  
-    const baseRadius = 6.9;
-    const shellGap = 1.65;
-    const poleLimit = 0.9;
-    const goldenAngle = Math.PI * (3 - Math.sqrt(5));
-  
-    let frameIndex = 0;
-  
-    for (let shellIndex = 0; shellIndex < shellCount; shellIndex++) {
-      const shellFrameCount = framesPerShell[shellIndex];
-      const shellRadius = baseRadius + shellIndex * shellGap;
-  
-      for (let i = 0; i < shellFrameCount; i++) {
-        const t = shellFrameCount === 1 ? 0.5 : i / (shellFrameCount - 1);
-  
-        const yNorm = poleLimit - t * (poleLimit * 2);
-        const radial = Math.sqrt(Math.max(0.0001, 1 - yNorm * yNorm));
-        const theta = goldenAngle * i + shellIndex * 0.45;
-  
-        const x = Math.cos(theta) * radial * shellRadius;
-        const y = yNorm * shellRadius + 2.55;
-        const z = Math.sin(theta) * radial * shellRadius;
-  
-        const frame = createFrame(frameIndex + 1, totalFrames);
-        frame.position.set(x, y, z);
-        frame.lookAt(0, 2.55, 0);
-        frame.rotation.z += (Math.random() - 0.5) * 0.25;
-  
-        frame.userData.memoryId = frameIndex % memories.length;
-        frame.userData.baseTheta = theta;
-        frame.userData.baseYNorm = yNorm;
-        frame.userData.baseRadius = shellRadius;
-        frame.userData.angularSpeed = (shellIndex % 2 === 0 ? 1 : -1) * (0.035 + (i % 7) * 0.002);
-        frame.userData.floatOffset = Math.random() * Math.PI * 2;
-        frame.userData.shellIndex = shellIndex;
-  
-        framesGroup.add(frame);
-        frameMeshes.push(frame);
-        frameIndex++;
-      }
-    }
-  }
-  
-  layoutFrames();
-
-  const dustGroup = new THREE.Group();
-  scene.add(dustGroup);
-
-  for (let i = 0; i < 140; i++) {
-    const dot = new THREE.Mesh(
-      new THREE.SphereGeometry(0.03 + Math.random() * 0.03, 8, 8),
-      new THREE.MeshBasicMaterial({
-        color: 0xd9ecff,
-        transparent: true,
-        opacity: 0.35
-      })
-    );
-    dot.position.set(
-      (Math.random() - 0.5) * 18,
-      Math.random() * 10 - 1,
-      (Math.random() - 0.5) * 18
-    );
-    dot.userData.baseY = dot.position.y;
-    dot.userData.offset = Math.random() * Math.PI * 2;
-    dustGroup.add(dot);
-  }
-
-  const hud = document.getElementById("hud");
-  const timeline = document.getElementById("timeline");
-  const timelineLabel = document.getElementById("timelineLabel");
-  const fpsEl = document.getElementById("fps");
-
-  const startOverlay = document.getElementById("startOverlay");
-  const startBtn = document.getElementById("startBtn");
-  const backToMenuBtn = document.getElementById("backToMenuBtn");
-
-  const memoryPanel = document.getElementById("memoryPanel");
-  const togglePanelBtn = document.getElementById("togglePanelBtn");
-  const memoryNameInput = document.getElementById("memoryName");
-  const memoryIdText = document.getElementById("memoryIdText");
-  const clarityText = document.getElementById("clarityText");
-  const toneText = document.getElementById("toneText");
-  const stateText = document.getElementById("stateText");
-
-  const saveBtn = document.getElementById("saveBtn");
-  const undoBtn = document.getElementById("undoBtn");
-  const enterBtn = document.getElementById("enterBtn");
-  const exitBtn = document.getElementById("exitBtn");
-  const addMemoryBtn = document.getElementById("addMemoryBtn");
-  const resetBtn = document.getElementById("resetBtn");
-
-  const raycaster = new THREE.Raycaster();
-  const mouse = new THREE.Vector2();
-
-  function updateHud() {
-    if (appState === "menu") {
-      hud.textContent = "memory fragments: waiting";
-      return;
-    }
-
-    if (appState === "memory") {
-      hud.textContent = `inside memory: ${memories[selectedMemoryId].name}`;
-      return;
-    }
-
-    const archive = getArchiveStats();
-    hud.textContent = `memory fragments: ${archive.totalFrames} | memories: ${archive.memoryCount} | shells: ${archive.shellCount}`;
-  }
-
-  function updateMemoryPanel() {
-    const memory = memories[selectedMemoryId];
-    memoryNameInput.value = memory.name;
-    memoryIdText.textContent = memory.id;
-    clarityText.textContent = memory.clarity.toFixed(2);
-    toneText.textContent = memory.tone;
-  }
-
-  function highlightFrames() {
-    const t = Number(timeline.value) / 100;
-  
-    for (const frame of frameMeshes) {
-      const isSelected = frame === selectedFrame;
-  
-      for (const bar of frame.userData.borderBars) {
-        bar.material.emissiveIntensity = isSelected ? (0.35 + t * 0.9) : (0.08 + t * 0.08);
-        bar.material.color.set(isSelected ? 0xe7c79f : 0x8e7354);
-      }
-  
-      frame.userData.backing.material.color.set(isSelected ? 0x3f4958 : 0x262a34);
-      frame.userData.backing.material.emissive.set(isSelected ? 0x1b2432 : 0x0a0c10);
-      frame.userData.backing.material.emissiveIntensity = isSelected ? (0.10 + t * 0.32) : 0.02;
-  
-      frame.userData.inner.material.opacity = isSelected ? (0.78 + t * 0.22) : (0.28 + (1 - t) * 0.22);
-    }
-  }
-
-  function selectMemoryFrame(frame) {
-    selectedFrame = frame;
-    selectedMemoryId = frame.userData.memoryId;
-    updateMemoryPanel();
-    highlightFrames();
-    updateHud();
-  }
-
-  function saveSelectedMemoryName() {
-    const memory = memories[selectedMemoryId];
-    const trimmed = memoryNameInput.value.trim();
-    if (!trimmed) return;
-
-    memory.history.push(memory.name);
-    memory.name = trimmed;
-    saveMemories();
-    updateMemoryPanel();
-    updateHud();
-  }
-
-  function undoMemoryName() {
-    const memory = memories[selectedMemoryId];
-    if (memory.history.length > 0) {
-      memory.name = memory.history.pop();
-      saveMemories();
-      updateMemoryPanel();
-      updateHud();
-    }
-  }
-
-  function addMemory() {
-    const nextId = memories.length;
-    memories.push({
-      id: nextId,
-      name: `Memory ${String(nextId + 1).padStart(2, "0")}`,
-      clarity: 0.5,
-      tone: "neutral",
-      edited: false,
-      history: []
-    });
-
-    saveMemories();
-    layoutFrames();
-
-    selectedMemoryId = nextId;
-    selectedFrame = frameMeshes.find(frame => frame.userData.memoryId === selectedMemoryId) || frameMeshes[0] || null;
-
-    updateMemoryPanel();
-    highlightFrames();
-    updateHud();
-  }
-
-  togglePanelBtn.addEventListener("click", () => {
-    memoryPanel.classList.toggle("minimized");
-    togglePanelBtn.textContent = memoryPanel.classList.contains("minimized") ? "Expand" : "Minimize";
-  });
-
-  window.addEventListener("click", (event) => {
-    if (appState !== "hub") return;
-
-    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-    raycaster.setFromCamera(mouse, camera);
-
-    const intersects = raycaster.intersectObjects(frameMeshes, true);
-
-    if (intersects.length > 0) {
-      let obj = intersects[0].object;
-      while (obj.parent && obj.parent !== framesGroup) {
-        obj = obj.parent;
-      }
-      selectMemoryFrame(obj);
-    }
-  });
-
-  saveBtn.addEventListener("click", saveSelectedMemoryName);
-  undoBtn.addEventListener("click", undoMemoryName);
-
-  enterBtn.addEventListener("click", () => {
-    setAppState("memory");
-  });
-
-  exitBtn.addEventListener("click", () => {
-    setAppState("hub");
-  });
-
-  addMemoryBtn.addEventListener("click", () => {
-    addMemory();
-  });
-
-  resetBtn.addEventListener("click", () => {
-    setAppState("menu");
-  });
-
-  startBtn.addEventListener("click", () => {
-    setAppState("hub");
-  });
-
-  backToMenuBtn.addEventListener("click", () => {
-    setAppState("menu");
-  });
-
-  window.addEventListener("keydown", (e) => {
-    if (e.key === "r" || e.key === "R") {
-      saveSelectedMemoryName();
-    }
-
-    if (e.key === "u" || e.key === "U") {
-      undoMemoryName();
-    }
-
-    if (e.key === "Escape") {
-      setAppState("menu");
-    }
-  });
-
-  function setAppState(nextState) {
-    appState = nextState;
-    stateText.textContent = nextState;
-
-    if (nextState === "menu") {
-      startOverlay.style.display = "flex";
-      memoryPanel.style.display = "none";
-      timeline.style.display = "none";
-      timelineLabel.style.display = "none";
-      updateHud();
-    }
-
-    if (nextState === "hub") {
-      startOverlay.style.display = "none";
-      memoryPanel.style.display = "block";
-      timeline.style.display = "block";
-      timelineLabel.style.display = "block";
-      updateHud();
-      scene.fog.color.set(0x111122);
-      museumSphere.material.color.set(0x0b0b14);
-      scene.fog.density = 0.02;
-      framesGroup.visible = true;
-      platformGroup.visible = true;
-      avatarGroup.visible = true;
-      consoleGroup.visible = true;
-      controls.target.set(0, 2.3, -1.2);
-      controls.update();
-
-      if (!selectedFrame && frameMeshes.length > 0) {
-        selectMemoryFrame(frameMeshes[0]);
-      }
-    }
-
-    if (nextState === "memory") {
-      startOverlay.style.display = "none";
-      memoryPanel.style.display = "block";
-      timeline.style.display = "block";
-      timelineLabel.style.display = "block";
-      updateHud();
-      scene.fog.color.set(0x24182e);
-      scene.fog.density = 0.05;
-      museumSphere.material.color.set(0x120f1a);
-      framesGroup.visible = true;
-      platformGroup.visible = true;
-      avatarGroup.visible = true;
-      consoleGroup.visible = true;
-      controls.target.set(0, 2.12, -1.6);
-      controls.update();
-    }
-  }
-
-  let lastFpsTime = performance.now();
-  let frames = 0;
-
-  updateMemoryPanel();
-  updateHud();
-  setAppState("menu");
-
-  function animate() {
-    requestAnimationFrame(animate);
-
-    const t = Number(timeline.value) / 100;
-    const time = performance.now() * 0.001;
-
-    const targetDistance = appState === "memory"
-      ? 3.9 - t * 0.75
-      : 18.5 - t * 16.6;
-
-    const dir = camera.position.clone().sub(controls.target);
-    if (dir.lengthSq() < 0.0001) {
-      dir.set(0, 0, 1);
-    }
-    dir.normalize();
-    const desiredPos = controls.target.clone().add(dir.multiplyScalar(targetDistance));
-    camera.position.lerp(desiredPos, 0.08);
-
-    if (t > 0.955) {
-      avatarGroup.visible = false;
-    } else if (appState !== "menu") {
-      avatarGroup.visible = true;
-    }
-
-    if (appState === "hub") {
-      scene.fog.density = 0.011 + t * 0.026;
-      museumSphere.material.color.set(0x0b0b14);
-      memories[selectedMemoryId].clarity = t;
-      clarityText.textContent = t.toFixed(2);
-      highlightFrames();
-    }
-
-    if (appState === "memory") {
-      scene.fog.density = 0.03 + t * 0.035;
-      museumSphere.material.color.set(0x120f1a);
-      memories[selectedMemoryId].clarity = t;
-      clarityText.textContent = t.toFixed(2);
-      highlightFrames();
-    }
-
-    if (framesGroup.visible) {
-      for (let i = 0; i < frameMeshes.length; i++) {
-        const frame = frameMeshes[i];
-        const theta = frame.userData.baseTheta + time * frame.userData.angularSpeed * 0.14;
-        const yNorm = frame.userData.baseYNorm + Math.sin(time * 0.35 + frame.userData.floatOffset) * 0.004;
-        const radial = Math.sqrt(Math.max(0.0001, 1 - yNorm * yNorm));
-        const shellRadius = frame.userData.baseRadius;
-    
-        frame.position.x = Math.cos(theta) * radial * shellRadius;
-        frame.position.y = yNorm * shellRadius + 2.55;
-        frame.position.z = Math.sin(theta) * radial * shellRadius;
-    
-        frame.lookAt(camera.position);
-      }
-    }
-
-    for (const dot of dustGroup.children) {
-      dot.position.y = dot.userData.baseY + Math.sin(time + dot.userData.offset) * 0.05;
-    }
-
-    consoleGroup.position.y = consoleBaseY + Math.sin(time * 1.15) * 0.022;
-
-    scanlineBar.position.y = 1.62 + ((Math.sin(time * 1.4) + 1) * 0.48);
-    scanlineBar.material.opacity = 0.1 + ((Math.sin(time * 1.4) + 1) * 0.08);
-
-    pulseBar.scale.x = 0.95 + Math.sin(time * 2.1) * 0.09;
-    pulseBar.material.opacity = 0.16 + ((Math.sin(time * 2.1) + 1) * 0.07);
-
-    chartGlow.material.opacity = 0.04 + ((Math.sin(time * 1.8) + 1) * 0.02);
-    centerGlow.material.opacity = 0.028 + ((Math.sin(time * 1.2) + 1) * 0.015);
-
-    orbitCircle1.rotation.z += 0.009;
-    orbitCircle2.rotation.z -= 0.007;
-
-    sidePanelL.material.opacity = 0.08 + ((Math.sin(time * 1.1) + 1) * 0.02);
-    sidePanelR.material.opacity = 0.08 + ((Math.cos(time * 1.0) + 1) * 0.02);
-
-    consoleLight.intensity = 0.82 + ((Math.sin(time * 1.5) + 1) * 0.18);
-
-    controls.update();
-    renderer.render(scene, camera);
-
-    frames++;
-    const now = performance.now();
-    if (now - lastFpsTime >= 500) {
-      const fps = Math.round((frames * 1000) / (now - lastFpsTime));
-      fpsEl.textContent = "fps: " + fps;
-      frames = 0;
-      lastFpsTime = now;
-    }
-  }
-
-  animate();
-
-  window.addEventListener("resize", () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-  });
+  function createBlankCanvasTexture(seed) {
+    const c = document.createElement("canvas");
+    c.width = 512;
+    c.height = 768;
+    const g = c.getContext("2d");
+
+    const tones = [
+      ["#1d2128", "#2b313b"],
+      ["#242129", "#36313c"],
+      ["#1b2427", "#2d383d"],
+      ["#26211f", "#39302d"],
+      ["#1e2026", "#2f3440"]
+    ];
+    const pair = tones[seed % tones.length];
+
+    const grad = g.createLinearGradient(0, 0, 0, c.height);
+    grad.addColorStop(0, pair[0]);
+    grad.addColorStop(1, pair[1]);
+    g.fillStyle = grad;
+    g.fillRect(0, 0, c.width, c.height);
+
+    g.fillStyle = "rgba(255,255,255,0.018)";
+    for (let i = 0; i < 120; i++) {
+      const x = Math.random() * c.width;
+      const y = Math.random() * c.height;
+      const r = Math.random() * 2 + 0.5;
+      g.beginPath();
+      g.arc(x, y, r, 0, Math.PI * 2);
+      g.fill();
+    }
+
+    g.strokeStyle = "rgba(255,255,255,0.03)";
+    g.lineWidth = 2;
+    g.strokeRect(24, 24, c.width - 48, c.height - 48);
+
+    const tex = new THREE.CanvasTexture(c);
+    tex.needsUpdate = true;
+    return tex;
+  }
+
+  function createConsoleTexture() {
+    const c = document.createElement("canvas");
+    c.width = 1800;
+    c.height = 900;
+    const g = c.getContext("2d");
+
+    g.clearRect(0, 0, c.width, c.height);
+
+    g.strokeStyle = "rgba(165,235,255,0.95)";
+    g.lineWidth = 4;
+    g.strokeRect(36, 36, c.width - 72, c.height - 72);
+
+    g.strokeStyle = "rgba(160,230,255,0.16)";
+    g.lineWidth = 2;
+    g.strokeRect(120, 170, 460, 250);
+    g.strokeRect(720, 170, 460, 280);
+    g.strokeRect(1260, 140, 500, 320);
+    g.strokeRect(170, 570, 460, 260);
+    g.strokeRect(760, 560, 600, 300);
+
+    g.fillStyle = "rgba(185,242,255,0.95)";
+    g.fillRect(190, 240, 260, 12);
+    g.fillRect(190, 288, 210, 10);
+    g.fillRect(190, 326, 300, 10);
+    g.fillRect(190, 364, 165, 10);
+
+    g.strokeStyle = "rgba(185,242,255,0.98)";
+    g.lineWidth = 4;
+    g.beginPath();
+    g.arc(1470, 300, 100, 0, Math.PI * 2);
+    g.stroke();
+    g.beginPath();
+    g.arc(1470, 300, 58, 0, Math.PI * 2);
+    g.stroke();
+
+    g.beginPath();
+    g.arc(1315, 430, 74, 0, Math.PI * 2);
+    g.stroke();
+
+    g.beginPath();
+    g.moveTo(880, 770);
+    g.lineTo(1010, 645);
+    g.lineTo(1135, 735);
+    g.lineTo(1320, 560);
+    g.stroke();
+
+    g.lineWidth = 2;
+    for (let i = 0; i < 6; i++) {
+      g.beginPath();
+      g.moveTo(230, 645 + i * 28);
+      g.lineTo(505, 645 + i * 28);
+      g.stroke();
+    }
+
+    g.strokeStyle = "rgba(173,237,255,0.26)";
+    g.strokeRect(1260, 600, 240, 130);
+    g.strokeRect(1210, 170, 150, 180);
+
+    const tex = new THREE.CanvasTexture(c);
+    tex.needsUpdate = true;
+    return tex;
+  }
+
+  function getAdaptiveFrameScale(totalFrames) {
+    if (totalFrames <= 72) return 0.88;
+    if (totalFrames <= 132) return 0.74;
+    if (totalFrames <= 192) return 0.63;
+    if (totalFrames <= 260) return 0.56;
+    return 0.5;
+  }
+
+  let appState = "menu";
+
+  const scene = new THREE.Scene();
+  scene.fog = new THREE.FogExp2(0x111122, 0.02);
+
+  const camera = new THREE.PerspectiveCamera(
+    75,
+    window.innerWidth / window.innerHeight,
+    0.1,
+    1000
+  );
+  camera.position.set(0, 4.2, 11.8);
+
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  document.body.appendChild(renderer.domElement);
+
+  const controls = new THREE.OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.enablePan = false;
+  controls.enableZoom = false;
+  controls.minDistance = 1.5;
+  controls.maxDistance = 24;
+  controls.target.set(0, 2.1, 0);
+  controls.update();
+
+  const keyLight = new THREE.SpotLight(0xffffff, 2.6, 65, Math.PI / 6, 0.45, 1.15);
+  keyLight.position.set(0, 17, 5);
+  keyLight.target.position.set(0, 2.2, 0);
+  scene.add(keyLight);
+  scene.add(keyLight.target);
+
+  const fillLight = new THREE.PointLight(0x87a9ff, 0.7, 35);
+  fillLight.position.set(-8, 6, -8);
+  scene.add(fillLight);
+
+  const rimLight = new THREE.PointLight(0xc6d7ff, 0.4, 30);
+  rimLight.position.set(7, 6, 8);
+  scene.add(rimLight);
+
+  const consoleLight = new THREE.PointLight(0x7fd7ff, 1.05, 22);
+  consoleLight.position.set(0, 3.25, -1.75);
+  scene.add(consoleLight);
+
+  const ambient = new THREE.AmbientLight(0xffffff, 0.16);
+  scene.add(ambient);
+
+  const sphereGeo = new THREE.SphereGeometry(30, 64, 64);
+  const sphereMat = new THREE.MeshStandardMaterial({
+    color: 0x0b0b14,
+    side: THREE.BackSide,
+    roughness: 1,
+    metalness: 0
+  });
+  const museumSphere = new THREE.Mesh(sphereGeo, sphereMat);
+  scene.add(museumSphere);
+
+  const savedNames = JSON.parse(localStorage.getItem("dreamscape_memory_names") || "null");
+  const initialMemoryCount = savedNames && savedNames.length > 0 ? savedNames.length : 6;
+
+  const memories = Array.from({ length: initialMemoryCount }, (_, i) => ({
+    id: i,
+    name: savedNames?.[i] || `Memory ${String(i + 1).padStart(2, "0")}`,
+    clarity: 0.5,
+    tone: "neutral",
+    edited: false,
+    history: []
+  }));
+
+  let selectedMemoryId = 0;
+  let selectedFrame = null;
+
+  function saveMemories() {
+    const names = memories.map(m => m.name);
+    localStorage.setItem("dreamscape_memory_names", JSON.stringify(names));
+  }
+
+  function getArchiveStats() {
+    const totalFrames = Math.max(memories.length * 12, 48);
+
+    let shellCount = 1;
+    if (totalFrames > 84) shellCount = 2;
+    if (totalFrames > 168) shellCount = 3;
+    if (totalFrames > 280) shellCount = 4;
+
+    return {
+      memoryCount: memories.length,
+      totalFrames,
+      shellCount
+    };
+  }
+
+  const platformGroup = new THREE.Group();
+
+  const topDisk = new THREE.Mesh(
+    new THREE.CylinderGeometry(2.15, 2.7, 0.38, 56),
+    new THREE.MeshStandardMaterial({
+      color: 0x5a535d,
+      roughness: 0.96,
+      metalness: 0.02
+    })
+  );
+  topDisk.position.y = 0.28;
+  platformGroup.add(topDisk);
+
+  const lowerCone = new THREE.Mesh(
+    new THREE.ConeGeometry(1.7, 2.35, 56),
+    new THREE.MeshStandardMaterial({
+      color: 0x454049,
+      roughness: 0.99,
+      metalness: 0.01
+    })
+  );
+  lowerCone.position.y = -1.15;
+  platformGroup.add(lowerCone);
+
+  const undersideRing = new THREE.Mesh(
+    new THREE.TorusGeometry(1.5, 0.05, 12, 80),
+    new THREE.MeshStandardMaterial({
+      color: 0x7b727f,
+      roughness: 0.9,
+      metalness: 0.02
+    })
+  );
+  undersideRing.rotation.x = Math.PI / 2;
+  undersideRing.position.y = -0.22;
+  platformGroup.add(undersideRing);
+
+  platformGroup.position.set(0, 0.55, 0);
+  scene.add(platformGroup);
+
+  const avatarGroup = new THREE.Group();
+
+  const avatarMat = new THREE.MeshStandardMaterial({
+    color: 0x262b3d,
+    roughness: 0.88,
+    metalness: 0.03,
+    emissive: 0x101421,
+    emissiveIntensity: 0.12
+  });
+
+  const legGeo = new THREE.CylinderGeometry(0.06, 0.06, 1.02, 14);
+  const legLeft = new THREE.Mesh(legGeo, avatarMat);
+  legLeft.position.set(-0.11, 0.58, 0);
+  avatarGroup.add(legLeft);
+
+  const legRight = new THREE.Mesh(legGeo, avatarMat);
+  legRight.position.set(0.11, 0.58, 0);
+  avatarGroup.add(legRight);
+
+  const torsoGeo = new THREE.CylinderGeometry(0.18, 0.22, 1.35, 18);
+  const torso = new THREE.Mesh(torsoGeo, avatarMat);
+  torso.position.set(0, 1.48, 0);
+  avatarGroup.add(torso);
+
+  const shoulders = new THREE.Mesh(
+    new THREE.SphereGeometry(0.2, 18, 18),
+    avatarMat
+  );
+  shoulders.position.set(0, 1.95, 0);
+  shoulders.scale.set(1.5, 0.72, 0.9);
+  avatarGroup.add(shoulders);
+
+  const head = new THREE.Mesh(
+    new THREE.SphereGeometry(0.155, 18, 18),
+    avatarMat
+  );
+  head.position.set(0, 2.26, 0.02);
+  avatarGroup.add(head);
+
+  const armGeo = new THREE.CylinderGeometry(0.05, 0.055, 1.08, 12);
+
+  const armLeft = new THREE.Mesh(armGeo, avatarMat);
+  armLeft.position.set(-0.5, 1.72, 0.02);
+  armLeft.rotation.z = -1.08;
+  avatarGroup.add(armLeft);
+
+  const armRight = new THREE.Mesh(armGeo, avatarMat);
+  armRight.position.set(0.5, 1.72, 0.02);
+  armRight.rotation.z = 1.08;
+  avatarGroup.add(armRight);
+
+  avatarGroup.position.set(0, 0.72, 0.02);
+  scene.add(avatarGroup);
+
+  const consoleGroup = new THREE.Group();
+
+  const consoleTexture = createConsoleTexture();
+
+  const consoleGlass = new THREE.Mesh(
+    new THREE.PlaneGeometry(4.35, 2.2),
+    new THREE.MeshBasicMaterial({
+      color: 0x83d7ff,
+      transparent: true,
+      opacity: 0.06
+    })
+  );
+  consoleGlass.position.set(0, 2.12, -0.04);
+  consoleGroup.add(consoleGlass);
+
+  const mainScreen = new THREE.Mesh(
+    new THREE.PlaneGeometry(4.05, 2.02),
+    new THREE.MeshBasicMaterial({
+      map: consoleTexture,
+      transparent: true,
+      opacity: 0.97
+    })
+  );
+  mainScreen.position.set(0, 2.12, 0);
+  consoleGroup.add(mainScreen);
+
+  const innerFrame = new THREE.Mesh(
+    new THREE.PlaneGeometry(3.65, 1.78),
+    new THREE.MeshBasicMaterial({
+      color: 0x90deff,
+      transparent: true,
+      opacity: 0.045
+    })
+  );
+  innerFrame.position.set(0, 2.12, 0.02);
+  consoleGroup.add(innerFrame);
+
+  const lowerPlate = new THREE.Mesh(
+    new THREE.PlaneGeometry(4.25, 0.26),
+    new THREE.MeshBasicMaterial({
+      color: 0x7fd7ff,
+      transparent: true,
+      opacity: 0.09
+    })
+  );
+  lowerPlate.position.set(0, 1.47, 0.01);
+  consoleGroup.add(lowerPlate);
+
+  const sidePanelL = new THREE.Mesh(
+    new THREE.PlaneGeometry(0.82, 0.48),
+    new THREE.MeshBasicMaterial({
+      color: 0x9ddfff,
+      transparent: true,
+      opacity: 0.1
+    })
+  );
+  sidePanelL.position.set(-2.22, 2.02, 0.01);
+  sidePanelL.rotation.y = 0.32;
+  consoleGroup.add(sidePanelL);
+
+  const sidePanelR = new THREE.Mesh(
+    new THREE.PlaneGeometry(0.92, 0.58),
+    new THREE.MeshBasicMaterial({
+      color: 0x9ddfff,
+      transparent: true,
+      opacity: 0.1
+    })
+  );
+  sidePanelR.position.set(2.16, 1.88, 0.01);
+  sidePanelR.rotation.y = -0.28;
+  consoleGroup.add(sidePanelR);
+
+  const orbitCircle1 = new THREE.Mesh(
+    new THREE.TorusGeometry(0.17, 0.008, 12, 64),
+    new THREE.MeshBasicMaterial({
+      color: 0x96dcff,
+      transparent: true,
+      opacity: 0.72
+    })
+  );
+  orbitCircle1.position.set(1.2, 2.2, 0.02);
+  consoleGroup.add(orbitCircle1);
+
+  const orbitCircle2 = new THREE.Mesh(
+    new THREE.TorusGeometry(0.28, 0.01, 12, 64),
+    new THREE.MeshBasicMaterial({
+      color: 0x96dcff,
+      transparent: true,
+      opacity: 0.72
+    })
+  );
+  orbitCircle2.position.set(1.65, 1.98, 0.02);
+  consoleGroup.add(orbitCircle2);
+
+  const scanlineBar = new THREE.Mesh(
+    new THREE.PlaneGeometry(4.05, 0.05),
+    new THREE.MeshBasicMaterial({
+      color: 0xb8efff,
+      transparent: true,
+      opacity: 0.18
+    })
+  );
+  scanlineBar.position.set(0, 2.1, 0.03);
+  consoleGroup.add(scanlineBar);
+
+  const pulseBar = new THREE.Mesh(
+    new THREE.PlaneGeometry(1.05, 0.06),
+    new THREE.MeshBasicMaterial({
+      color: 0xc7f3ff,
+      transparent: true,
+      opacity: 0.24
+    })
+  );
+  pulseBar.position.set(-1.25, 2.3, 0.03);
+  consoleGroup.add(pulseBar);
+
+  const chartGlow = new THREE.Mesh(
+    new THREE.PlaneGeometry(1.25, 0.7),
+    new THREE.MeshBasicMaterial({
+      color: 0x75d6ff,
+      transparent: true,
+      opacity: 0.055
+    })
+  );
+  chartGlow.position.set(-0.05, 1.92, 0.03);
+  consoleGroup.add(chartGlow);
+
+  const centerGlow = new THREE.Mesh(
+    new THREE.PlaneGeometry(2.25, 1.22),
+    new THREE.MeshBasicMaterial({
+      color: 0x92e5ff,
+      transparent: true,
+      opacity: 0.035
+    })
+  );
+  centerGlow.position.set(0.02, 2.02, 0.025);
+  consoleGroup.add(centerGlow);
+
+  consoleGroup.position.set(0, 0.22, -1.82);
+  consoleGroup.rotation.y = 0;
+  const consoleBaseY = consoleGroup.position.y;
+  scene.add(consoleGroup);
+
+  const framesGroup = new THREE.Group();
+  scene.add(framesGroup);
+
+  const frameMeshes = [];
+
+  function createFrame(seed, totalFrames) {
+    const frame = new THREE.Group();
+
+    const bronzeMat = new THREE.MeshStandardMaterial({
+      color: 0x9a7b57,
+      roughness: 0.8,
+      metalness: 0.08,
+      emissive: 0x3d2819,
+      emissiveIntensity: 0.15
+    });
+
+    const densityScale = getAdaptiveFrameScale(totalFrames);
+
+    const w = (0.78 + (seed % 3) * 0.13) * densityScale;
+    const h = (0.98 + ((seed + 1) % 3) * 0.16) * densityScale;
+
+    const topBar = new THREE.Mesh(new THREE.BoxGeometry(w + 0.18, 0.08, 0.05), bronzeMat.clone());
+    topBar.position.set(0, h / 2, 0);
+    frame.add(topBar);
+
+    const bottomBar = new THREE.Mesh(new THREE.BoxGeometry(w + 0.18, 0.08, 0.05), bronzeMat.clone());
+    bottomBar.position.set(0, -h / 2, 0);
+    frame.add(bottomBar);
+
+    const leftBar = new THREE.Mesh(new THREE.BoxGeometry(0.08, h + 0.16, 0.05), bronzeMat.clone());
+    leftBar.position.set(-w / 2, 0, 0);
+    frame.add(leftBar);
+
+    const rightBar = new THREE.Mesh(new THREE.BoxGeometry(0.08, h + 0.16, 0.05), bronzeMat.clone());
+    rightBar.position.set(w / 2, 0, 0);
+    frame.add(rightBar);
+
+    const backing = new THREE.Mesh(
+      new THREE.PlaneGeometry(w, h),
+      new THREE.MeshStandardMaterial({
+        color: 0x2f3440,
+        roughness: 0.95,
+        metalness: 0.01,
+        side: THREE.DoubleSide
+      })
+    );
+    backing.position.z = 0.015;
+    frame.add(backing);
+
+    const inner = new THREE.Mesh(
+      new THREE.PlaneGeometry(w - 0.06, h - 0.06),
+      new THREE.MeshBasicMaterial({
+        map: createBlankCanvasTexture(seed),
+        transparent: false,
+        opacity: 1
+      })
+    );
+    inner.position.z = 0.03;
+    frame.add(inner);
+
+    frame.userData.borderBars = [topBar, bottomBar, leftBar, rightBar];
+    frame.userData.backing = backing;
+    frame.userData.inner = inner;
+
+    return frame;
+  }
+
+  function layoutFrames() {
+    framesGroup.clear();
+    frameMeshes.length = 0;
+
+    const archive = getArchiveStats();
+    const totalFrames = archive.totalFrames;
+    const shellCount = archive.shellCount;
+
+    const shellWeights = [];
+    for (let i = 0; i < shellCount; i++) {
+      shellWeights.push(1 + i * 0.28);
+    }
+
+    const weightSum = shellWeights.reduce((a, b) => a + b, 0);
+    const framesPerShell = [];
+    let assigned = 0;
+
+    for (let i = 0; i < shellCount; i++) {
+      const isLast = i === shellCount - 1;
+      const count = isLast
+        ? totalFrames - assigned
+        : Math.round((shellWeights[i] / weightSum) * totalFrames);
+      framesPerShell.push(count);
+      assigned += count;
+    }
+
+    const yBands = [-0.82, -0.62, -0.42, -0.22, 0, 0.22, 0.42, 0.62, 0.82];
+    const bandWeights = yBands.map(v => Math.max(0.18, Math.sqrt(1 - v * v)));
+
+    const baseRadius = 5.9;
+    const shellGap = 1.38;
+    const yScale = 1.02;
+
+    let frameIndex = 0;
+
+    for (let shellIndex = 0; shellIndex < shellCount; shellIndex++) {
+      const shellRadius = baseRadius + shellIndex * shellGap;
+      const shellFrames = framesPerShell[shellIndex];
+
+      const thisBandCounts = [];
+      let shellAssigned = 0;
+      const bandWeightSum = bandWeights.reduce((a, b) => a + b, 0);
+
+      for (let bandIndex = 0; bandIndex < yBands.length; bandIndex++) {
+        const isLastBand = bandIndex === yBands.length - 1;
+        let count = isLastBand
+          ? shellFrames - shellAssigned
+          : Math.max(2, Math.round((bandWeights[bandIndex] / bandWeightSum) * shellFrames));
+
+        if ((bandIndex === 0 || bandIndex === yBands.length - 1) && count > 4) count = 4;
+        if ((bandIndex === 1 || bandIndex === yBands.length - 2) && count > 8) count = 8;
+
+        thisBandCounts.push(count);
+        shellAssigned += count;
+      }
+
+      const diff = shellFrames - thisBandCounts.reduce((a, b) => a + b, 0);
+      thisBandCounts[Math.floor(thisBandCounts.length / 2)] += diff;
+
+      for (let bandIndex = 0; bandIndex < yBands.length; bandIndex++) {
+        const countInBand = Math.max(1, thisBandCounts[bandIndex]);
+        const yNorm = yBands[bandIndex];
+        const ringRadius = Math.max(0.65, Math.sqrt(Math.max(0.0001, 1 - yNorm * yNorm)) * shellRadius);
+        const y = yNorm * shellRadius * yScale + 2.55;
+        const angleOffset = shellIndex * 0.52 + (bandIndex % 2) * (Math.PI / Math.max(2, countInBand));
+
+        for (let i = 0; i < countInBand; i++) {
+          if (frameIndex >= totalFrames) break;
+
+          const angle = (i / countInBand) * Math.PI * 2 + angleOffset;
+          const frame = createFrame(frameIndex + 1, totalFrames);
+
+          frame.position.set(
+            Math.cos(angle) * ringRadius,
+            y,
+            Math.sin(angle) * ringRadius
+          );
+
+          frame.lookAt(0, 2.55, 0);
+          frame.rotation.z += (Math.random() - 0.5) * 0.18;
+
+          frame.userData.memoryId = frameIndex % memories.length;
+          frame.userData.baseAngle = angle;
+          frame.userData.ringRadius = ringRadius;
+          frame.userData.baseY = y;
+          frame.userData.baseYNorm = yNorm;
+          frame.userData.orbitSpeed = (shellIndex % 2 === 0 ? 1 : -1) * (0.06 + bandIndex * 0.0035);
+          frame.userData.floatOffset = Math.random() * Math.PI * 2;
+          frame.userData.tiltZ = (Math.random() - 0.5) * 0.18;
+          frame.userData.shellIndex = shellIndex;
+          frame.userData.bandIndex = bandIndex;
+
+          framesGroup.add(frame);
+          frameMeshes.push(frame);
+          frameIndex++;
+        }
+      }
+    }
+
+    if (frameMeshes.length > totalFrames) {
+      while (frameMeshes.length > totalFrames) {
+        const f = frameMeshes.pop();
+        framesGroup.remove(f);
+      }
+    }
+  }
+
+  layoutFrames();
+
+  const dustGroup = new THREE.Group();
+  scene.add(dustGroup);
+
+  for (let i = 0; i < 140; i++) {
+    const dot = new THREE.Mesh(
+      new THREE.SphereGeometry(0.03 + Math.random() * 0.03, 8, 8),
+      new THREE.MeshBasicMaterial({
+        color: 0xd9ecff,
+        transparent: true,
+        opacity: 0.35
+      })
+    );
+    dot.position.set(
+      (Math.random() - 0.5) * 18,
+      Math.random() * 10 - 1,
+      (Math.random() - 0.5) * 18
+    );
+    dot.userData.baseY = dot.position.y;
+    dot.userData.offset = Math.random() * Math.PI * 2;
+    dustGroup.add(dot);
+  }
+
+  const hud = document.getElementById("hud");
+  const timeline = document.getElementById("timeline");
+  const timelineLabel = document.getElementById("timelineLabel");
+  const fpsEl = document.getElementById("fps");
+
+  const startOverlay = document.getElementById("startOverlay");
+  const startBtn = document.getElementById("startBtn");
+  const backToMenuBtn = document.getElementById("backToMenuBtn");
+
+  const memoryPanel = document.getElementById("memoryPanel");
+  const togglePanelBtn = document.getElementById("togglePanelBtn");
+  const memoryNameInput = document.getElementById("memoryName");
+  const memoryIdText = document.getElementById("memoryIdText");
+  const clarityText = document.getElementById("clarityText");
+  const toneText = document.getElementById("toneText");
+  const stateText = document.getElementById("stateText");
+
+  const saveBtn = document.getElementById("saveBtn");
+  const undoBtn = document.getElementById("undoBtn");
+  const enterBtn = document.getElementById("enterBtn");
+  const exitBtn = document.getElementById("exitBtn");
+  const addMemoryBtn = document.getElementById("addMemoryBtn");
+  const resetBtn = document.getElementById("resetBtn");
+
+  const raycaster = new THREE.Raycaster();
+  const mouse = new THREE.Vector2();
+
+  function updateHud() {
+    if (appState === "menu") {
+      hud.textContent = "memory fragments: waiting";
+      return;
+    }
+
+    if (appState === "memory") {
+      hud.textContent = `inside memory: ${memories[selectedMemoryId].name}`;
+      return;
+    }
+
+    const archive = getArchiveStats();
+    hud.textContent = `memory fragments: ${archive.totalFrames} | memories: ${archive.memoryCount} | shells: ${archive.shellCount}`;
+  }
+
+  function updateMemoryPanel() {
+    const memory = memories[selectedMemoryId];
+    memoryNameInput.value = memory.name;
+    memoryIdText.textContent = memory.id;
+    clarityText.textContent = memory.clarity.toFixed(2);
+    toneText.textContent = memory.tone;
+  }
+
+  function highlightFrames() {
+    const t = Number(timeline.value) / 100;
+
+    for (const frame of frameMeshes) {
+      const isSelected = frame === selectedFrame;
+
+      for (const bar of frame.userData.borderBars) {
+        bar.material.emissiveIntensity = isSelected ? (0.35 + t * 0.9) : (0.08 + t * 0.08);
+        bar.material.color.set(isSelected ? 0xe7c79f : 0x8e7354);
+      }
+
+      frame.userData.backing.material.color.set(isSelected ? 0x3f4958 : 0x262a34);
+      frame.userData.backing.material.emissive.set(isSelected ? 0x1b2432 : 0x0a0c10);
+      frame.userData.backing.material.emissiveIntensity = isSelected ? (0.10 + t * 0.32) : 0.02;
+
+      frame.userData.inner.material.opacity = isSelected ? (0.78 + t * 0.22) : (0.28 + (1 - t) * 0.22);
+    }
+  }
+
+  function selectMemoryFrame(frame) {
+    selectedFrame = frame;
+    selectedMemoryId = frame.userData.memoryId;
+    updateMemoryPanel();
+    highlightFrames();
+    updateHud();
+  }
+
+  function saveSelectedMemoryName() {
+    const memory = memories[selectedMemoryId];
+    const trimmed = memoryNameInput.value.trim();
+    if (!trimmed) return;
+
+    memory.history.push(memory.name);
+    memory.name = trimmed;
+    saveMemories();
+    updateMemoryPanel();
+    updateHud();
+  }
+
+  function undoMemoryName() {
+    const memory = memories[selectedMemoryId];
+    if (memory.history.length > 0) {
+      memory.name = memory.history.pop();
+      saveMemories();
+      updateMemoryPanel();
+      updateHud();
+    }
+  }
+
+  function addMemory() {
+    const nextId = memories.length;
+    memories.push({
+      id: nextId,
+      name: `Memory ${String(nextId + 1).padStart(2, "0")}`,
+      clarity: 0.5,
+      tone: "neutral",
+      edited: false,
+      history: []
+    });
+
+    saveMemories();
+    layoutFrames();
+
+    selectedMemoryId = nextId;
+    selectedFrame = frameMeshes.find(frame => frame.userData.memoryId === selectedMemoryId) || frameMeshes[0] || null;
+
+    updateMemoryPanel();
+    highlightFrames();
+    updateHud();
+  }
+
+  togglePanelBtn.addEventListener("click", () => {
+    memoryPanel.classList.toggle("minimized");
+    togglePanelBtn.textContent = memoryPanel.classList.contains("minimized") ? "Expand" : "Minimize";
+  });
+
+  window.addEventListener("click", (event) => {
+    if (appState !== "hub") return;
+
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+    raycaster.setFromCamera(mouse, camera);
+
+    const intersects = raycaster.intersectObjects(frameMeshes, true);
+
+    if (intersects.length > 0) {
+      let obj = intersects[0].object;
+      while (obj.parent && obj.parent !== framesGroup) {
+        obj = obj.parent;
+      }
+      selectMemoryFrame(obj);
+    }
+  });
+
+  saveBtn.addEventListener("click", saveSelectedMemoryName);
+  undoBtn.addEventListener("click", undoMemoryName);
+
+  enterBtn.addEventListener("click", () => {
+    setAppState("memory");
+  });
+
+  exitBtn.addEventListener("click", () => {
+    setAppState("hub");
+  });
+
+  addMemoryBtn.addEventListener("click", () => {
+    addMemory();
+  });
+
+  resetBtn.addEventListener("click", () => {
+    setAppState("menu");
+  });
+
+  startBtn.addEventListener("click", () => {
+    setAppState("hub");
+  });
+
+  backToMenuBtn.addEventListener("click", () => {
+    setAppState("menu");
+  });
+
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "r" || e.key === "R") {
+      saveSelectedMemoryName();
+    }
+
+    if (e.key === "u" || e.key === "U") {
+      undoMemoryName();
+    }
+
+    if (e.key === "Escape") {
+      setAppState("menu");
+    }
+  });
+
+  function setAppState(nextState) {
+    appState = nextState;
+    stateText.textContent = nextState;
+
+    if (nextState === "menu") {
+      startOverlay.style.display = "flex";
+      memoryPanel.style.display = "none";
+      timeline.style.display = "none";
+      timelineLabel.style.display = "none";
+      updateHud();
+    }
+
+    if (nextState === "hub") {
+      startOverlay.style.display = "none";
+      memoryPanel.style.display = "block";
+      timeline.style.display = "block";
+      timelineLabel.style.display = "block";
+      updateHud();
+      scene.fog.color.set(0x111122);
+      museumSphere.material.color.set(0x0b0b14);
+      scene.fog.density = 0.02;
+      framesGroup.visible = true;
+      platformGroup.visible = true;
+      avatarGroup.visible = true;
+      consoleGroup.visible = true;
+      controls.target.set(0, 2.3, -1.2);
+      controls.update();
+
+      if (!selectedFrame && frameMeshes.length > 0) {
+        selectMemoryFrame(frameMeshes[0]);
+      }
+    }
+
+    if (nextState === "memory") {
+      startOverlay.style.display = "none";
+      memoryPanel.style.display = "block";
+      timeline.style.display = "block";
+      timelineLabel.style.display = "block";
+      updateHud();
+      scene.fog.color.set(0x24182e);
+      scene.fog.density = 0.05;
+      museumSphere.material.color.set(0x120f1a);
+      framesGroup.visible = true;
+      platformGroup.visible = true;
+      avatarGroup.visible = true;
+      consoleGroup.visible = true;
+      controls.target.set(0, 2.12, -1.6);
+      controls.update();
+    }
+  }
+
+  let lastFpsTime = performance.now();
+  let frames = 0;
+
+  updateMemoryPanel();
+  updateHud();
+  setAppState("menu");
+
+  function animate() {
+    requestAnimationFrame(animate);
+
+    const t = Number(timeline.value) / 100;
+    const time = performance.now() * 0.001;
+
+    const targetDistance = appState === "memory"
+      ? 3.9 - t * 0.75
+      : 18.5 - t * 16.6;
+
+    const dir = camera.position.clone().sub(controls.target);
+    if (dir.lengthSq() < 0.0001) {
+      dir.set(0, 0, 1);
+    }
+    dir.normalize();
+    const desiredPos = controls.target.clone().add(dir.multiplyScalar(targetDistance));
+    camera.position.lerp(desiredPos, 0.08);
+
+    if (t > 0.955) {
+      avatarGroup.visible = false;
+    } else if (appState !== "menu") {
+      avatarGroup.visible = true;
+    }
+
+    if (appState === "hub") {
+      scene.fog.density = 0.011 + t * 0.026;
+      museumSphere.material.color.set(0x0b0b14);
+      memories[selectedMemoryId].clarity = t;
+      clarityText.textContent = t.toFixed(2);
+      highlightFrames();
+    }
+
+    if (appState === "memory") {
+      scene.fog.density = 0.03 + t * 0.035;
+      museumSphere.material.color.set(0x120f1a);
+      memories[selectedMemoryId].clarity = t;
+      clarityText.textContent = t.toFixed(2);
+      highlightFrames();
+    }
+
+    if (framesGroup.visible) {
+      for (let i = 0; i < frameMeshes.length; i++) {
+        const frame = frameMeshes[i];
+        const angle = frame.userData.baseAngle + time * frame.userData.orbitSpeed * 0.12;
+        const bobY = Math.sin(time * 0.28 + frame.userData.floatOffset) * 0.025;
+
+        frame.position.x = Math.cos(angle) * frame.userData.ringRadius;
+        frame.position.y = frame.userData.baseY + bobY;
+        frame.position.z = Math.sin(angle) * frame.userData.ringRadius;
+
+        frame.lookAt(0, 2.55, 0);
+        frame.rotation.z += frame.userData.tiltZ;
+      }
+    }
+
+    for (const dot of dustGroup.children) {
+      dot.position.y = dot.userData.baseY + Math.sin(time + dot.userData.offset) * 0.05;
+    }
+
+    consoleGroup.position.y = consoleBaseY + Math.sin(time * 1.15) * 0.022;
+
+    scanlineBar.position.y = 1.62 + ((Math.sin(time * 1.4) + 1) * 0.48);
+    scanlineBar.material.opacity = 0.1 + ((Math.sin(time * 1.4) + 1) * 0.08);
+
+    pulseBar.scale.x = 0.95 + Math.sin(time * 2.1) * 0.09;
+    pulseBar.material.opacity = 0.16 + ((Math.sin(time * 2.1) + 1) * 0.07);
+
+    chartGlow.material.opacity = 0.04 + ((Math.sin(time * 1.8) + 1) * 0.02);
+    centerGlow.material.opacity = 0.028 + ((Math.sin(time * 1.2) + 1) * 0.015);
+
+    orbitCircle1.rotation.z += 0.009;
+    orbitCircle2.rotation.z -= 0.007;
+
+    sidePanelL.material.opacity = 0.08 + ((Math.sin(time * 1.1) + 1) * 0.02);
+    sidePanelR.material.opacity = 0.08 + ((Math.cos(time * 1.0) + 1) * 0.02);
+
+    consoleLight.intensity = 0.82 + ((Math.sin(time * 1.5) + 1) * 0.18);
+
+    controls.update();
+    renderer.render(scene, camera);
+
+    frames++;
+    const now = performance.now();
+    if (now - lastFpsTime >= 500) {
+      const fps = Math.round((frames * 1000) / (now - lastFpsTime));
+      fpsEl.textContent = "fps: " + fps;
+      frames = 0;
+      lastFpsTime = now;
+    }
+  }
+
+  animate();
+
+  window.addEventListener("resize", () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
 </script>
 
 </body>
