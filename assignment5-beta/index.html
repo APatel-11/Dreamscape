@@ -837,7 +837,7 @@
         const frame = createFrame(frameIndex + 1, totalFrames);
         frame.position.set(x, y, z);
         frame.lookAt(0, 2.55, 0);
-        frame.rotation.z += (Math.randon() - 0.5) * 0.25;
+        frame.rotation.z += (Math.random() - 0.5) * 0.25;
   
         frame.userData.memoryId = frameIndex % memories.length;
         frame.userData.baseTheta = theta;
