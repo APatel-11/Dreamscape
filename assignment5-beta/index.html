@@ -833,10 +833,21 @@
   
       for (let bandIndex = 0; bandIndex < bandCount; bandIndex++) {
         const countInBand = framesPerBand[bandIndex];
+        let countInBand = framesPerBand[bandIndex];
+
+        if (bandIndex === 0 || bandIndex === bandCount - 1) {
+          countInBand = Math.min(3, countInBand);
+        }
+        
         const v = bandCount === 1 ? 0.5 : bandIndex / (bandCount - 1);
         const phi = v * Math.PI;
         const y = Math.cos(phi) * shellYRadius + 2.55;
-        const ringRadius = Math.sin(phi) * shellRadius;
+        let ringRadius = Math.sin(phi) * shellRadius;
+
+        if (ringRadius < 0.6) {
+          ringRadius = 0.6;
+        }
+        
         const angleOffset = (bandIndex % 2) * (Math.PI / Math.max(2, countInBand));
   
         for (let i = 0; i < countInBand; i++) {
