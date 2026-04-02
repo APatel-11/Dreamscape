@@ -837,6 +837,7 @@
         const frame = createFrame(frameIndex + 1, totalFrames);
         frame.position.set(x, y, z);
         frame.lookAt(0, 2.55, 0);
+        frame.rotation.z += (Math.randon() - 0.5) * 0.25;
   
         frame.userData.memoryId = frameIndex % memories.length;
         frame.userData.baseTheta = theta;
@@ -1164,8 +1165,8 @@
     if (framesGroup.visible) {
       for (let i = 0; i < frameMeshes.length; i++) {
         const frame = frameMeshes[i];
-        const theta = frame.userData.baseTheta + time * frame.userData.angularSpeed * 0.22;
-        const yNorm = frame.userData.baseYNorm + Math.sin(time * 0.45 + frame.userData.floatOffset) * 0.01;
+        const theta = frame.userData.baseTheta + time * frame.userData.angularSpeed * 0.14;
+        const yNorm = frame.userData.baseYNorm + Math.sin(time * 0.35 + frame.userData.floatOffset) * 0.004;
         const radial = Math.sqrt(Math.max(0.0001, 1 - yNorm * yNorm));
         const shellRadius = frame.userData.baseRadius;
     
@@ -1173,7 +1174,7 @@
         frame.position.y = yNorm * shellRadius + 2.55;
         frame.position.z = Math.sin(theta) * radial * shellRadius;
     
-        frame.lookAt(0, 2.55, 0);
+        frame.lookAt(camera.position);
       }
     }
 
