@@ -388,7 +388,11 @@
   }
 
   function getAdaptiveFrameScale(totalFrames) {
-    return Math.max(0.52, 1.02 - totalFrames * 0.0022);
+    if (totalFrames <= 72) return 0.92;
+    if (totalFrames <= 132) return 0.78;
+    if (totalFrames <= 192) return 0.66;
+    if (totalFrames <= 260) return 0.58;
+    return 0.52;
   }
 
   let appState = "menu";
@@ -794,9 +798,9 @@
     const totalFrames = Math.max(memories.length * 12, 48);
   
     let shellCount = 1;
-    if (totalFrames > 70) shellCount = 2;
-    if (totalFrames > 140) shellCount = 3;
-    if (totalFrames > 240) shellCount = 4;
+    if (totalFrames > 60) shellCount = 2;
+    if (totalFrames > 120) shellCount = 3;
+    if (totalFrames > 210) shellCount = 4;
   
     const framesPerShell = [];
     let remaining = totalFrames;
@@ -808,72 +812,43 @@
       remaining -= countForThisShell;
     }
   
-    const baseRadius = 7.2;
-    const shellGap = 2.0;
-    const baseYRadius = 7.0;
-    const shellYGap = 1.0;
+    const baseRadius = 6.9;
+    const shellGap = 1.65;
+    const poleLimit = 0.9;
+    const goldenAngle = Math.PI * (3 - Math.sqrt(5));
   
     let frameIndex = 0;
   
     for (let shellIndex = 0; shellIndex < shellCount; shellIndex++) {
       const shellFrameCount = framesPerShell[shellIndex];
       const shellRadius = baseRadius + shellIndex * shellGap;
-      const shellYRadius = baseYRadius + shellIndex * shellYGap;
   
-      const bandCount = Math.max(7, Math.ceil(shellFrameCount / 9));
-      const framesPerBand = [];
-      let shellRemaining = shellFrameCount;
+      for (let i = 0; i < shellFrameCount; i++) {
+        const t = shellFrameCount === 1 ? 0.5 : i / (shellFrameCount - 1);
   
-      for (let bandIndex = 0; bandIndex < bandCount; bandIndex++) {
-        const bandsLeft = bandCount - bandIndex;
-        const countForBand = Math.ceil(shellRemaining / bandsLeft);
-        framesPerBand.push(countForBand);
-        shellRemaining -= countForBand;
-      }
+        const yNorm = poleLimit - t * (poleLimit * 2);
+        const radial = Math.sqrt(Math.max(0.0001, 1 - yNorm * yNorm));
+        const theta = goldenAngle * i + shellIndex * 0.45;
   
-      for (let bandIndex = 0; bandIndex < bandCount; bandIndex++) {
-        let countInBand = framesPerBand[bandIndex];
-
-        if (bandIndex === 0 || bandIndex === bandCount - 1) {
-          countInBand = Math.min(3, countInBand);
-        }
-        
-        const v = bandCount === 1 ? 0.5 : bandIndex / (bandCount - 1);
-        const phi = v * Math.PI;
-        const y = Math.cos(phi) * shellYRadius + 2.55;
-        let ringRadius = Math.sin(phi) * shellRadius;
-
-        if (ringRadius < 0.6) {
-          ringRadius = 0.6;
-        }
-        
-        const angleOffset = (bandIndex % 2) * (Math.PI / Math.max(2, countInBand));
+        const x = Math.cos(theta) * radial * shellRadius;
+        const y = yNorm * shellRadius + 2.55;
+        const z = Math.sin(theta) * radial * shellRadius;
   
-        for (let i = 0; i < countInBand; i++) {
-          const angle = (i / countInBand) * Math.PI * 2 + angleOffset;
-          const frame = createFrame(frameIndex + 1, totalFrames);
+        const frame = createFrame(frameIndex + 1, totalFrames);
+        frame.position.set(x, y, z);
+        frame.lookAt(0, 2.55, 0);
   
-          frame.position.set(
-            Math.cos(angle) * ringRadius,
-            y,
-            Math.sin(angle) * ringRadius
-          );
+        frame.userData.memoryId = frameIndex % memories.length;
+        frame.userData.baseTheta = theta;
+        frame.userData.baseYNorm = yNorm;
+        frame.userData.baseRadius = shellRadius;
+        frame.userData.angularSpeed = (shellIndex % 2 === 0 ? 1 : -1) * (0.035 + (i % 7) * 0.002);
+        frame.userData.floatOffset = Math.random() * Math.PI * 2;
+        frame.userData.shellIndex = shellIndex;
   
-          frame.lookAt(0, 2.55, 0);
-  
-          frame.userData.memoryId = frameIndex % memories.length;
-          frame.userData.baseAngle = angle;
-          frame.userData.ringRadius = ringRadius;
-          frame.userData.baseY = y;
-          frame.userData.ringSpeed = (shellIndex % 2 === 0 ? 1 : -1) * (0.05 + bandIndex * 0.003);
-          frame.userData.floatOffset = Math.random() * Math.PI * 2;
-          frame.userData.shellIndex = shellIndex;
-          frame.userData.bandIndex = bandIndex;
-  
-          framesGroup.add(frame);
-          frameMeshes.push(frame);
-          frameIndex++;
-        }
+        framesGroup.add(frame);
+        frameMeshes.push(frame);
+        frameIndex++;
       }
     }
   }
@@ -1189,12 +1164,14 @@
     if (framesGroup.visible) {
       for (let i = 0; i < frameMeshes.length; i++) {
         const frame = frameMeshes[i];
-        const angle = frame.userData.baseAngle + time * frame.userData.ringSpeed * 0.12;
-        const floatY = Math.sin(time * 0.55 + frame.userData.floatOffset) * 0.05;
+        const theta = frame.userData.baseTheta + time * frame.userData.angularSpeed * 0.22;
+        const yNorm = frame.userData.baseYNorm + Math.sin(time * 0.45 + frame.userData.floatOffset) * 0.01;
+        const radial = Math.sqrt(Math.max(0.0001, 1 - yNorm * yNorm));
+        const shellRadius = frame.userData.baseRadius;
     
-        frame.position.x = Math.cos(angle) * frame.userData.ringRadius;
-        frame.position.y = frame.userData.baseY + floatY;
-        frame.position.z = Math.sin(angle) * frame.userData.ringRadius;
+        frame.position.x = Math.cos(theta) * radial * shellRadius;
+        frame.position.y = yNorm * shellRadius + 2.55;
+        frame.position.z = Math.sin(theta) * radial * shellRadius;
     
         frame.lookAt(0, 2.55, 0);
       }
