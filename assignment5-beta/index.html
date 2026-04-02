@@ -925,13 +925,21 @@
   }
 
   function highlightFrames() {
+    const t = Number(timeline.value) / 100;
+  
     for (const frame of frameMeshes) {
       const isSelected = frame === selectedFrame;
+  
       for (const bar of frame.userData.borderBars) {
-        bar.material.emissiveIntensity = isSelected ? 0.65 : 0.15;
-        bar.material.color.set(isSelected ? 0xe0b78d : 0x9a7b57);
+        bar.material.emissiveIntensity = isSelected ? (0.35 + t * 0.9) : (0.08 + t * 0.08);
+        bar.material.color.set(isSelected ? 0xe7c79f : 0x8e7354);
       }
-      frame.userData.inner.material.opacity = 1;
+  
+      frame.userData.backing.material.color.set(isSelected ? 0x3f4958 : 0x262a34);
+      frame.userData.backing.material.emissive.set(isSelected ? 0x1b2432 : 0x0a0c10);
+      frame.userData.backing.material.emissiveIntensity = isSelected ? (0.10 + t * 0.32) : 0.02;
+  
+      frame.userData.inner.material.opacity = isSelected ? (0.78 + t * 0.22) : (0.28 + (1 - t) * 0.22);
     }
   }
 
@@ -1139,6 +1147,7 @@
       museumSphere.material.color.set(0x0b0b14);
       memories[selectedMemoryId].clarity = t;
       clarityText.textContent = t.toFixed(2);
+      highlightFrames();
     }
 
     if (appState === "memory") {
@@ -1146,6 +1155,7 @@
       museumSphere.material.color.set(0x120f1a);
       memories[selectedMemoryId].clarity = t;
       clarityText.textContent = t.toFixed(2);
+      highlightFrames();
     }
 
     if (framesGroup.visible) {
