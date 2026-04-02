@@ -790,66 +790,83 @@
   function layoutFrames() {
     framesGroup.clear();
     frameMeshes.length = 0;
-
+  
     const totalFrames = Math.max(memories.length * 12, 48);
-
+  
     let shellCount = 1;
     if (totalFrames > 70) shellCount = 2;
     if (totalFrames > 140) shellCount = 3;
     if (totalFrames > 240) shellCount = 4;
-
+  
     const framesPerShell = [];
     let remaining = totalFrames;
-
+  
     for (let i = 0; i < shellCount; i++) {
       const shellsLeft = shellCount - i;
       const countForThisShell = Math.ceil(remaining / shellsLeft);
       framesPerShell.push(countForThisShell);
       remaining -= countForThisShell;
     }
-
-    const baseRadius = 7.4;
-    const shellGap = 1.9;
-    const baseYScale = 6.9;
-    const yGap = 1.05;
-
+  
+    const baseRadius = 7.2;
+    const shellGap = 2.1;
+    const baseHeight = 9.2;
+    const shellHeightGap = 1.0;
+  
     let frameIndex = 0;
-    const goldenAngle = Math.PI * (3 - Math.sqrt(5));
-
-    for (let layerIndex = 0; layerIndex < shellCount; layerIndex++) {
-      const count = framesPerShell[layerIndex];
-      const shellRadius = baseRadius + layerIndex * shellGap;
-      const yScale = baseYScale + layerIndex * yGap;
-
-      for (let i = 0; i < count; i++) {
-        const yN = 1 - (i / Math.max(1, count - 1)) * 2;
-        const radiusAtY = Math.sqrt(Math.max(0.0001, 1 - yN * yN));
-        const theta = goldenAngle * i + layerIndex * 0.55;
-
-        const x = Math.cos(theta) * radiusAtY * shellRadius;
-        const y = yN * yScale + 2.55;
-        const z = Math.sin(theta) * radiusAtY * shellRadius;
-
-        const frame = createFrame(frameIndex + 1, totalFrames);
-        frame.position.set(x, y, z);
-        frame.lookAt(0, 2.55, 0);
-
-        frame.userData.memoryId = frameIndex % memories.length;
-        frame.userData.baseTheta = theta;
-        frame.userData.baseYN = yN;
-        frame.userData.shellRadius = shellRadius;
-        frame.userData.yScale = yScale;
-        frame.userData.angularSpeed = (frameIndex % 2 === 0 ? 1 : -1) * (0.010 + (frameIndex % 5) * 0.0012);
-        frame.userData.floatOffset = Math.random() * Math.PI * 2;
-        frame.userData.layerIndex = layerIndex;
-
-        framesGroup.add(frame);
-        frameMeshes.push(frame);
-        frameIndex++;
+  
+    for (let shellIndex = 0; shellIndex < shellCount; shellIndex++) {
+      const shellFrameCount = framesPerShell[shellIndex];
+      const shellRadius = baseRadius + shellIndex * shellGap;
+      const shellHeight = baseHeight + shellIndex * shellHeightGap;
+  
+      const bandCount = Math.max(5, Math.ceil(shellFrameCount / 10));
+      const framesPerBand = [];
+      let shellRemaining = shellFrameCount;
+  
+      for (let bandIndex = 0; bandIndex < bandCount; bandIndex++) {
+        const bandsLeft = bandCount - bandIndex;
+        const countForBand = Math.ceil(shellRemaining / bandsLeft);
+        framesPerBand.push(countForBand);
+        shellRemaining -= countForBand;
+      }
+  
+      for (let bandIndex = 0; bandIndex < bandCount; bandIndex++) {
+        const countInBand = framesPerBand[bandIndex];
+        const yNorm = bandCount === 1 ? 0 : 1 - (bandIndex / (bandCount - 1)) * 2;
+        const ringRadiusFactor = Math.sqrt(Math.max(0.12, 1 - yNorm * yNorm));
+        const ringRadius = shellRadius * ringRadiusFactor;
+        const y = yNorm * shellHeight * 0.5 + 2.55;
+        const angleOffset = (bandIndex % 2) * (Math.PI / Math.max(2, countInBand));
+  
+        for (let i = 0; i < countInBand; i++) {
+          const angle = (i / countInBand) * Math.PI * 2 + angleOffset;
+          const frame = createFrame(frameIndex + 1, totalFrames);
+  
+          frame.position.set(
+            Math.cos(angle) * ringRadius,
+            y,
+            Math.sin(angle) * ringRadius
+          );
+          frame.lookAt(0, y, 0);
+  
+          frame.userData.memoryId = frameIndex % memories.length;
+          frame.userData.baseAngle = angle;
+          frame.userData.ringRadius = ringRadius;
+          frame.userData.baseY = y;
+          frame.userData.ringSpeed = (shellIndex % 2 === 0 ? 1 : -1) * (0.05 + bandIndex * 0.003);
+          frame.userData.floatOffset = Math.random() * Math.PI * 2;
+          frame.userData.bandIndex = bandIndex;
+          frame.userData.shellIndex = shellIndex;
+  
+          framesGroup.add(frame);
+          frameMeshes.push(frame);
+          frameIndex++;
+        }
       }
     }
   }
-
+  
   layoutFrames();
 
   const dustGroup = new THREE.Group();
@@ -1161,17 +1178,14 @@
     if (framesGroup.visible) {
       for (let i = 0; i < frameMeshes.length; i++) {
         const frame = frameMeshes[i];
-        const theta = frame.userData.baseTheta + time * frame.userData.angularSpeed;
-        const wobbleAmount = Math.max(0.0025, 0.009 - frameMeshes.length * 0.000035);
-        const yN = frame.userData.baseYN + Math.sin(time * 0.35 + frame.userData.floatOffset) * wobbleAmount;
-        const rAtY = Math.sqrt(Math.max(0.0001, 1 - yN * yN));
-        const shellRadius = frame.userData.shellRadius;
+        const angle = frame.userData.baseAngle + time * frame.userData.ringSpeed * 0.12;
+        const floatY = Math.sin(time * 0.55 + frame.userData.floatOffset) * 0.06;
 
-        frame.position.x = Math.cos(theta) * rAtY * shellRadius;
-        frame.position.y = yN * frame.userData.yScale + 2.55;
-        frame.position.z = Math.sin(theta) * rAtY * shellRadius;
+        frame.position.x = Math.cos(angle) * frame.userData.ringRadius;
+        frame.position.y = frame.userData.baseY + floatY;
+        frame.position.z = Math.sin(angle) * frame.userData.ringRadius;
 
-        frame.lookAt(0, 2.55, 0);
+        frame.lookAt(0, frame.position.y, 0);
       }
     }
 
