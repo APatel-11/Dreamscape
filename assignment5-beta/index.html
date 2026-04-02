@@ -809,18 +809,18 @@
     }
   
     const baseRadius = 7.2;
-    const shellGap = 2.1;
-    const baseHeight = 9.2;
-    const shellHeightGap = 1.0;
+    const shellGap = 2.0;
+    const baseYRadius = 7.0;
+    const shellYGap = 1.0;
   
     let frameIndex = 0;
   
     for (let shellIndex = 0; shellIndex < shellCount; shellIndex++) {
       const shellFrameCount = framesPerShell[shellIndex];
       const shellRadius = baseRadius + shellIndex * shellGap;
-      const shellHeight = baseHeight + shellIndex * shellHeightGap;
+      const shellYRadius = baseYRadius + shellIndex * shellYGap;
   
-      const bandCount = Math.max(5, Math.ceil(shellFrameCount / 10));
+      const bandCount = Math.max(7, Math.ceil(shellFrameCount / 9));
       const framesPerBand = [];
       let shellRemaining = shellFrameCount;
   
@@ -833,10 +833,10 @@
   
       for (let bandIndex = 0; bandIndex < bandCount; bandIndex++) {
         const countInBand = framesPerBand[bandIndex];
-        const yNorm = bandCount === 1 ? 0 : 1 - (bandIndex / (bandCount - 1)) * 2;
-        const ringRadiusFactor = Math.sqrt(Math.max(0.12, 1 - yNorm * yNorm));
-        const ringRadius = shellRadius * ringRadiusFactor;
-        const y = yNorm * shellHeight * 0.5 + 2.55;
+        const v = bandCount === 1 ? 0.5 : bandIndex / (bandCount - 1);
+        const phi = v * Math.PI;
+        const y = Math.cos(phi) * shellYRadius + 2.55;
+        const ringRadius = Math.sin(phi) * shellRadius;
         const angleOffset = (bandIndex % 2) * (Math.PI / Math.max(2, countInBand));
   
         for (let i = 0; i < countInBand; i++) {
@@ -848,7 +848,8 @@
             y,
             Math.sin(angle) * ringRadius
           );
-          frame.lookAt(0, y, 0);
+  
+          frame.lookAt(0, 2.55, 0);
   
           frame.userData.memoryId = frameIndex % memories.length;
           frame.userData.baseAngle = angle;
@@ -856,8 +857,8 @@
           frame.userData.baseY = y;
           frame.userData.ringSpeed = (shellIndex % 2 === 0 ? 1 : -1) * (0.05 + bandIndex * 0.003);
           frame.userData.floatOffset = Math.random() * Math.PI * 2;
-          frame.userData.bandIndex = bandIndex;
           frame.userData.shellIndex = shellIndex;
+          frame.userData.bandIndex = bandIndex;
   
           framesGroup.add(frame);
           frameMeshes.push(frame);
@@ -1179,13 +1180,13 @@
       for (let i = 0; i < frameMeshes.length; i++) {
         const frame = frameMeshes[i];
         const angle = frame.userData.baseAngle + time * frame.userData.ringSpeed * 0.12;
-        const floatY = Math.sin(time * 0.55 + frame.userData.floatOffset) * 0.06;
-
+        const floatY = Math.sin(time * 0.55 + frame.userData.floatOffset) * 0.05;
+    
         frame.position.x = Math.cos(angle) * frame.userData.ringRadius;
         frame.position.y = frame.userData.baseY + floatY;
         frame.position.z = Math.sin(angle) * frame.userData.ringRadius;
-
-        frame.lookAt(0, frame.position.y, 0);
+    
+        frame.lookAt(0, 2.55, 0);
       }
     }
 
