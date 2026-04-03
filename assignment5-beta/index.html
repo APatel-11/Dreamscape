@@ -479,6 +479,7 @@
   let selectedFrame = null;
   let memoryFocusTarget = new THREE.Vector3(0, 2.12, -1.6);
   let memoryEntryTarget = new THREE.Vector3(0, 2.12, -1.6);
+  let memoryEntryCameraPos = new THREE.Vector3(0, 2.12, 0.4);
   let hubTarget = new THREE.Vector3(0, 2.3, -1.2);
   let isMemoryTransitioning = false;
   let memoryTransitionProgress = 0;
@@ -1040,20 +1041,22 @@
   }
 
   function updateMemoryEntryTarget() {
-      if (!selectedFrame) {
-        memoryEntryTarget.set(0, 2.12, -1.6);
-        return;
-      }
-    
-      const worldPos = new THREE.Vector3();
-      selectedFrame.getWorldPosition(worldPos);
-    
-      const archiveCenter = new THREE.Vector3(0, 2.55, 0);
-      const inwardDir = worldPos.clone().sub(archiveCenter).normalize();
-    
-      memoryEntryTarget.copy(worldPos.clone().sub(inwardDir.multiplyScalar(1.4)));
+    if (!selectedFrame) {
+      memoryEntryTarget.set(0, 2.12, -1.6);
+      memoryEntryCameraPos.set(0, 2.12, 0.4);
+      return;
     }
-
+  
+    const worldPos = new THREE.Vector3();
+    selectedFrame.getWorldPosition(worldPos);
+  
+    const archiveCenter = new THREE.Vector3(0, 2.55, 0);
+    const inwardDir = worldPos.clone().sub(archiveCenter).normalize();
+  
+    memoryEntryTarget.copy(worldPos.clone().sub(inwardDir.multiplyScalar(0.15)));
+    memoryEntryCameraPos.copy(worldPos.clone().sub(inwardDir.multiplyScalar(2.1)));
+  }
+  
   function saveSelectedMemoryName() {
     const memory = memories[selectedMemoryId];
     const trimmed = memoryNameInput.value.trim();
@@ -1181,10 +1184,15 @@
   undoBtn.addEventListener("click", undoMemoryName);
 
   enterBtn.addEventListener("click", () => {
-  if (!selectedFrame) return;
+    if (!selectedFrame) return;
   
     updateMemoryFocusTarget();
     updateMemoryEntryTarget();
+  
+    camera.position.copy(memoryEntryCameraPos);
+    controls.target.copy(memoryEntryTarget);
+    controls.update();
+  
     isMemoryTransitioning = true;
     memoryTransitionProgress = 0;
     setAppState("memory");
@@ -1274,8 +1282,6 @@
       
       updateMemoryFocusTarget();
       updateMemoryEntryTarget();
-      controls.target.copy(memoryEntryTarget);
-      controls.update();
     }
   }
 
