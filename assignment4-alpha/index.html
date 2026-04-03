@@ -451,15 +451,10 @@
   const museumSphere = new THREE.Mesh(sphereGeo, sphereMat);
   scene.add(museumSphere);
 
-  const DEFAULT_MEMORY_COUNT = 6;
+  const MEMORY_COUNT = 6;
   const savedNames = JSON.parse(localStorage.getItem("dreamscape_memory_names") || "null");
-  
-  const initialMemoryCount =
-    Array.isArray(savedNames) && savedNames.length > 0
-      ? savedNames.length
-      : DEFAULT_MEMORY_COUNT;
-  
-  const memories = Array.from({ length: initialMemoryCount }, (_, i) => ({
+
+  const memories = Array.from({ length: MEMORY_COUNT }, (_, i) => ({
     id: i,
     name: savedNames?.[i] || `Memory ${String(i + 1).padStart(2, "0")}`,
     clarity: 0.5,
@@ -779,92 +774,69 @@
     return frame;
   }
 
-  function getArchiveCameraRange() {
-    const totalFrames = memories.length;
-  
-    let shellCount = 1;
-    if (totalFrames > 14) shellCount = 2;
-    if (totalFrames > 32) shellCount = 3;
-    if (totalFrames > 60) shellCount = 4;
-  
-    const baseRadius = 5.8;
-    const shellGap = 2.15;
-    const outerRadius = baseRadius + (shellCount - 1) * shellGap;
-  
-    return {
-      shellCount,
-      outerRadius,
-      hubMax: outerRadius * 3.0,
-      hubMin: Math.max(outerRadius * 1.05, 8.0),
-      memoryMax: 3.9,
-      memoryMin: 3.15
-    };
-  }
-
   function layoutFrames() {
     framesGroup.clear();
     frameMeshes.length = 0;
-  
-    const totalFrames = memories.length;
-    if (totalFrames === 0) return;
-  
+
+    const totalFrames = Math.max(memories.length * 12, 48);
+
     let shellCount = 1;
-    if (totalFrames > 14) shellCount = 2;
-    if (totalFrames > 32) shellCount = 3;
-    if (totalFrames > 60) shellCount = 4;
-  
+    if (totalFrames > 70) shellCount = 2;
+    if (totalFrames > 140) shellCount = 3;
+    if (totalFrames > 240) shellCount = 4;
+
     const framesPerShell = [];
     let remaining = totalFrames;
-  
+
     for (let i = 0; i < shellCount; i++) {
       const shellsLeft = shellCount - i;
       const countForThisShell = Math.ceil(remaining / shellsLeft);
       framesPerShell.push(countForThisShell);
       remaining -= countForThisShell;
     }
-  
-    const baseRadius = 5.8;
-    const shellGap = 2.15;
-    const yScale = 1.08;
-    const goldenAngle = Math.PI * (3 - Math.sqrt(5));
-  
+
+    const baseRadius = 7.4;
+    const shellGap = 1.9;
+    const baseYScale = 6.9;
+    const yGap = 1.05;
+
     let frameIndex = 0;
-  
-    for (let shellIndex = 0; shellIndex < shellCount; shellIndex++) {
-      const shellRadius = baseRadius + shellIndex * shellGap;
-      const count = framesPerShell[shellIndex];
-  
+    const goldenAngle = Math.PI * (3 - Math.sqrt(5));
+
+    for (let layerIndex = 0; layerIndex < shellCount; layerIndex++) {
+      const count = framesPerShell[layerIndex];
+      const shellRadius = baseRadius + layerIndex * shellGap;
+      const yScale = baseYScale + layerIndex * yGap;
+
       for (let i = 0; i < count; i++) {
+        const yN = 1 - (i / Math.max(1, count - 1)) * 2;
+        const radiusAtY = Math.sqrt(Math.max(0.0001, 1 - yN * yN));
+        const theta = goldenAngle * i + layerIndex * 0.55;
+
+        const x = Math.cos(theta) * radiusAtY * shellRadius;
+        const y = yN * yScale + 2.55;
+        const z = Math.sin(theta) * radiusAtY * shellRadius;
+
         const frame = createFrame(frameIndex + 1, totalFrames);
-  
-        const t = (i + 0.5) / count;
-        const yN = 1 - 2 * t;
-        const radial = Math.sqrt(Math.max(0.0001, 1 - yN * yN));
-        const theta = goldenAngle * i + shellIndex * 0.7;
-  
-        const x = Math.cos(theta) * radial * shellRadius;
-        const y = yN * shellRadius * yScale + 2.55;
-        const z = Math.sin(theta) * radial * shellRadius;
-  
         frame.position.set(x, y, z);
         frame.lookAt(0, 2.55, 0);
-  
-        frame.userData.memoryId = frameIndex;
+
+        frame.userData.memoryId = frameIndex % MEMORY_COUNT;
         frame.userData.baseTheta = theta;
-        frame.userData.baseYNorm = yN;
-        frame.userData.baseRadius = shellRadius;
-        frame.userData.angularSpeed =
-          (shellIndex % 2 === 0 ? 1 : -1) * (0.018 + (i % 5) * 0.002);
+        frame.userData.baseYN = yN;
+        frame.userData.shellRadius = shellRadius;
+        frame.userData.yScale = yScale;
+        frame.userData.angularSpeed = (frameIndex % 2 === 0 ? 1 : -1) * (0.010 + (frameIndex % 5) * 0.0012);
         frame.userData.floatOffset = Math.random() * Math.PI * 2;
-        frame.userData.shellIndex = shellIndex;
-  
+        frame.userData.layerIndex = layerIndex;
+
         framesGroup.add(frame);
         frameMeshes.push(frame);
         frameIndex++;
       }
     }
   }
-  
+
   layoutFrames();
 
   const dustGroup = new THREE.Group();
@@ -910,21 +882,17 @@
   const undoBtn = document.getElementById("undoBtn");
   const enterBtn = document.getElementById("enterBtn");
   const exitBtn = document.getElementById("exitBtn");
-  const addMemoryBtn = document.getElementById("addMemoryBtn");
-  const eraseMemoryBtn = document.getElementById("eraseMemoryBtn");
-  const resetDefaultBtn = document.getElementById("resetDefaultBtn");
+  const resetBtn = document.getElementById("resetBtn");
 
   const raycaster = new THREE.Raycaster();
   const mouse = new THREE.Vector2();
 
   function updateMemoryPanel() {
-    if (!memories.length) return;
-  
-    const memory = memories[selectedMemoryId];
-    memoryNameInput.value = memory.name;
-    memoryIdText.textContent = memory.id;
-    clarityText.textContent = memory.clarity.toFixed(2);
-    toneText.textContent = memory.tone;
+    const memory = memories[selectedMemoryId];
+    memoryNameInput.value = memory.name;
+    memoryIdText.textContent = memory.id;
+    clarityText.textContent = memory.clarity.toFixed(2);
+    toneText.textContent = memory.tone;
   }
 
   function highlightFrames() {
@@ -965,82 +933,6 @@
     }
   }
 
-  function refreshArchiveAfterChange(preferredMemoryId = null) {
-    layoutFrames();
-  
-    if (memories.length === 0) {
-      selectedMemoryId = 0;
-      selectedFrame = null;
-      return;
-    }
-  
-    if (preferredMemoryId !== null) {
-      const clampedId = Math.max(0, Math.min(preferredMemoryId, memories.length - 1));
-      selectedMemoryId = clampedId;
-    } else {
-      selectedMemoryId = Math.max(0, Math.min(selectedMemoryId, memories.length - 1));
-    }
-  
-    selectedFrame =
-      frameMeshes.find(frame => frame.userData.memoryId === selectedMemoryId) || frameMeshes[0] || null;
-  
-    updateMemoryPanel();
-    highlightFrames();
-  
-    if (appState === "hub") {
-      hud.textContent = `memory archive: ${memories.length} memories`;
-    }
-  }
-  
-  function addMemory() {
-    const newId = memories.length;
-  
-    memories.push({
-      id: newId,
-      name: `Memory ${String(newId + 1).padStart(2, "0")}`,
-      clarity: 0.5,
-      tone: "neutral",
-      edited: false,
-      history: []
-    });
-  
-    saveMemories();
-    refreshArchiveAfterChange(newId);
-  }
-  
-  function eraseSelectedMemory() {
-    if (memories.length <= 1) return;
-  
-    memories.splice(selectedMemoryId, 1);
-  
-    for (let i = 0; i < memories.length; i++) {
-      memories[i].id = i;
-    }
-  
-    saveMemories();
-    refreshArchiveAfterChange(Math.max(0, selectedMemoryId - 1));
-  }
-  
-  function resetToDefault() {
-    memories.length = 0;
-  
-    for (let i = 0; i < DEFAULT_MEMORY_COUNT; i++) {
-      memories.push({
-        id: i,
-        name: `Memory ${String(i + 1).padStart(2, "0")}`,
-        clarity: 0.5,
-        tone: "neutral",
-        edited: false,
-        history: []
-      });
-    }
-  
-    localStorage.removeItem("dreamscape_memory_names");
-    saveMemories();
-    refreshArchiveAfterChange(0);
-    setAppState("hub");
-  }
-
   togglePanelBtn.addEventListener("click", () => {
     memoryPanel.classList.toggle("minimized");
     togglePanelBtn.textContent = memoryPanel.classList.contains("minimized") ? "Expand" : "Minimize";
@@ -1067,25 +959,17 @@
 
   saveBtn.addEventListener("click", saveSelectedMemoryName);
   undoBtn.addEventListener("click", undoMemoryName);
-  
+
   enterBtn.addEventListener("click", () => {
     setAppState("memory");
   });
-  
+
   exitBtn.addEventListener("click", () => {
     setAppState("hub");
   });
-  
-  addMemoryBtn.addEventListener("click", () => {
-    addMemory();
-  });
-  
-  eraseMemoryBtn.addEventListener("click", () => {
-    eraseSelectedMemory();
-  });
-  
-  resetDefaultBtn.addEventListener("click", () => {
-    resetToDefault();
+
+  resetBtn.addEventListener("click", () => {
+    setAppState("menu");
   });
 
   startBtn.addEventListener("click", () => {
@@ -1119,7 +1003,7 @@
       memoryPanel.style.display = "none";
       timeline.style.display = "none";
       timelineLabel.style.display = "none";
-      hud.textContent = "memory archive: waiting";
+      hud.textContent = "memory fragments: waiting";
     }
 
     if (nextState === "hub") {
@@ -1127,7 +1011,7 @@
       memoryPanel.style.display = "block";
       timeline.style.display = "block";
       timelineLabel.style.display = "block";
-      hud.textContent = `memory archive: ${memories.length} memories`;
+      hud.textContent = "memory fragments: curated frames";
       scene.fog.color.set(0x111122);
       museumSphere.material.color.set(0x0b0b14);
       scene.fog.density = 0.02;
@@ -1165,12 +1049,6 @@
   let frames = 0;
 
   updateMemoryPanel();
-  selectedFrame = frameMeshes[0] || null;
-  if (selectedFrame) {
-    selectedMemoryId = selectedFrame.userData.memoryId;
-    updateMemoryPanel();
-    highlightFrames();
-  }
   setAppState("menu");
 
   function animate() {
@@ -1179,11 +1057,9 @@
     const t = Number(timeline.value) / 100;
     const time = performance.now() * 0.001;
 
-    const cameraRange = getArchiveCameraRange();
-
     const targetDistance = appState === "memory"
-      ? cameraRange.memoryMax - t * (cameraRange.memoryMax - cameraRange.memoryMin)
-      : cameraRange.hubMax - t * (cameraRange.hubMax - cameraRange.hubMin);
+      ? 3.9 - t * 0.75
+      : 18.5 - t * 16.6;
 
     const dir = camera.position.clone().sub(controls.target);
     if (dir.lengthSq() < 0.0001) {
@@ -1214,44 +1090,34 @@
     }
 
     if (framesGroup.visible) {
-      const clarity = Number(timeline.value) / 100;
-      const orbitMultiplier = 0.12 + clarity * 0.28;
-      const floatAmplitude = 0.004 + clarity * 0.018;
-      const breathingRadius = 0.985 + Math.sin(time * 0.9) * (0.002 + clarity * 0.01);
-    
       for (let i = 0; i < frameMeshes.length; i++) {
         const frame = frameMeshes[i];
-        const theta = frame.userData.baseTheta + time * frame.userData.angularSpeed * orbitMultiplier;
-        const yNorm =
-          frame.userData.baseYNorm +
-          Math.sin(time * (0.45 + clarity * 0.55) + frame.userData.floatOffset) * floatAmplitude;
-    
-        const radial = Math.sqrt(Math.max(0.0001, 1 - yNorm * yNorm));
-        const shellRadius = frame.userData.baseRadius * breathingRadius;
-    
-        frame.position.x = Math.cos(theta) * radial * shellRadius;
-        frame.position.y = yNorm * shellRadius + 2.55;
-        frame.position.z = Math.sin(theta) * radial * shellRadius;
-    
+        const theta = frame.userData.baseTheta + time * frame.userData.angularSpeed;
+        const wobbleAmount = Math.max(0.0025, 0.009 - frameMeshes.length * 0.000035);
+        const yN = frame.userData.baseYN + Math.sin(time * 0.35 + frame.userData.floatOffset) * wobbleAmount;
+        const rAtY = Math.sqrt(Math.max(0.0001, 1 - yN * yN));
+        const shellRadius = frame.userData.shellRadius;
+
+        frame.position.x = Math.cos(theta) * rAtY * shellRadius;
+        frame.position.y = yN * frame.userData.yScale + 2.55;
+        frame.position.z = Math.sin(theta) * rAtY * shellRadius;
+
         frame.lookAt(0, 2.55, 0);
       }
     }
 
-    const clarity = Number(timeline.value) / 100;
-
     for (const dot of dustGroup.children) {
-      const drift = 0.03 + clarity * 0.1;
-      dot.position.y = dot.userData.baseY + Math.sin(time * (1 + clarity) + dot.userData.offset) * drift;
+      dot.position.y = dot.userData.baseY + Math.sin(time + dot.userData.offset) * 0.05;
     }
 
-    consoleGroup.position.y = consoleBaseY + Math.sin(time * (1.15 + t * 0.75)) * (0.014 + t * 0.028);
+    consoleGroup.position.y = consoleBaseY + Math.sin(time * 1.15) * 0.022;
 
-    scanlineBar.position.y = 1.62 + ((Math.sin(time * (1.2 + t * 1.6)) + 1) * 0.48);
-    scanlineBar.material.opacity = 0.08 + ((Math.sin(time * (1.2 + t * 1.6)) + 1) * (0.05 + t * 0.08));
-    
-    pulseBar.scale.x = 0.94 + Math.sin(time * (1.8 + t * 2.2)) * (0.05 + t * 0.09);
-    pulseBar.material.opacity = 0.13 + ((Math.sin(time * (1.8 + t * 2.2)) + 1) * (0.04 + t * 0.08));
-    
+    scanlineBar.position.y = 1.62 + ((Math.sin(time * 1.4) + 1) * 0.48);
+    scanlineBar.material.opacity = 0.1 + ((Math.sin(time * 1.4) + 1) * 0.08);
+
+    pulseBar.scale.x = 0.95 + Math.sin(time * 2.1) * 0.09;
+    pulseBar.material.opacity = 0.16 + ((Math.sin(time * 2.1) + 1) * 0.07);
+
     chartGlow.material.opacity = 0.04 + ((Math.sin(time * 1.8) + 1) * 0.02);
     centerGlow.material.opacity = 0.028 + ((Math.sin(time * 1.2) + 1) * 0.015);
 
