@@ -782,7 +782,7 @@
     if (totalFrames > 120) shellCount = 3;
     if (totalFrames > 210) shellCount = 4;
   
-    const baseRadius = 6.9;
+    const baseRadius = 6.9 + (shellCount - 1) * 2.2;
     const shellGap = 1.65;
     const outerRadius = baseRadius + (shellCount - 1) * shellGap;
   
