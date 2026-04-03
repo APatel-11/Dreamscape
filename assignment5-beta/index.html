@@ -477,6 +477,8 @@
 
   let selectedMemoryId = 0;
   let selectedFrame = null;
+  let memoryFocusTarget = new THREE.Vector3(0, 2.12, -1.6);
+  let hubTarget = new THREE.Vector3(0, 2.3, -1.2);
 
   function saveMemories() {
     const names = memories.map(m => m.name);
@@ -967,9 +969,24 @@
   function selectMemoryFrame(frame) {
     selectedFrame = frame;
     selectedMemoryId = frame.userData.memoryId;
+    updateMemoryFocusTarget();
     updateMemoryPanel();
     highlightFrames();
     updateHud();
+  }
+
+  function updateMemoryFocusTarget() {
+    if (!selectedFrame) {
+      memoryFocusTarget.set(0, 2.12, -1.6);
+      return;
+    }
+  
+    const worldPos = new THREE.Vector3();
+    selectedFrame.getWorldPosition(worldPos);
+  
+    const inwardDir = worldPos.clone().sub(new THREE.Vector3(0, 2.55, 0)).normalize();
+  
+    memoryFocusTarget.copy(worldPos.clone().sub(inwardDir.multiplyScalar(0.9)));
   }
 
   function saveSelectedMemoryName() {
@@ -1014,7 +1031,8 @@
       frameMeshes.find(frame => frame.userData.memoryId === selectedMemoryId) ||
       frameMeshes[0] ||
       null;
-  
+
+    updateMemoryFocusTarget();
     updateMemoryPanel();
     highlightFrames();
     updateHud();
@@ -1155,7 +1173,7 @@
       platformGroup.visible = true;
       avatarGroup.visible = true;
       consoleGroup.visible = true;
-      controls.target.set(0, 2.3, -1.2);
+      controls.target.copy(hubTarget);
       controls.update();
 
       if (!selectedFrame && frameMeshes.length > 0) {
@@ -1176,7 +1194,8 @@
       platformGroup.visible = true;
       avatarGroup.visible = true;
       consoleGroup.visible = true;
-      controls.target.set(0, 2.12, -1.6);
+      updateMemoryFocusTarget();
+      controls.target.copy(memoryFocusTarget);
       controls.update();
     }
   }
@@ -1200,8 +1219,11 @@
     const t = Number(timeline.value) / 100;
     const time = performance.now() * 0.001;
 
+    const desiredTarget = appState === "memory" ? memoryFocusTarget : hubTarget;
+    controls.target.lerp(desiredTarget, appState === "memory" ? 0.08 : 0.06);
+
     const targetDistance = appState === "memory"
-      ? 3.9 - t * 0.75
+      ? 2.8 - t * 0.45
       : 18.5 - t * 16.6;
 
     const dir = camera.position.clone().sub(controls.target);
