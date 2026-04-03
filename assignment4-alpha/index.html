@@ -784,13 +784,14 @@
   
     const baseRadius = 6.9 + (shellCount - 1) * 2.2;
     const shellGap = 1.65;
+  
     const outerRadius = baseRadius + (shellCount - 1) * shellGap;
   
     return {
       shellCount,
       outerRadius,
-      hubMax: outerRadius + 10.8,
-      hubMin: Math.max(outerRadius + 1.8, 8.2),
+      hubMax: outerRadius * 2.35,
+      hubMin: Math.max(outerRadius * 0.95, 8.5),
       memoryMax: 3.9,
       memoryMin: 3.15
     };
