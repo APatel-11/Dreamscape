@@ -451,10 +451,15 @@
   const museumSphere = new THREE.Mesh(sphereGeo, sphereMat);
   scene.add(museumSphere);
 
-  const MEMORY_COUNT = 6;
+  const DEFAULT_MEMORY_COUNT = 6;
   const savedNames = JSON.parse(localStorage.getItem("dreamscape_memory_names") || "null");
-
-  const memories = Array.from({ length: MEMORY_COUNT }, (_, i) => ({
+  
+  const initialMemoryCount =
+    Array.isArray(savedNames) && savedNames.length > 0
+      ? savedNames.length
+      : DEFAULT_MEMORY_COUNT;
+  
+  const memories = Array.from({ length: initialMemoryCount }, (_, i) => ({
     id: i,
     name: savedNames?.[i] || `Memory ${String(i + 1).padStart(2, "0")}`,
     clarity: 0.5,
@@ -844,7 +849,7 @@
         frame.position.set(x, y, z);
         frame.lookAt(0, 2.55, 0);
 
-        frame.userData.memoryId = frameIndex % MEMORY_COUNT;
+        frame.userData.memoryId = frameIndex % memories.length;
         frame.userData.baseTheta = theta;
         frame.userData.baseYN = yN;
         frame.userData.shellRadius = shellRadius;
