@@ -453,9 +453,14 @@
   const museumSphere = new THREE.Mesh(sphereGeo, sphereMat);
   scene.add(museumSphere);
 
+  const DEFAULT_MEMORY_COUNT = 6;
   const savedNames = JSON.parse(localStorage.getItem("dreamscape_memory_names") || "null");
-  const initialMemoryCount = savedNames && savedNames.length > 0 ? savedNames.length : 6;
-
+  
+  const initialMemoryCount =
+    Array.isArray(savedNames) && savedNames.length > 0
+      ? savedNames.length
+      : DEFAULT_MEMORY_COUNT;
+  
   const memories = Array.from({ length: initialMemoryCount }, (_, i) => ({
     id: i,
     name: savedNames?.[i] || `Memory ${String(i + 1).padStart(2, "0")}`,
@@ -475,16 +480,21 @@
 
   function getArchiveStats() {
     const totalFrames = Math.max(memories.length * 12, 48);
-
+  
     let shellCount = 1;
     if (totalFrames > 70) shellCount = 2;
     if (totalFrames > 140) shellCount = 3;
     if (totalFrames > 240) shellCount = 4;
-
+  
+    const baseRadius = 6.9;
+    const shellGap = 1.65;
+    const outerRadius = baseRadius + (shellCount - 1) * shellGap;
+  
     return {
       memoryCount: memories.length,
       totalFrames,
-      shellCount
+      shellCount,
+      outerRadius
     };
   }
 
@@ -980,6 +990,7 @@
 
   function addMemory() {
     const nextId = memories.length;
+  
     memories.push({
       id: nextId,
       name: `Memory ${String(nextId + 1).padStart(2, "0")}`,
@@ -988,6 +999,20 @@
       edited: false,
       history: []
     });
+  
+    saveMemories();
+    layoutFrames();
+  
+    selectedMemoryId = nextId;
+    selectedFrame =
+      frameMeshes.find(frame => frame.userData.memoryId === selectedMemoryId) ||
+      frameMeshes[0] ||
+      null;
+  
+    updateMemoryPanel();
+    highlightFrames();
+    updateHud();
+  }
 
     saveMemories();
     layoutFrames();
