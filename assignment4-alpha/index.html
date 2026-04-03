@@ -774,6 +774,28 @@
     return frame;
   }
 
+  function getArchiveCameraRange() {
+    const totalFrames = Math.max(memories.length * 12, 48);
+  
+    let shellCount = 1;
+    if (totalFrames > 60) shellCount = 2;
+    if (totalFrames > 120) shellCount = 3;
+    if (totalFrames > 210) shellCount = 4;
+  
+    const baseRadius = 6.9;
+    const shellGap = 1.65;
+    const outerRadius = baseRadius + (shellCount - 1) * shellGap;
+  
+    return {
+      shellCount,
+      outerRadius,
+      hubMax: outerRadius + 10.8,
+      hubMin: Math.max(outerRadius + 1.8, 8.2),
+      memoryMax: 3.9,
+      memoryMin: 3.15
+    };
+  }
+
   function layoutFrames() {
     framesGroup.clear();
     frameMeshes.length = 0;
@@ -1057,9 +1079,11 @@
     const t = Number(timeline.value) / 100;
     const time = performance.now() * 0.001;
 
+    const cameraRange = getArchiveCameraRange();
+
     const targetDistance = appState === "memory"
-      ? 3.9 - t * 0.75
-      : 18.5 - t * 16.6;
+      ? cameraRange.memoryMax - t * (cameraRange.memoryMax - cameraRange.memoryMin)
+      : cameraRange.hubMax - t * (cameraRange.hubMax - cameraRange.hubMin);
 
     const dir = camera.position.clone().sub(controls.target);
     if (dir.lengthSq() < 0.0001) {
