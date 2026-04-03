@@ -1090,34 +1090,44 @@
     }
 
     if (framesGroup.visible) {
+      const clarity = Number(timeline.value) / 100;
+      const orbitMultiplier = 0.12 + clarity * 0.28;
+      const floatAmplitude = 0.004 + clarity * 0.018;
+      const breathingRadius = 0.985 + Math.sin(time * 0.9) * (0.002 + clarity * 0.01);
+    
       for (let i = 0; i < frameMeshes.length; i++) {
         const frame = frameMeshes[i];
-        const theta = frame.userData.baseTheta + time * frame.userData.angularSpeed;
-        const wobbleAmount = Math.max(0.0025, 0.009 - frameMeshes.length * 0.000035);
-        const yN = frame.userData.baseYN + Math.sin(time * 0.35 + frame.userData.floatOffset) * wobbleAmount;
-        const rAtY = Math.sqrt(Math.max(0.0001, 1 - yN * yN));
-        const shellRadius = frame.userData.shellRadius;
-
-        frame.position.x = Math.cos(theta) * rAtY * shellRadius;
-        frame.position.y = yN * frame.userData.yScale + 2.55;
-        frame.position.z = Math.sin(theta) * rAtY * shellRadius;
-
+        const theta = frame.userData.baseTheta + time * frame.userData.angularSpeed * orbitMultiplier;
+        const yNorm =
+          frame.userData.baseYNorm +
+          Math.sin(time * (0.45 + clarity * 0.55) + frame.userData.floatOffset) * floatAmplitude;
+    
+        const radial = Math.sqrt(Math.max(0.0001, 1 - yNorm * yNorm));
+        const shellRadius = frame.userData.baseRadius * breathingRadius;
+    
+        frame.position.x = Math.cos(theta) * radial * shellRadius;
+        frame.position.y = yNorm * shellRadius + 2.55;
+        frame.position.z = Math.sin(theta) * radial * shellRadius;
+    
         frame.lookAt(0, 2.55, 0);
       }
     }
 
+    const clarity = Number(timeline.value) / 100;
+
     for (const dot of dustGroup.children) {
-      dot.position.y = dot.userData.baseY + Math.sin(time + dot.userData.offset) * 0.05;
+      const drift = 0.03 + clarity * 0.1;
+      dot.position.y = dot.userData.baseY + Math.sin(time * (1 + clarity) + dot.userData.offset) * drift;
     }
 
-    consoleGroup.position.y = consoleBaseY + Math.sin(time * 1.15) * 0.022;
+    consoleGroup.position.y = consoleBaseY + Math.sin(time * (1.15 + t * 0.75)) * (0.014 + t * 0.028);
 
-    scanlineBar.position.y = 1.62 + ((Math.sin(time * 1.4) + 1) * 0.48);
-    scanlineBar.material.opacity = 0.1 + ((Math.sin(time * 1.4) + 1) * 0.08);
-
-    pulseBar.scale.x = 0.95 + Math.sin(time * 2.1) * 0.09;
-    pulseBar.material.opacity = 0.16 + ((Math.sin(time * 2.1) + 1) * 0.07);
-
+    scanlineBar.position.y = 1.62 + ((Math.sin(time * (1.2 + t * 1.6)) + 1) * 0.48);
+    scanlineBar.material.opacity = 0.08 + ((Math.sin(time * (1.2 + t * 1.6)) + 1) * (0.05 + t * 0.08));
+    
+    pulseBar.scale.x = 0.94 + Math.sin(time * (1.8 + t * 2.2)) * (0.05 + t * 0.09);
+    pulseBar.material.opacity = 0.13 + ((Math.sin(time * (1.8 + t * 2.2)) + 1) * (0.04 + t * 0.08));
+    
     chartGlow.material.opacity = 0.04 + ((Math.sin(time * 1.8) + 1) * 0.02);
     centerGlow.material.opacity = 0.028 + ((Math.sin(time * 1.2) + 1) * 0.015);
 
