@@ -481,6 +481,8 @@
   let memoryEntryTarget = new THREE.Vector3(0, 2.12, -1.6);
   let memoryEntryCameraPos = new THREE.Vector3(0, 2.12, 0.4);
   let hubTarget = new THREE.Vector3(0, 2.3, -1.2);
+  let previewFrameTarget = new THREE.Vector3(0, 2.55, -0.95);
+  let previewFrameActive = false;
   let isMemoryTransitioning = false;
   let memoryTransitionProgress = 0;
   
@@ -1019,6 +1021,8 @@
   function selectMemoryFrame(frame) {
     selectedFrame = frame;
     selectedMemoryId = frame.userData.memoryId;
+    previewFrameActive = true;
+    updatePreviewFrameTarget();
     updateMemoryFocusTarget();
     updateMemoryEntryTarget();
     updateMemoryPanel();
@@ -1032,6 +1036,11 @@
       return;
     }
   
+    if (previewFrameActive) {
+      memoryFocusTarget.copy(previewFrameTarget.clone().add(new THREE.Vector3(0, 0, -0.55)));
+      return;
+    }
+  
     const worldPos = new THREE.Vector3();
     selectedFrame.getWorldPosition(worldPos);
   
@@ -1039,11 +1048,17 @@
   
     memoryFocusTarget.copy(worldPos.clone().sub(inwardDir.multiplyScalar(0.9)));
   }
-
+  
   function updateMemoryEntryTarget() {
     if (!selectedFrame) {
       memoryEntryTarget.set(0, 2.12, -1.6);
       memoryEntryCameraPos.set(0, 2.12, 0.4);
+      return;
+    }
+  
+    if (previewFrameActive) {
+      memoryEntryTarget.copy(previewFrameTarget);
+      memoryEntryCameraPos.copy(previewFrameTarget.clone().add(new THREE.Vector3(0, 0.02, 2.0)));
       return;
     }
   
@@ -1055,6 +1070,10 @@
   
     memoryEntryTarget.copy(worldPos.clone().sub(inwardDir.multiplyScalar(0.15)));
     memoryEntryCameraPos.copy(worldPos.clone().sub(inwardDir.multiplyScalar(2.1)));
+  }
+  
+  function updatePreviewFrameTarget() {
+    previewFrameTarget.set(0, 2.6, -0.95);
   }
   
   function saveSelectedMemoryName() {
@@ -1192,7 +1211,8 @@
     camera.position.copy(memoryEntryCameraPos);
     controls.target.copy(memoryEntryTarget);
     controls.update();
-  
+    
+    previewFrameActive = false;
     isMemoryTransitioning = true;
     memoryTransitionProgress = 0;
     setAppState("memory");
@@ -1256,6 +1276,11 @@
       avatarGroup.visible = true;
       consoleGroup.visible = true;
       memoryWorldGroup.visible = false;
+
+      previewFrameActive = !!selectedFrame;
+      updatePreviewFrameTarget();
+      updateMemoryFocusTarget();
+      updateMemoryEntryTarget();
       
       controls.target.copy(hubTarget);
       controls.update();
@@ -1377,16 +1402,26 @@
     if (framesGroup.visible) {
       for (let i = 0; i < frameMeshes.length; i++) {
         const frame = frameMeshes[i];
-        const theta = frame.userData.baseTheta + time * frame.userData.angularSpeed * 0.22;
-        const yNorm = frame.userData.baseYNorm + Math.sin(time * 0.45 + frame.userData.floatOffset) * 0.01;
-        const radial = Math.sqrt(Math.max(0.0001, 1 - yNorm * yNorm));
-        const shellRadius = frame.userData.baseRadius;
+        const isPreviewed = previewFrameActive && frame === selectedFrame;
     
-        frame.position.x = Math.cos(theta) * radial * shellRadius;
-        frame.position.y = yNorm * shellRadius + 2.55;
-        frame.position.z = Math.sin(theta) * radial * shellRadius;
+        if (isPreviewed) {
+          frame.position.lerp(previewFrameTarget, 0.12);
     
-        frame.lookAt(0, 2.55, 0);
+          frame.rotation.x += (0 - frame.rotation.x) * 0.12;
+          frame.rotation.y += (0 - frame.rotation.y) * 0.12;
+          frame.rotation.z += (0 - frame.rotation.z) * 0.12;
+        } else {
+          const theta = frame.userData.baseTheta + time * frame.userData.angularSpeed * 0.22;
+          const yNorm = frame.userData.baseYNorm + Math.sin(time * 0.45 + frame.userData.floatOffset) * 0.01;
+          const radial = Math.sqrt(Math.max(0.0001, 1 - yNorm * yNorm));
+          const shellRadius = frame.userData.baseRadius;
+    
+          frame.position.x = Math.cos(theta) * radial * shellRadius;
+          frame.position.y = yNorm * shellRadius + 2.55;
+          frame.position.z = Math.sin(theta) * radial * shellRadius;
+    
+          frame.lookAt(0, 2.55, 0);
+        }
       }
     }
 
