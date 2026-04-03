@@ -223,7 +223,7 @@
   <div id="startCard">
     <h1>Dreamscape</h1>
     <p>
-      Enter a curated memory sphere where framed fragments orbit around you.
+      Enter a memory archive where individual memories are organized as interactive frames.
       Select a memory, rename it, adjust its clarity, and enter a focused memory state.
     </p>
     <div class="menuRow">
@@ -235,7 +235,7 @@
 
 <input id="timeline" type="range" min="0" max="100" value="18" />
 
-<div id="hud">memory fragments: curated frames</div>
+<div id="hud">memory archive: initializing</div>
 <div id="timelineLabel">timeline = point of view + memory clarity</div>
 <div id="fps">fps: --</div>
 
@@ -272,10 +272,10 @@
     </div>
 
     <div id="controlsHint">
-      Click a floating memory frame to select it.<br>
-      Rename it here, then Save Name.<br>
-      Undo restores the last saved name.<br>
-      Drag to orbit. Slider changes point of view and clarity.
+      Select a memory frame to activate it.<br>
+      Rename it and save your changes.<br>
+      Undo restores the previous name.<br>
+      Drag to orbit. The slider controls perspective and memory clarity.
     </div>
   </div>
 </div>
@@ -906,17 +906,19 @@
 
   function updateHud() {
     if (appState === "menu") {
-      hud.textContent = "memory fragments: waiting";
+      hud.textContent = "memory archive: idle";
       return;
     }
-
+  
     if (appState === "memory") {
-      hud.textContent = `inside memory: ${memories[selectedMemoryId].name}`;
+      hud.textContent = `active memory: ${memories[selectedMemoryId].name}`;
       return;
     }
-
+  
     const archive = getArchiveStats();
-    hud.textContent = `memory fragments: ${archive.totalFrames} | memories: ${archive.memoryCount} | shells: ${archive.shellCount}`;
+  
+    hud.textContent =
+      `memory archive: ${archive.memoryCount} memories | density: ${archive.shellCount} shells`;
   }
 
   function updateMemoryPanel() {
