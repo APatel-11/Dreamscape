@@ -910,17 +910,21 @@
   const undoBtn = document.getElementById("undoBtn");
   const enterBtn = document.getElementById("enterBtn");
   const exitBtn = document.getElementById("exitBtn");
-  const resetBtn = document.getElementById("resetBtn");
+  const addMemoryBtn = document.getElementById("addMemoryBtn");
+  const eraseMemoryBtn = document.getElementById("eraseMemoryBtn");
+  const resetDefaultBtn = document.getElementById("resetDefaultBtn");
 
   const raycaster = new THREE.Raycaster();
   const mouse = new THREE.Vector2();
 
   function updateMemoryPanel() {
-    const memory = memories[selectedMemoryId];
-    memoryNameInput.value = memory.name;
-    memoryIdText.textContent = memory.id;
-    clarityText.textContent = memory.clarity.toFixed(2);
-    toneText.textContent = memory.tone;
+    if (!memories.length) return;
+  
+    const memory = memories[selectedMemoryId];
+    memoryNameInput.value = memory.name;
+    memoryIdText.textContent = memory.id;
+    clarityText.textContent = memory.clarity.toFixed(2);
+    toneText.textContent = memory.tone;
   }
 
   function highlightFrames() {
@@ -961,6 +965,82 @@
     }
   }
 
+  function refreshArchiveAfterChange(preferredMemoryId = null) {
+    layoutFrames();
+  
+    if (memories.length === 0) {
+      selectedMemoryId = 0;
+      selectedFrame = null;
+      return;
+    }
+  
+    if (preferredMemoryId !== null) {
+      const clampedId = Math.max(0, Math.min(preferredMemoryId, memories.length - 1));
+      selectedMemoryId = clampedId;
+    } else {
+      selectedMemoryId = Math.max(0, Math.min(selectedMemoryId, memories.length - 1));
+    }
+  
+    selectedFrame =
+      frameMeshes.find(frame => frame.userData.memoryId === selectedMemoryId) || frameMeshes[0] || null;
+  
+    updateMemoryPanel();
+    highlightFrames();
+  
+    if (appState === "hub") {
+      hud.textContent = `memory archive: ${memories.length} memories`;
+    }
+  }
+  
+  function addMemory() {
+    const newId = memories.length;
+  
+    memories.push({
+      id: newId,
+      name: `Memory ${String(newId + 1).padStart(2, "0")}`,
+      clarity: 0.5,
+      tone: "neutral",
+      edited: false,
+      history: []
+    });
+  
+    saveMemories();
+    refreshArchiveAfterChange(newId);
+  }
+  
+  function eraseSelectedMemory() {
+    if (memories.length <= 1) return;
+  
+    memories.splice(selectedMemoryId, 1);
+  
+    for (let i = 0; i < memories.length; i++) {
+      memories[i].id = i;
+    }
+  
+    saveMemories();
+    refreshArchiveAfterChange(Math.max(0, selectedMemoryId - 1));
+  }
+  
+  function resetToDefault() {
+    memories.length = 0;
+  
+    for (let i = 0; i < DEFAULT_MEMORY_COUNT; i++) {
+      memories.push({
+        id: i,
+        name: `Memory ${String(i + 1).padStart(2, "0")}`,
+        clarity: 0.5,
+        tone: "neutral",
+        edited: false,
+        history: []
+      });
+    }
+  
+    localStorage.removeItem("dreamscape_memory_names");
+    saveMemories();
+    refreshArchiveAfterChange(0);
+    setAppState("hub");
+  }
+
   togglePanelBtn.addEventListener("click", () => {
     memoryPanel.classList.toggle("minimized");
     togglePanelBtn.textContent = memoryPanel.classList.contains("minimized") ? "Expand" : "Minimize";
@@ -987,17 +1067,25 @@
 
   saveBtn.addEventListener("click", saveSelectedMemoryName);
   undoBtn.addEventListener("click", undoMemoryName);
-
+  
   enterBtn.addEventListener("click", () => {
     setAppState("memory");
   });
-
+  
   exitBtn.addEventListener("click", () => {
     setAppState("hub");
   });
-
-  resetBtn.addEventListener("click", () => {
-    setAppState("menu");
+  
+  addMemoryBtn.addEventListener("click", () => {
+    addMemory();
+  });
+  
+  eraseMemoryBtn.addEventListener("click", () => {
+    eraseSelectedMemory();
+  });
+  
+  resetDefaultBtn.addEventListener("click", () => {
+    resetToDefault();
   });
 
   startBtn.addEventListener("click", () => {
@@ -1077,6 +1165,12 @@
   let frames = 0;
 
   updateMemoryPanel();
+  selectedFrame = frameMeshes[0] || null;
+  if (selectedFrame) {
+    selectedMemoryId = selectedFrame.userData.memoryId;
+    updateMemoryPanel();
+    highlightFrames();
+  }
   setAppState("menu");
 
   function animate() {
