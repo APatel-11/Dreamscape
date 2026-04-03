@@ -276,9 +276,10 @@
     </div>
 
     <div id="controlsHint">
-      Select a memory frame to activate it.<br>
-      Rename it and save your changes.<br>
-      Undo restores the previous name.<br>
+      Select a memory frame to focus it.<br>
+      Save Name updates the selected memory.<br>
+      Undo restores the previous saved name.<br>
+      Add, erase, or reset the archive from this console.<br>
       Drag to orbit. The slider controls perspective and memory clarity.
     </div>
   </div>
@@ -921,12 +922,12 @@
 
   function updateHud() {
     if (appState === "menu") {
-      hud.textContent = "memory archive: idle";
+      hud.textContent = "memory archive: standby";
       return;
     }
   
     if (appState === "memory") {
-      hud.textContent = `active memory: ${memories[selectedMemoryId].name}`;
+      hud.textContent = `memory focus: ${memories[selectedMemoryId].name}`;
       return;
     }
   
@@ -1183,7 +1184,13 @@
   let lastFpsTime = performance.now();
   let frames = 0;
 
+  selectedFrame = frameMeshes[0] || null;
+  if (selectedFrame) {
+    selectedMemoryId = selectedFrame.userData.memoryId;
+  }
+  
   updateMemoryPanel();
+  highlightFrames();
   updateHud();
   setAppState("menu");
 
