@@ -268,7 +268,11 @@
 
     <div class="btnRow">
       <button id="addMemoryBtn">Add Memory</button>
-      <button id="resetBtn" class="secondary">Reset Experience</button>
+      <button id="eraseBtn" class="secondary">Erase Memory</button>
+    </div>
+    
+    <div class="btnRow">
+      <button id="resetArchiveBtn" class="secondary">Reset Archive</button>
     </div>
 
     <div id="controlsHint">
@@ -909,8 +913,9 @@
   const enterBtn = document.getElementById("enterBtn");
   const exitBtn = document.getElementById("exitBtn");
   const addMemoryBtn = document.getElementById("addMemoryBtn");
-  const resetBtn = document.getElementById("resetBtn");
-
+  const eraseBtn = document.getElementById("eraseBtn");
+  const resetArchiveBtn = document.getElementById("resetArchiveBtn");
+  
   const raycaster = new THREE.Raycaster();
   const mouse = new THREE.Vector2();
 
@@ -1014,6 +1019,55 @@
     updateHud();
   }
 
+  function eraseSelectedMemory() {
+    if (memories.length <= 1) return;
+  
+    memories.splice(selectedMemoryId, 1);
+  
+    memories.forEach((m, i) => {
+      m.id = i;
+    });
+  
+    saveMemories();
+    layoutFrames();
+  
+    selectedMemoryId = Math.max(0, selectedMemoryId - 1);
+    selectedFrame =
+      frameMeshes.find(frame => frame.userData.memoryId === selectedMemoryId) ||
+      frameMeshes[0] ||
+      null;
+  
+    updateMemoryPanel();
+    highlightFrames();
+    updateHud();
+  }
+
+  function resetArchive() {
+    localStorage.removeItem("dreamscape_memory_names");
+  
+    memories.length = 0;
+  
+    for (let i = 0; i < DEFAULT_MEMORY_COUNT; i++) {
+      memories.push({
+        id: i,
+        name: `Memory ${String(i + 1).padStart(2, "0")}`,
+        clarity: 0.5,
+        tone: "neutral",
+        edited: false,
+        history: []
+      });
+    }
+  
+    layoutFrames();
+  
+    selectedMemoryId = 0;
+    selectedFrame = frameMeshes[0] || null;
+  
+    updateMemoryPanel();
+    highlightFrames();
+    updateHud();
+  }
+
   togglePanelBtn.addEventListener("click", () => {
     memoryPanel.classList.toggle("minimized");
     togglePanelBtn.textContent = memoryPanel.classList.contains("minimized") ? "Expand" : "Minimize";
@@ -1049,13 +1103,9 @@
     setAppState("hub");
   });
 
-  addMemoryBtn.addEventListener("click", () => {
-    addMemory();
-  });
-
-  resetBtn.addEventListener("click", () => {
-    setAppState("menu");
-  });
+  addMemoryBtn.addEventListener("click", addMemory);
+  eraseBtn.addEventListener("click", eraseSelectedMemory);
+  resetArchiveBtn.addEventListener("click", resetArchive);
 
   startBtn.addEventListener("click", () => {
     setAppState("hub");
