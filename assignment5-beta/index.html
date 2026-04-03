@@ -1014,17 +1014,6 @@
     updateHud();
   }
 
-    saveMemories();
-    layoutFrames();
-
-    selectedMemoryId = nextId;
-    selectedFrame = frameMeshes.find(frame => frame.userData.memoryId === selectedMemoryId) || frameMeshes[0] || null;
-
-    updateMemoryPanel();
-    highlightFrames();
-    updateHud();
-  }
-
   togglePanelBtn.addEventListener("click", () => {
     memoryPanel.classList.toggle("minimized");
     togglePanelBtn.textContent = memoryPanel.classList.contains("minimized") ? "Expand" : "Minimize";
