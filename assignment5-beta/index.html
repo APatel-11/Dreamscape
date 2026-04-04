@@ -1123,6 +1123,10 @@
       previewFrameTarget.clone().add(new THREE.Vector3(0, 0.04, -0.82))
     );
   }
+
+  function updatePreviewFrameTarget() {
+    previewFrameTarget.set(0, 2.62, -0.82);
+  }
   
   function easeInOutCubic(x) {
     return x < 0.5
