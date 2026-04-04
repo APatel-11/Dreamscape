@@ -494,8 +494,8 @@
   let transitionFrameApproachPos = new THREE.Vector3();
   let transitionFramePassThroughPos = new THREE.Vector3();
   
-  let memoryCameraTarget = new THREE.Vector3(0, 1.7, -1.8);
-  let memoryCameraPos = new THREE.Vector3(0, 1.95, 3.6);
+  let memoryCameraTarget = new THREE.Vector3(0, 1.7, -1.9);
+  let memoryCameraPos = new THREE.Vector3(0, 2.0, 4.6);
   
   function saveMemories() {
     const names = memories.map(m => m.name);
@@ -1108,16 +1108,16 @@
     consoleGroup.visible = true;
   
     transitionPhase1StartPos.copy(camera.position);
-    transitionPhase1EndPos.set(0, 2.45, 5.2);
-  
-    transitionFrameCenter.copy(previewFrameTarget);
-  
+    transitionPhase1EndPos.set(0, 3.05, 6.6);
+    
+    transitionFrameCenter.copy(previewFrameTarget.clone().add(new THREE.Vector3(0, 0.02, 0)));
+    
     transitionFrameApproachPos.copy(
-      previewFrameTarget.clone().add(new THREE.Vector3(0, 0.02, 1.9))
+      previewFrameTarget.clone().add(new THREE.Vector3(0, 0.10, 2.85))
     );
-  
+    
     transitionFramePassThroughPos.copy(
-      previewFrameTarget.clone().add(new THREE.Vector3(0, 0.02, -0.55))
+      previewFrameTarget.clone().add(new THREE.Vector3(0, 0.06, -0.95))
     );
   }
   
@@ -1419,18 +1419,18 @@
         let desiredCameraPos;
         let desiredTarget;
     
-        if (memoryTransitionProgress < 0.35) {
-          const p = memoryTransitionProgress / 0.35;
+        if (memoryTransitionProgress < 0.32) {
+          const p = memoryTransitionProgress / 0.32;
     
           desiredCameraPos = transitionPhase1StartPos.clone().lerp(transitionPhase1EndPos, p);
           desiredTarget = previewFrameTarget.clone();
-        } else if (memoryTransitionProgress < 0.78) {
-          const p = (memoryTransitionProgress - 0.35) / 0.43;
+        } else if (memoryTransitionProgress < 0.74) {
+          const p = (memoryTransitionProgress - 0.32) / 0.42;
     
           desiredCameraPos = transitionFrameApproachPos.clone().lerp(transitionFramePassThroughPos, p);
           desiredTarget = transitionFrameCenter.clone();
         } else {
-          const p = (memoryTransitionProgress - 0.78) / 0.22;
+          const p = (memoryTransitionProgress - 0.74) / 0.26;
     
           if (!memoryWorldGroup.visible) {
             framesGroup.visible = false;
