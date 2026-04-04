@@ -483,8 +483,13 @@
   let hubTarget = new THREE.Vector3(0, 2.3, -1.2);
   let previewFrameTarget = new THREE.Vector3(0, 2.55, -0.95);
   let previewFrameActive = false;
+  
   let isMemoryTransitioning = false;
   let memoryTransitionProgress = 0;
+  let transitionStartPos = new THREE.Vector3();
+  let transitionMidPos = new THREE.Vector3();
+  let transitionEndPos = new THREE.Vector3();
+  let transitionLookTarget = new THREE.Vector3();
   
   function saveMemories() {
     const names = memories.map(m => m.name);
@@ -1076,6 +1081,29 @@
     memoryEntryTarget.copy(worldPos.clone().sub(inwardDir.multiplyScalar(0.15)));
     memoryEntryCameraPos.copy(worldPos.clone().sub(inwardDir.multiplyScalar(2.1)));
   }
+
+  function beginMemoryTransition() {
+    if (!selectedFrame) return;
+  
+    updatePreviewFrameTarget();
+    updateMemoryFocusTarget();
+    updateMemoryEntryTarget();
+  
+    transitionStartPos.copy(camera.position);
+    transitionMidPos.copy(memoryEntryCameraPos);
+    transitionEndPos.copy(previewFrameTarget.clone().add(new THREE.Vector3(0, 0, -0.9)));
+    transitionLookTarget.copy(previewFrameTarget);
+  
+    previewFrameActive = true;
+    isMemoryTransitioning = true;
+    memoryTransitionProgress = 0;
+  
+    memoryWorldGroup.visible = false;
+    framesGroup.visible = true;
+    platformGroup.visible = true;
+    avatarGroup.visible = true;
+    consoleGroup.visible = true;
+  }
   
   function updatePreviewFrameTarget() {
     previewFrameTarget.set(0, 2.6, -0.95);
@@ -1228,22 +1256,15 @@
   enterBtn.addEventListener("click", () => {
     if (!selectedFrame) return;
   
-    updateMemoryFocusTarget();
-    updateMemoryEntryTarget();
-  
-    camera.position.copy(memoryEntryCameraPos);
-    controls.target.copy(memoryEntryTarget);
-    controls.update();
-    
-    previewFrameActive = false;
-    isMemoryTransitioning = true;
-    memoryTransitionProgress = 0;
     setAppState("memory");
+    beginMemoryTransition();
   });
 
   exitBtn.addEventListener("click", () => {
     isMemoryTransitioning = false;
     memoryTransitionProgress = 0;
+    memoryWorldGroup.visible = false;
+    previewFrameActive = true;
     setAppState("hub");
   });
 
@@ -1322,12 +1343,13 @@
       scene.fog.color.set(0x24182e);
       scene.fog.density = 0.05;
       museumSphere.material.color.set(0x120f1a);
+    
       framesGroup.visible = true;
       platformGroup.visible = true;
       avatarGroup.visible = true;
       consoleGroup.visible = true;
       memoryWorldGroup.visible = false;
-      
+    
       updateMemoryFocusTarget();
       updateMemoryEntryTarget();
     }
@@ -1359,13 +1381,28 @@
     
     if (appState === "memory") {
       if (isMemoryTransitioning) {
-        memoryTransitionProgress = Math.min(1, memoryTransitionProgress + 0.02);
+        memoryTransitionProgress = Math.min(1, memoryTransitionProgress + 0.018);
     
-        const transitionTarget = memoryEntryTarget.clone().lerp(memoryFocusTarget, memoryTransitionProgress);
-        desiredTarget = transitionTarget;
-        targetDistance = 1.6 - memoryTransitionProgress * 1.15;
+        let desiredCameraPos;
     
-        if (memoryTransitionProgress >= 0.55) {
+        if (memoryTransitionProgress < 0.45) {
+          const p = memoryTransitionProgress / 0.45;
+          desiredCameraPos = transitionStartPos.clone().lerp(transitionMidPos, p);
+          desiredTarget = transitionLookTarget.clone();
+        } else if (memoryTransitionProgress < 0.82) {
+          const p = (memoryTransitionProgress - 0.45) / 0.37;
+          desiredCameraPos = transitionMidPos.clone().lerp(transitionEndPos, p);
+          desiredTarget = transitionLookTarget.clone();
+        } else {
+          const p = (memoryTransitionProgress - 0.82) / 0.18;
+          desiredCameraPos = transitionEndPos.clone().lerp(new THREE.Vector3(0, 2.0, 1.6), p);
+          desiredTarget = new THREE.Vector3(0, 1.6, -2.0);
+        }
+    
+        controls.target.lerp(desiredTarget, 0.14);
+        camera.position.lerp(desiredCameraPos, 0.14);
+    
+        if (memoryTransitionProgress >= 0.72) {
           framesGroup.visible = false;
           platformGroup.visible = false;
           avatarGroup.visible = false;
@@ -1375,9 +1412,10 @@
     
         if (memoryTransitionProgress >= 1) {
           isMemoryTransitioning = false;
+          memoryWorldGroup.visible = true;
           desiredTarget = new THREE.Vector3(0, 1.6, -2.0);
-          targetDistance = 4.4 - t * 0.8;
           controls.target.copy(desiredTarget);
+          camera.position.lerp(new THREE.Vector3(0, 2.0, 6.0 - t * 0.8), 0.2);
         }
       } else {
         desiredTarget = memoryWorldGroup.visible
@@ -1385,20 +1423,32 @@
           : memoryFocusTarget;
     
         targetDistance = memoryWorldGroup.visible
-          ? 4.4 - t * 0.8
+          ? 4.8 - t * 0.9
           : 2.8 - t * 0.45;
+    
+        controls.target.lerp(desiredTarget, 0.1);
+    
+        const dir = camera.position.clone().sub(controls.target);
+        if (dir.lengthSq() < 0.0001) {
+          dir.set(0, 0, 1);
+        }
+        dir.normalize();
+    
+        const desiredPos = controls.target.clone().add(dir.multiplyScalar(targetDistance));
+        camera.position.lerp(desiredPos, 0.08);
       }
-    }
+    } else {
+      controls.target.lerp(desiredTarget, 0.06);
     
-    controls.target.lerp(desiredTarget, appState === "memory" ? 0.1 : 0.06);
+      const dir = camera.position.clone().sub(controls.target);
+      if (dir.lengthSq() < 0.0001) {
+        dir.set(0, 0, 1);
+      }
+      dir.normalize();
     
-    const dir = camera.position.clone().sub(controls.target);
-    if (dir.lengthSq() < 0.0001) {
-      dir.set(0, 0, 1);
+      const desiredPos = controls.target.clone().add(dir.multiplyScalar(targetDistance));
+      camera.position.lerp(desiredPos, 0.08);
     }
-    dir.normalize();
-    const desiredPos = controls.target.clone().add(dir.multiplyScalar(targetDistance));
-    camera.position.lerp(desiredPos, 0.08);
 
     if (t > 0.955) {
       avatarGroup.visible = false;
