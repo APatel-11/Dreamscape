@@ -973,6 +973,11 @@
   
   const raycaster = new THREE.Raycaster();
   const mouse = new THREE.Vector2();
+  
+  let pointerDownX = 0;
+  let pointerDownY = 0;
+  let pointerMoved = false;
+  const CLICK_MOVE_THRESHOLD = 8;
 
   function updateHud() {
     if (appState === "menu") {
@@ -1180,21 +1185,39 @@
     togglePanelBtn.textContent = memoryPanel.classList.contains("minimized") ? "Expand" : "Minimize";
   });
 
-  window.addEventListener("click", (event) => {
+  window.addEventListener("pointerdown", (event) => {
+    pointerDownX = event.clientX;
+    pointerDownY = event.clientY;
+    pointerMoved = false;
+  });
+  
+  window.addEventListener("pointermove", (event) => {
+    const dx = event.clientX - pointerDownX;
+    const dy = event.clientY - pointerDownY;
+  
+    if (Math.sqrt(dx * dx + dy * dy) > CLICK_MOVE_THRESHOLD) {
+      pointerMoved = true;
+    }
+  });
+  
+  window.addEventListener("pointerup", (event) => {
     if (appState !== "hub") return;
-
+    if (pointerMoved) return;
+  
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
+  
     raycaster.setFromCamera(mouse, camera);
-
+  
     const intersects = raycaster.intersectObjects(frameMeshes, true);
-
+  
     if (intersects.length > 0) {
       let obj = intersects[0].object;
+  
       while (obj.parent && obj.parent !== framesGroup) {
         obj = obj.parent;
       }
+  
       selectMemoryFrame(obj);
     }
   });
