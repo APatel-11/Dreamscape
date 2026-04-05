@@ -486,14 +486,14 @@
   
   let isMemoryTransitioning = false;
   let memoryTransitionProgress = 0;
-  
+
   let transitionPhase1StartPos = new THREE.Vector3();
   let transitionPhase1EndPos = new THREE.Vector3();
-  
+
+  let transitionEyePos = new THREE.Vector3();
   let transitionFrameCenter = new THREE.Vector3();
-  let transitionFrameApproachPos = new THREE.Vector3();
   let transitionFramePassThroughPos = new THREE.Vector3();
-  
+
   let memoryCameraTarget = new THREE.Vector3(0, 1.72, -1.95);
   let memoryCameraPos = new THREE.Vector3(0, 1.96, 4.2);
   
@@ -1090,37 +1090,39 @@
 
   function beginMemoryTransition() {
     if (!selectedFrame) return;
-  
+
     updatePreviewFrameTarget();
     updateMemoryFocusTarget();
     updateMemoryEntryTarget();
-  
+
     controls.enabled = false;
-  
+
     previewFrameActive = true;
     isMemoryTransitioning = true;
     memoryTransitionProgress = 0;
-  
+
     memoryWorldGroup.visible = false;
     framesGroup.visible = true;
     platformGroup.visible = true;
     avatarGroup.visible = true;
     consoleGroup.visible = true;
-  
+
     transitionPhase1StartPos.copy(camera.position);
-  
-    transitionFrameCenter.copy(previewFrameTarget.clone());
-  
+
     transitionPhase1EndPos.copy(
-      previewFrameTarget.clone().add(new THREE.Vector3(0, 0.14, 3.15))
+      previewFrameTarget.clone().add(new THREE.Vector3(0, 0.18, 3.0))
     );
-  
-    transitionFrameApproachPos.copy(
-      previewFrameTarget.clone().add(new THREE.Vector3(0, 0.10, 2.55))
+
+    transitionEyePos.copy(
+      previewFrameTarget.clone().add(new THREE.Vector3(0, 0.05, 1.65))
     );
-  
+
+    transitionFrameCenter.copy(
+      previewFrameTarget.clone().add(new THREE.Vector3(0, 0.05, 0.0))
+    );
+
     transitionFramePassThroughPos.copy(
-      previewFrameTarget.clone().add(new THREE.Vector3(0, 0.04, -0.82))
+      previewFrameTarget.clone().add(new THREE.Vector3(0, 0.04, -0.92))
     );
   }
 
@@ -1215,9 +1217,9 @@
 
   function resetArchive() {
     localStorage.removeItem("dreamscape_memory_names");
-  
+
     memories.length = 0;
-  
+
     for (let i = 0; i < DEFAULT_MEMORY_COUNT; i++) {
       memories.push({
         id: i,
@@ -1228,12 +1230,18 @@
         history: []
       });
     }
-  
+
     layoutFrames();
-  
+
     selectedMemoryId = 0;
     selectedFrame = frameMeshes[0] || null;
-  
+    previewFrameActive = !!selectedFrame;
+    isMemoryTransitioning = false;
+    memoryTransitionProgress = 0;
+
+    updatePreviewFrameTarget();
+    updateMemoryFocusTarget();
+    updateMemoryEntryTarget();
     updateMemoryPanel();
     highlightFrames();
     updateHud();
@@ -1412,14 +1420,6 @@
 
     let desiredTarget = hubTarget;
     let targetDistance = 18.5 - t * 16.6;
-    
-    if (isMemoryTransitioning) {
-      avatarGroup.visible = false;
-    } else if (t > 0.955) {
-      avatarGroup.visible = false;
-    } else if (appState !== "menu" && appState !== "memory") {
-      avatarGroup.visible = true;
-    }
 
     if (appState === "hub") {
       scene.fog.density = 0.011 + t * 0.026;
@@ -1430,74 +1430,129 @@
     }
 
     if (appState === "memory") {
-      if (isMemoryTransitioning) {
-        memoryTransitionProgress = Math.min(1, memoryTransitionProgress + 0.016);
-    
-        let desiredCameraPos;
-        let desiredTarget;
-    
-        if (memoryTransitionProgress < 0.34) {
-          const p = easeInOutCubic(memoryTransitionProgress / 0.34);
-    
-          desiredCameraPos = transitionPhase1StartPos.clone().lerp(transitionPhase1EndPos, p);
-          desiredTarget = transitionFrameCenter.clone();
+      scene.fog.density = 0.03 + t * 0.035;
+      museumSphere.material.color.set(0x120f1a);
+      memories[selectedMemoryId].clarity = t;
+      clarityText.textContent = t.toFixed(2);
+      highlightFrames();
+    }
+
+    if (appState === "memory" && isMemoryTransitioning) {
+      memoryTransitionProgress = Math.min(1, memoryTransitionProgress + 0.016);
+
+      let desiredCameraPos;
+      let desiredLookTarget;
+
+      if (memoryTransitionProgress < 0.38) {
+        const p = easeInOutCubic(memoryTransitionProgress / 0.38);
+
+        desiredCameraPos = transitionPhase1StartPos.clone().lerp(transitionPhase1EndPos, p);
+        desiredLookTarget = transitionFrameCenter.clone();
+
+        avatarGroup.visible = true;
+        memoryWorldGroup.visible = false;
+      } else if (memoryTransitionProgress < 0.78) {
+        const p = easeInOutCubic((memoryTransitionProgress - 0.38) / 0.40);
+
+        desiredCameraPos = getQuadraticPoint(
+          transitionPhase1EndPos,
+          transitionEyePos,
+          transitionFramePassThroughPos,
+          p
+        );
+
+        desiredLookTarget = transitionFrameCenter.clone();
+
+        if (p < 0.55) {
+          avatarGroup.visible = true;
         } else {
-          const p = easeInOutCubic((memoryTransitionProgress - 0.34) / 0.66);
-    
-          desiredCameraPos = getQuadraticPoint(
-            transitionFrameApproachPos,
-            transitionFramePassThroughPos,
-            memoryCameraPos,
-            p
-          );
-    
-          desiredTarget = transitionFrameCenter.clone().lerp(memoryCameraTarget, p);
-        }
-    
-        if (memoryTransitionProgress >= 0.50) {
-          memoryWorldGroup.visible = true;
-        }
-    
-        if (memoryTransitionProgress >= 0.64) {
-          framesGroup.visible = false;
-          platformGroup.visible = false;
-          consoleGroup.visible = false;
-        }
-    
-        camera.position.lerp(desiredCameraPos, 0.22);
-        controls.target.lerp(desiredTarget, 0.22);
-    
-        if (memoryTransitionProgress >= 1) {
-          isMemoryTransitioning = false;
-          previewFrameActive = false;
-          memoryWorldGroup.visible = true;
-          framesGroup.visible = false;
-          platformGroup.visible = false;
-          consoleGroup.visible = false;
           avatarGroup.visible = false;
-          camera.position.copy(memoryCameraPos);
-          controls.target.copy(memoryCameraTarget);
+        }
+
+        if (memoryTransitionProgress >= 0.68) {
+          memoryWorldGroup.visible = true;
         }
       } else {
+        const p = easeInOutCubic((memoryTransitionProgress - 0.78) / 0.22);
+
+        desiredCameraPos = transitionFramePassThroughPos.clone().lerp(memoryCameraPos, p);
+        desiredLookTarget = transitionFrameCenter.clone().lerp(memoryCameraTarget, p);
+
+        memoryWorldGroup.visible = true;
+        avatarGroup.visible = false;
+      }
+
+      if (memoryTransitionProgress >= 0.82) {
+        framesGroup.visible = false;
+        platformGroup.visible = false;
+        consoleGroup.visible = false;
+      } else {
+        framesGroup.visible = true;
+        platformGroup.visible = true;
+        consoleGroup.visible = true;
+      }
+
+      camera.position.lerp(desiredCameraPos, 0.22);
+      controls.target.lerp(desiredLookTarget, 0.22);
+
+      if (memoryTransitionProgress >= 1) {
+        isMemoryTransitioning = false;
+        previewFrameActive = false;
         memoryWorldGroup.visible = true;
         framesGroup.visible = false;
         platformGroup.visible = false;
         consoleGroup.visible = false;
         avatarGroup.visible = false;
-    
-        controls.target.lerp(memoryCameraTarget, 0.08);
-        camera.position.lerp(memoryCameraPos, 0.08);
+        camera.position.copy(memoryCameraPos);
+        controls.target.copy(memoryCameraTarget);
       }
+    } else if (appState === "memory") {
+      memoryWorldGroup.visible = true;
+      framesGroup.visible = false;
+      platformGroup.visible = false;
+      consoleGroup.visible = false;
+      avatarGroup.visible = false;
+
+      controls.target.lerp(memoryCameraTarget, 0.08);
+      camera.position.lerp(memoryCameraPos, 0.08);
+    } else {
+      memoryWorldGroup.visible = false;
+      framesGroup.visible = true;
+      platformGroup.visible = true;
+      consoleGroup.visible = true;
+
+      if (t > 0.955) {
+        avatarGroup.visible = false;
+      } else if (appState !== "menu") {
+        avatarGroup.visible = true;
+      }
+
+      controls.target.lerp(desiredTarget, 0.06);
+
+      const dir = camera.position.clone().sub(controls.target);
+      if (dir.lengthSq() < 0.0001) {
+        dir.set(0, 0, 1);
+      }
+      dir.normalize();
+
+      const desiredPos = controls.target.clone().add(dir.multiplyScalar(targetDistance));
+      camera.position.lerp(desiredPos, 0.08);
     }
 
     if (framesGroup.visible) {
       for (let i = 0; i < frameMeshes.length; i++) {
         const frame = frameMeshes[i];
         const isPreviewed = previewFrameActive && frame === selectedFrame;
-    
+
+        if (isMemoryTransitioning) {
+          frame.visible = frame === selectedFrame;
+        } else {
+          frame.visible = true;
+        }
+
         if (isPreviewed) {
           frame.position.lerp(previewFrameTarget, 0.12);
-    
+
           frame.rotation.x += (0 - frame.rotation.x) * 0.12;
           frame.rotation.y += (0 - frame.rotation.y) * 0.12;
           frame.rotation.z += (0 - frame.rotation.z) * 0.12;
@@ -1506,11 +1561,11 @@
           const yNorm = frame.userData.baseYNorm + Math.sin(time * 0.45 + frame.userData.floatOffset) * 0.01;
           const radial = Math.sqrt(Math.max(0.0001, 1 - yNorm * yNorm));
           const shellRadius = frame.userData.baseRadius;
-    
+
           frame.position.x = Math.cos(theta) * radial * shellRadius;
           frame.position.y = yNorm * shellRadius + 2.55;
           frame.position.z = Math.sin(theta) * radial * shellRadius;
-    
+
           frame.lookAt(0, 2.55, 0);
         }
       }
@@ -1519,7 +1574,7 @@
     if (memoryWorldGroup.visible) {
       memoryCore.position.y = 1.8 + Math.sin(time * 1.4) * 0.16;
       memoryCore.rotation.y += 0.01;
-    
+
       for (let i = 0; i < memoryPillars.length; i++) {
         memoryPillars[i].rotation.y = Math.sin(time * 0.6 + i) * 0.08;
       }
@@ -1556,7 +1611,7 @@
       lastFpsTime = now;
     }
   }
-
+  
   animate();
 
   window.addEventListener("resize", () => {
