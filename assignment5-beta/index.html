@@ -486,7 +486,13 @@
     clarity: 0.5,
     tone: "neutral",
     edited: false,
-    history: []
+    history: [],
+
+    roomType: "living_room",
+    objects: [],
+    wallColor: 0x2a2330,
+    floorColor: 0x241f2a,
+    accentColor: 0x6d78b8
   }));
 
   let selectedMemoryId = 0;
@@ -1223,7 +1229,7 @@
     updateMemoryFocusTarget();
     updateMemoryEntryTarget();
   
-    controls.enabled = false;
+    controls.enabled = true;
   
     previewFrameActive = true;
     isMemoryTransitioning = true;
@@ -1336,7 +1342,13 @@
       clarity: 0.5,
       tone: "neutral",
       edited: false,
-      history: []
+      history: [],
+
+      roomType: "living_room",
+      objects: [],
+      wallColor: 0x2a2330,
+      floorColor: 0x241f2a,
+      accentColor: 0x6d78b8
     });
   
     saveMemories();
@@ -1390,7 +1402,13 @@
         clarity: 0.5,
         tone: "neutral",
         edited: false,
-        history: []
+        history: [],
+
+        roomType: "living_room",
+        objects: [],
+        wallColor: 0x2a2330,
+        floorColor: 0x241f2a,
+        accentColor: 0x6d78b8
       });
     }
 
@@ -1457,7 +1475,7 @@
 
   enterBtn.addEventListener("click", () => {
     if (!selectedFrame) return;
-  
+    controls.userData.initialized = false;
     beginMemoryTransition();
     setAppState("memory");
   });
@@ -1467,6 +1485,7 @@
     memoryTransitionProgress = 0;
     memoryWorldGroup.visible = false;
     previewFrameActive = !!selectedFrame;
+    controls.userData.initialized = false;
     controls.enabled = true;
     setAppState("hub");
   });
@@ -1515,7 +1534,16 @@
       timeline.style.display = "block";
       timelineLabel.style.display = "block";
       updateHud();
+      
       controls.enabled = true;
+      controls.enableRotate = true;
+      controls.enableZoom = false;
+      controls.enablePan = false;
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.05;
+      controls.minDistance = 1.5;
+      controls.maxDistance = 24;
+      
       scene.fog.color.set(0x111122);
       museumSphere.material.color.set(0x0b0b14);
       scene.fog.density = 0.02;
@@ -1544,7 +1572,16 @@
       timeline.style.display = "block";
       timelineLabel.style.display = "block";
       updateHud();
-      controls.enabled = false;
+    
+      controls.enabled = true;
+      controls.enableRotate = true;
+      controls.enableZoom = true;
+      controls.enablePan = true;
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.08;
+      controls.minDistance = 1.5;
+      controls.maxDistance = 10;
+    
       scene.fog.color.set(0x24182e);
       scene.fog.density = 0.05;
       museumSphere.material.color.set(0x120f1a);
@@ -1718,8 +1755,11 @@
       consoleGroup.visible = false;
       avatarGroup.visible = false;
 
-      controls.target.lerp(memoryCameraTarget, 0.08);
-      camera.position.lerp(memoryCameraPos, 0.08);
+      if (!controls.userData.initialized) {
+        controls.target.copy(memoryCameraTarget);
+        camera.position.copy(memoryCameraPos);
+        controls.userData.initialized = true;
+      }
     } else {
       memoryWorldGroup.visible = false;
       framesGroup.visible = true;
@@ -1777,7 +1817,7 @@
     }
 
     if (memoryWorldGroup.visible) {
-      memoryCore.position.y = 1.72 + Math.sin(time * 1.2) * 0.08;
+      memoryCore.position.y = 1.76 + Math.abs(Math.sin(time * 1.2)) * 0.03;
       memoryCore.rotation.y += 0.01;
     
       memoryWindow.material.emissiveIntensity = 0.26 + (Math.sin(time * 1.1) + 1) * 0.06;
