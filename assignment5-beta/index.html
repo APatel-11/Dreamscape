@@ -486,13 +486,7 @@
     clarity: 0.5,
     tone: "neutral",
     edited: false,
-    history: [],
-
-    roomType: "living_room",
-    objects: [],
-    wallColor: 0x2a2330,
-    floorColor: 0x241f2a,
-    accentColor: 0x6d78b8
+    history: []
   }));
 
   let selectedMemoryId = 0;
@@ -521,7 +515,6 @@
   
   let memoryCameraTarget = new THREE.Vector3(0, 1.72, -1.95);
   let memoryCameraPos = new THREE.Vector3(0, 1.96, 4.2);
-  let memoryControlsInitialized = false;
   
   function saveMemories() {
     const names = memories.map(m => m.name);
@@ -1230,7 +1223,7 @@
     updateMemoryFocusTarget();
     updateMemoryEntryTarget();
   
-    controls.enabled = true;
+    controls.enabled = false;
   
     previewFrameActive = true;
     isMemoryTransitioning = true;
@@ -1343,13 +1336,7 @@
       clarity: 0.5,
       tone: "neutral",
       edited: false,
-      history: [],
-
-      roomType: "living_room",
-      objects: [],
-      wallColor: 0x2a2330,
-      floorColor: 0x241f2a,
-      accentColor: 0x6d78b8
+      history: []
     });
   
     saveMemories();
@@ -1403,13 +1390,7 @@
         clarity: 0.5,
         tone: "neutral",
         edited: false,
-        history: [],
-
-        roomType: "living_room",
-        objects: [],
-        wallColor: 0x2a2330,
-        floorColor: 0x241f2a,
-        accentColor: 0x6d78b8
+        history: []
       });
     }
 
@@ -1476,7 +1457,7 @@
 
   enterBtn.addEventListener("click", () => {
     if (!selectedFrame) return;
-    memoryControlsInitialized = false;
+  
     beginMemoryTransition();
     setAppState("memory");
   });
@@ -1486,7 +1467,6 @@
     memoryTransitionProgress = 0;
     memoryWorldGroup.visible = false;
     previewFrameActive = !!selectedFrame;
-    memoryControlsInitialized = false;
     controls.enabled = true;
     setAppState("hub");
   });
@@ -1535,16 +1515,7 @@
       timeline.style.display = "block";
       timelineLabel.style.display = "block";
       updateHud();
-      
       controls.enabled = true;
-      controls.enableRotate = true;
-      controls.enableZoom = false;
-      controls.enablePan = false;
-      controls.enableDamping = true;
-      controls.dampingFactor = 0.05;
-      controls.minDistance = 1.5;
-      controls.maxDistance = 24;
-      
       scene.fog.color.set(0x111122);
       museumSphere.material.color.set(0x0b0b14);
       scene.fog.density = 0.02;
@@ -1573,16 +1544,7 @@
       timeline.style.display = "block";
       timelineLabel.style.display = "block";
       updateHud();
-    
-      controls.enabled = true;
-      controls.enableRotate = true;
-      controls.enableZoom = true;
-      controls.enablePan = true;
-      controls.enableDamping = true;
-      controls.dampingFactor = 0.08;
-      controls.minDistance = 1.5;
-      controls.maxDistance = 10;
-    
+      controls.enabled = false;
       scene.fog.color.set(0x24182e);
       scene.fog.density = 0.05;
       museumSphere.material.color.set(0x120f1a);
@@ -1756,11 +1718,8 @@
       consoleGroup.visible = false;
       avatarGroup.visible = false;
 
-      if (!memoryControlsInitialized) {
-        controls.target.copy(memoryCameraTarget);
-        camera.position.copy(memoryCameraPos);
-        memoryControlsInitialized = true;
-      }
+      controls.target.lerp(memoryCameraTarget, 0.08);
+      camera.position.lerp(memoryCameraPos, 0.08);
     } else {
       memoryWorldGroup.visible = false;
       framesGroup.visible = true;
@@ -1818,7 +1777,7 @@
     }
 
     if (memoryWorldGroup.visible) {
-      memoryCore.position.y = 1.76 + Math.abs(Math.sin(time * 1.2)) * 0.03;
+      memoryCore.position.y = 1.72 + Math.sin(time * 1.2) * 0.08;
       memoryCore.rotation.y += 0.01;
     
       memoryWindow.material.emissiveIntensity = 0.26 + (Math.sin(time * 1.1) + 1) * 0.06;
