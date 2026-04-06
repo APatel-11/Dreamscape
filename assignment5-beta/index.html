@@ -486,14 +486,19 @@
   
   let isMemoryTransitioning = false;
   let memoryTransitionProgress = 0;
-
+  
   let transitionPhase1StartPos = new THREE.Vector3();
   let transitionPhase1EndPos = new THREE.Vector3();
-
+  
   let transitionEyePos = new THREE.Vector3();
   let transitionFrameCenter = new THREE.Vector3();
   let transitionFramePassThroughPos = new THREE.Vector3();
-
+  
+  let transitionCurveP0 = new THREE.Vector3();
+  let transitionCurveP1 = new THREE.Vector3();
+  let transitionCurveP2 = new THREE.Vector3();
+  let transitionCurveP3 = new THREE.Vector3();
+  
   let memoryCameraTarget = new THREE.Vector3(0, 1.72, -1.95);
   let memoryCameraPos = new THREE.Vector3(0, 1.96, 4.2);
   
@@ -1090,40 +1095,59 @@
 
   function beginMemoryTransition() {
     if (!selectedFrame) return;
-
+  
     updatePreviewFrameTarget();
     updateMemoryFocusTarget();
     updateMemoryEntryTarget();
-
+  
     controls.enabled = false;
-
+  
     previewFrameActive = true;
     isMemoryTransitioning = true;
     memoryTransitionProgress = 0;
-
-    memoryWorldGroup.visible = false;
+  
+    memoryWorldGroup.visible = true;
     framesGroup.visible = true;
     platformGroup.visible = true;
     avatarGroup.visible = true;
     consoleGroup.visible = true;
-
+  
     transitionPhase1StartPos.copy(camera.position);
-
+  
     transitionPhase1EndPos.copy(
       previewFrameTarget.clone().add(new THREE.Vector3(0, 0.18, 3.0))
     );
-
+  
     transitionEyePos.copy(
       previewFrameTarget.clone().add(new THREE.Vector3(0, 0.05, 1.65))
     );
-
+  
     transitionFrameCenter.copy(
       previewFrameTarget.clone().add(new THREE.Vector3(0, 0.05, 0.0))
     );
-
+  
     transitionFramePassThroughPos.copy(
       previewFrameTarget.clone().add(new THREE.Vector3(0, 0.04, -0.92))
     );
+  
+    transitionCurveP0.copy(transitionPhase1EndPos);
+    transitionCurveP1.copy(
+      transitionEyePos.clone().lerp(
+        transitionFrameCenter.clone().add(new THREE.Vector3(0, 0.02, 0.25)),
+        0.45
+      )
+    );
+    transitionCurveP2.copy(
+      transitionFramePassThroughPos.clone().add(new THREE.Vector3(0, 0.02, 0.7))
+    );
+    transitionCurveP3.copy(memoryCameraPos);
+  
+    memoryWorldGroup.traverse((obj) => {
+      if (obj.material && "transparent" in obj.material) {
+        obj.material.transparent = true;
+        obj.material.opacity = 0;
+      }
+    });
   }
 
   function updatePreviewFrameTarget() {
@@ -1136,10 +1160,18 @@
       : 1 - Math.pow(-2 * x + 2, 3) / 2;
   }
   
-  function getQuadraticPoint(start, control, end, t) {
-    const a = start.clone().lerp(control, t);
-    const b = control.clone().lerp(end, t);
-    return a.lerp(b, t);
+  function getCubicPoint(p0, p1, p2, p3, t) {
+    const u = 1 - t;
+    const tt = t * t;
+    const uu = u * u;
+    const uuu = uu * u;
+    const ttt = tt * t;
+  
+    return new THREE.Vector3()
+      .add(p0.clone().multiplyScalar(uuu))
+      .add(p1.clone().multiplyScalar(3 * uu * t))
+      .add(p2.clone().multiplyScalar(3 * u * tt))
+      .add(p3.clone().multiplyScalar(ttt));
   }
   
   function saveSelectedMemoryName() {
@@ -1438,71 +1470,97 @@
     }
 
     if (appState === "memory" && isMemoryTransitioning) {
-      memoryTransitionProgress = Math.min(1, memoryTransitionProgress + 0.016);
-
+      memoryTransitionProgress = Math.min(1, memoryTransitionProgress + 0.014);
+    
       let desiredCameraPos;
       let desiredLookTarget;
-
-      if (memoryTransitionProgress < 0.38) {
-        const p = easeInOutCubic(memoryTransitionProgress / 0.38);
-
+    
+      if (memoryTransitionProgress < 0.34) {
+        const p = easeInOutCubic(memoryTransitionProgress / 0.34);
+    
         desiredCameraPos = transitionPhase1StartPos.clone().lerp(transitionPhase1EndPos, p);
         desiredLookTarget = transitionFrameCenter.clone();
-
+    
         avatarGroup.visible = true;
-        memoryWorldGroup.visible = false;
-      } else if (memoryTransitionProgress < 0.78) {
-        const p = easeInOutCubic((memoryTransitionProgress - 0.38) / 0.40);
-
-        desiredCameraPos = getQuadraticPoint(
-          transitionPhase1EndPos,
-          transitionEyePos,
-          transitionFramePassThroughPos,
-          p
-        );
-
-        desiredLookTarget = transitionFrameCenter.clone();
-
-        if (p < 0.55) {
-          avatarGroup.visible = true;
-        } else {
-          avatarGroup.visible = false;
-        }
-
-        if (memoryTransitionProgress >= 0.68) {
-          memoryWorldGroup.visible = true;
-        }
-      } else {
-        const p = easeInOutCubic((memoryTransitionProgress - 0.78) / 0.22);
-
-        desiredCameraPos = transitionFramePassThroughPos.clone().lerp(memoryCameraPos, p);
-        desiredLookTarget = transitionFrameCenter.clone().lerp(memoryCameraTarget, p);
-
-        memoryWorldGroup.visible = true;
-        avatarGroup.visible = false;
-      }
-
-      if (memoryTransitionProgress >= 0.82) {
-        framesGroup.visible = false;
-        platformGroup.visible = false;
-        consoleGroup.visible = false;
-      } else {
         framesGroup.visible = true;
         platformGroup.visible = true;
         consoleGroup.visible = true;
+      } else {
+        const p = easeInOutCubic((memoryTransitionProgress - 0.34) / 0.66);
+    
+        desiredCameraPos = getCubicPoint(
+          transitionCurveP0,
+          transitionCurveP1,
+          transitionCurveP2,
+          transitionCurveP3,
+          p
+        );
+    
+        desiredLookTarget = transitionFrameCenter.clone().lerp(memoryCameraTarget, p);
+    
+        avatarGroup.visible = p < 0.28;
+        framesGroup.visible = p < 0.88;
+        platformGroup.visible = p < 0.88;
+        consoleGroup.visible = p < 0.88;
+    
+        const worldOpacity = Math.min(1, Math.max(0, (p - 0.18) / 0.52));
+        memoryWorldGroup.visible = true;
+        memoryWorldGroup.traverse((obj) => {
+          if (obj.material && "opacity" in obj.material) {
+            obj.material.transparent = true;
+            obj.material.opacity = worldOpacity;
+          }
+        });
+    
+        if (selectedFrame) {
+          const frameFade = Math.max(0, 1 - (p - 0.12) / 0.46);
+    
+          for (const bar of selectedFrame.userData.borderBars) {
+            bar.material.transparent = true;
+            bar.material.opacity = frameFade;
+          }
+    
+          selectedFrame.userData.backing.material.transparent = true;
+          selectedFrame.userData.backing.material.opacity = frameFade;
+    
+          selectedFrame.userData.inner.material.transparent = true;
+          selectedFrame.userData.inner.material.opacity = Math.max(0, frameFade * 0.92);
+        }
       }
-
-      camera.position.lerp(desiredCameraPos, 0.22);
-      controls.target.lerp(desiredLookTarget, 0.22);
-
+    
+      camera.position.copy(desiredCameraPos);
+      controls.target.copy(desiredLookTarget);
+    
       if (memoryTransitionProgress >= 1) {
         isMemoryTransitioning = false;
         previewFrameActive = false;
+    
         memoryWorldGroup.visible = true;
+        memoryWorldGroup.traverse((obj) => {
+          if (obj.material && "opacity" in obj.material) {
+            obj.material.transparent = true;
+            obj.material.opacity = 1;
+          }
+        });
+    
+        if (selectedFrame) {
+          for (const bar of selectedFrame.userData.borderBars) {
+            bar.material.opacity = 1;
+            bar.material.transparent = false;
+          }
+    
+          selectedFrame.userData.backing.material.opacity = 1;
+          selectedFrame.userData.backing.material.transparent = false;
+    
+          selectedFrame.userData.inner.material.opacity = 1;
+          selectedFrame.userData.inner.material.transparent = false;
+        }
+    
         framesGroup.visible = false;
         platformGroup.visible = false;
         consoleGroup.visible = false;
         avatarGroup.visible = false;
+    
         camera.position.copy(memoryCameraPos);
         controls.target.copy(memoryCameraTarget);
       }
