@@ -521,6 +521,7 @@
   
   let memoryCameraTarget = new THREE.Vector3(0, 1.72, -1.95);
   let memoryCameraPos = new THREE.Vector3(0, 1.96, 4.2);
+  let memoryControlsInitialized = false;
   
   function saveMemories() {
     const names = memories.map(m => m.name);
@@ -1475,7 +1476,7 @@
 
   enterBtn.addEventListener("click", () => {
     if (!selectedFrame) return;
-    controls.userData.initialized = false;
+    memoryControlsInitialized = false;
     beginMemoryTransition();
     setAppState("memory");
   });
@@ -1485,7 +1486,7 @@
     memoryTransitionProgress = 0;
     memoryWorldGroup.visible = false;
     previewFrameActive = !!selectedFrame;
-    controls.userData.initialized = false;
+    memoryControlsInitialized = false;
     controls.enabled = true;
     setAppState("hub");
   });
@@ -1755,10 +1756,10 @@
       consoleGroup.visible = false;
       avatarGroup.visible = false;
 
-      if (!controls.userData.initialized) {
+      if (!memoryControlsInitialized) {
         controls.target.copy(memoryCameraTarget);
         camera.position.copy(memoryCameraPos);
-        controls.userData.initialized = true;
+        memoryControlsInitialized = true;
       }
     } else {
       memoryWorldGroup.visible = false;
