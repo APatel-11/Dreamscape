@@ -515,6 +515,9 @@
   
   let memoryCameraTarget = new THREE.Vector3(0, 1.72, -1.95);
   let memoryCameraPos = new THREE.Vector3(0, 1.96, 4.2);
+
+  let memoryControlInitialized = false;
+  let memoryObjectFloatEnabled = false;
   
   function saveMemories() {
     const names = memories.map(m => m.name);
@@ -1046,12 +1049,50 @@
   tableLeg4.position.set(1.1, 0.58, -2.6);
   memoryWorldGroup.add(tableLeg4);
   
-  const memoryCore = new THREE.Mesh(
-    new THREE.SphereGeometry(0.52, 32, 32),
-    memoryAccentMat
+  const photoFrameOuter = new THREE.Mesh(
+    new THREE.BoxGeometry(0.9, 0.65, 0.06),
+    new THREE.MeshStandardMaterial({
+      color: 0x5c4638,
+      roughness: 0.82,
+      metalness: 0.08
+    })
   );
-  memoryCore.position.set(0, 1.72, -2.2);
-  memoryWorldGroup.add(memoryCore);
+  photoFrameOuter.position.set(0, 1.58, -2.22);
+  memoryWorldGroup.add(photoFrameOuter);
+  
+  const photoFrameInner = new THREE.Mesh(
+    new THREE.PlaneGeometry(0.68, 0.46),
+    new THREE.MeshStandardMaterial({
+      color: 0xb8c7e6,
+      emissive: 0x25304d,
+      emissiveIntensity: 0.12,
+      roughness: 0.7,
+      metalness: 0.02
+    })
+  );
+  photoFrameInner.position.set(0, 1.58, -2.18);
+  memoryWorldGroup.add(photoFrameInner);
+  
+  const photoFrameStand = new THREE.Mesh(
+    new THREE.BoxGeometry(0.12, 0.28, 0.12),
+    memoryTrimMat
+  );
+  photoFrameStand.position.set(0, 1.34, -2.34);
+  photoFrameStand.rotation.x = -0.28;
+  memoryWorldGroup.add(photoFrameStand);
+  
+  const keepsakeBox = new THREE.Mesh(
+    new THREE.BoxGeometry(0.5, 0.16, 0.32),
+    new THREE.MeshStandardMaterial({
+      color: 0x6d78b8,
+      emissive: 0x232d63,
+      emissiveIntensity: 0.18,
+      roughness: 0.58,
+      metalness: 0.1
+    })
+  );
+  keepsakeBox.position.set(0.82, 1.33, -2.12);
+  memoryWorldGroup.add(keepsakeBox);
   
   const leftCabinet = new THREE.Mesh(
     new THREE.BoxGeometry(1.4, 2.2, 0.8),
@@ -1304,6 +1345,41 @@
       .add(p2.clone().multiplyScalar(3 * u * tt))
       .add(p3.clone().multiplyScalar(ttt));
   }
+
+  function configureMemoryControls() {
+    controls.enabled = true;
+    controls.enablePan = true;
+    controls.enableZoom = true;
+    controls.enableRotate = true;
+    controls.enableDamping = true;
+  
+    controls.target.copy(memoryCameraTarget);
+  
+    controls.minDistance = 1.8;
+    controls.maxDistance = 9.5;
+  
+    controls.minPolarAngle = 0.95;
+    controls.maxPolarAngle = Math.PI / 2 + 0.22;
+  
+    memoryControlsInitialized = true;
+    controls.update();
+  }
+  
+  function configureHubControls() {
+    controls.enabled = true;
+    controls.enablePan = false;
+    controls.enableZoom = false;
+    controls.enableRotate = true;
+    controls.enableDamping = true;
+  
+    controls.minDistance = 1.5;
+    controls.maxDistance = 24;
+    controls.minPolarAngle = 0;
+    controls.maxPolarAngle = Math.PI;
+  
+    memoryControlsInitialized = false;
+    controls.update();
+  }
   
   function saveSelectedMemoryName() {
     const memory = memories[selectedMemoryId];
@@ -1515,7 +1591,7 @@
       timeline.style.display = "block";
       timelineLabel.style.display = "block";
       updateHud();
-      controls.enabled = true;
+      configureHubControls();
       scene.fog.color.set(0x111122);
       museumSphere.material.color.set(0x0b0b14);
       scene.fog.density = 0.02;
@@ -1545,6 +1621,8 @@
       timelineLabel.style.display = "block";
       updateHud();
       controls.enabled = false;
+      memoryControlsInitialized = false;
+      
       scene.fog.color.set(0x24182e);
       scene.fog.density = 0.05;
       museumSphere.material.color.set(0x120f1a);
@@ -1709,7 +1787,7 @@
         avatarGroup.visible = false;
     
         camera.position.copy(memoryCameraPos);
-        controls.target.copy(memoryCameraTarget);
+        configureMemoryControls();
       }
     } else if (appState === "memory") {
       memoryWorldGroup.visible = true;
@@ -1718,8 +1796,10 @@
       consoleGroup.visible = false;
       avatarGroup.visible = false;
 
-      controls.target.lerp(memoryCameraTarget, 0.08);
-      camera.position.lerp(memoryCameraPos, 0.08);
+      if (!memoryControlsInitialized) {
+        camera.position.copy(memoryCameraPos);
+        configureMemoryControls();
+      }
     } else {
       memoryWorldGroup.visible = false;
       framesGroup.visible = true;
@@ -1777,9 +1857,6 @@
     }
 
     if (memoryWorldGroup.visible) {
-      memoryCore.position.y = 1.72 + Math.sin(time * 1.2) * 0.08;
-      memoryCore.rotation.y += 0.01;
-    
       memoryWindow.material.emissiveIntensity = 0.26 + (Math.sin(time * 1.1) + 1) * 0.06;
     
       for (let i = 0; i < memoryFramesInside.length; i++) {
