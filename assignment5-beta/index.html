@@ -517,7 +517,7 @@
   let memoryCameraBasePos = new THREE.Vector3(0, 1.96, 4.2);
   let memoryCameraPos = memoryCameraBasePos.clone();
 
-  let memoryControlInitialized = false;
+  let memoryControlsInitialized = false;
   let memoryObjectFloatEnabled = false;
   
   function saveMemories() {
@@ -1145,7 +1145,7 @@
     memoryTrimMat
   );
   rightCabinet.position.set(4.95, 0.8, -4.2);
-  rightCabinet,rotation.y = -0.12
+  rightCabinet.rotation.y = -0.12;
   memoryWorldGroup.add(rightCabinet);
   
   const bench = new THREE.Mesh(
