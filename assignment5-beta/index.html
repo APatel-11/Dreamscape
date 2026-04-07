@@ -445,7 +445,7 @@
   consoleLight.position.set(0, 3.25, -1.75);
   scene.add(consoleLight);
 
-  const ambient = new THREE.AmbientLight(0xffffff, 0.16);
+  const ambient = new THREE.AmbientLight(0xffffff, 0.11);
   scene.add(ambient);
 
   const memoryWarmLight = new THREE.PointLight(0xffd6b3, 0.9, 18);
@@ -971,15 +971,15 @@
   memoryWorldGroup.add(memoryFloor);
 
   const areaRug = new THREE.Mesh(
-    new THREE.PlaneGeometry(6.2, 3.8),
+    new THREE.PlaneGeometry(5.8, 3.4),
     new THREE.MeshStandardMaterial({
-      color: 0x6a5a6f,
-      roughness: 0.98,
+      color: 0x4f434f,
+      roughness: 1.0,
       metalness: 0.0
     })
   );
   areaRug.rotation.x = -Math.PI / 2;
-  areaRug.position.set(0.1, 0.01, -1.15);
+  areaRug.position.set(0.25, 0.012, -1.2);
   memoryWorldGroup.add(areaRug);
   
   const backWall = new THREE.Mesh(
@@ -1184,14 +1184,15 @@
   memoryWorldGroup.add(leftCabinet);
 
   const wallShelf = new THREE.Mesh(
-    new THREE.BoxGeometry(2.0, 0.12, 0.38),
+    new THREE.BoxGeometry(1.9, 0.12, 0.32),
     new THREE.MeshStandardMaterial({
-      color: 0x5f4b42,
-      roughness: 0.86,
+      color: 0x5a473f,
+      roughness: 0.9,
       metalness: 0.02
     })
   );
-  wallShelf.position.set(-4.2, 2.35, -2.6);
+  wallShelf.position.set(-6.15, 2.2, -1.15);
+  wallShelf.rotation.y = Math.PI / 2;
   memoryWorldGroup.add(wallShelf);
   
   const book1 = new THREE.Mesh(
@@ -1202,7 +1203,8 @@
       metalness: 0.04
     })
   );
-  book1.position.set(-4.9, 2.67, -2.58);
+  book1.position.set(-6.12, 2.52, -1.62);
+  book1.rotation.y = Math.PI / 2;
   memoryWorldGroup.add(book1);
   
   const book2 = new THREE.Mesh(
@@ -1213,8 +1215,9 @@
       metalness: 0.04
     })
   );
-  book2.position.set(-4.68, 2.63, -2.56);
-  book2.rotation.z = 0.06;
+  book2.position.set(-6.12, 2.49, -1.38);
+  book2.rotation.y = Math.PI / 2;
+  book2.rotation.z = 0.08;
   memoryWorldGroup.add(book2);
   
   const book3 = new THREE.Mesh(
@@ -1225,7 +1228,8 @@
       metalness: 0.04
     })
   );
-  book3.position.set(-4.42, 2.71, -2.58);
+  book3.position.set(-6.12, 2.56, -1.1);
+  book3.rotation.y = Math.PI / 2;
   memoryWorldGroup.add(book3);
   
   const rightCabinet = new THREE.Mesh(
