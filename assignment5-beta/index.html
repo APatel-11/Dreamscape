@@ -514,7 +514,8 @@
   let transitionCurveP3 = new THREE.Vector3();
   
   let memoryCameraTarget = new THREE.Vector3(0, 1.72, -1.95);
-  let memoryCameraPos = new THREE.Vector3(0, 1.96, 4.2);
+  let memoryCameraBasePos = new THREE.Vector3(0, 1.96, 4.2);
+  let memoryCameraPos = memoryCameraBasePos.clone();
 
   let memoryControlInitialized = false;
   let memoryObjectFloatEnabled = false;
@@ -1004,31 +1005,69 @@
   ceilingPanel.position.set(0, 5.95, 0);
   memoryWorldGroup.add(ceilingPanel);
   
-  const backTrim = new THREE.Mesh(
-    new THREE.BoxGeometry(8.8, 3.4, 0.12),
+  const windowOuterFrame = new THREE.Mesh(
+    new THREE.BoxGeometry(9.1, 3.7, 0.18),
     memoryTrimMat
   );
-  backTrim.position.set(0, 2.7, -5.92);
-  memoryWorldGroup.add(backTrim);
+  windowOuterFrame.position.set(0, 2.78, -5.93);
+  memoryWorldGroup.add(windowOuterFrame);
   
-  const memoryWindow = new THREE.Mesh(
-    new THREE.PlaneGeometry(8.1, 2.8),
+  const windowInnerBacking = new THREE.Mesh(
+    new THREE.PlaneGeometry(8.15, 2.75),
     new THREE.MeshStandardMaterial({
-      color: 0x4f5fa8,
-      emissive: 0x2b3d87,
-      emissiveIntensity: 0.32,
-      roughness: 0.35,
-      metalness: 0.08,
-      transparent: true,
-      opacity: 0.9
+      color: 0x1f2740,
+      emissive: 0x273b72,
+      emissiveIntensity: 0.22,
+      roughness: 0.55,
+      metalness: 0.04
     })
   );
-  memoryWindow.position.set(0, 2.72, -5.86);
+  windowInnerBacking.position.set(0, 2.78, -5.84);
+  memoryWorldGroup.add(windowInnerBacking);
+  
+  const memoryWindow = new THREE.Mesh(
+    new THREE.PlaneGeometry(7.85, 2.45),
+    new THREE.MeshStandardMaterial({
+      color: 0x9bc4ff,
+      emissive: 0x4e74c9,
+      emissiveIntensity: 0.20,
+      roughness: 0.18,
+      metalness: 0.08,
+      transparent: true,
+      opacity: 0.78
+    })
+  );
+  memoryWindow.position.set(0, 2.78, -5.80);
   memoryWorldGroup.add(memoryWindow);
   
-  const tableBase = new THREE.Mesh(
-    new THREE.BoxGeometry(2.8, 0.18, 1.2),
+  const windowMullionV = new THREE.Mesh(
+    new THREE.BoxGeometry(0.12, 2.55, 0.08),
     memoryTrimMat
+  );
+  windowMullionV.position.set(0, 2.78, -5.77);
+  memoryWorldGroup.add(windowMullionV);
+  
+  const windowMullionH = new THREE.Mesh(
+    new THREE.BoxGeometry(7.95, 0.12, 0.08),
+    memoryTrimMat
+  );
+  windowMullionH.position.set(0, 2.78, -5.77);
+  memoryWorldGroup.add(windowMullionH);
+  
+  const windowSill = new THREE.Mesh(
+    new THREE.BoxGeometry(8.3, 0.14, 0.35),
+    memoryTrimMat
+  );
+  windowSill.position.set(0, 1.48, -5.67);
+  memoryWorldGroup.add(windowSill);
+  
+  const tableBase = new THREE.Mesh(
+    new THREE.BoxGeometry(2.9, 0.16, 1.25),
+    new THREE.MeshStandardMaterial({
+      color: 0x5d4a3f,
+      roughness: 0.86,
+      metalness: 0.02
+    })
   );
   tableBase.position.set(0, 1.15, -2.2);
   memoryWorldGroup.add(tableBase);
@@ -1105,15 +1144,56 @@
     new THREE.BoxGeometry(1.8, 1.6, 0.9),
     memoryTrimMat
   );
-  rightCabinet.position.set(4.6, 0.8, -4.6);
+  rightCabinet.position.set(4.95, 0.8, -4.2);
+  rightCabinet,rotation.y = -0.12
   memoryWorldGroup.add(rightCabinet);
   
   const bench = new THREE.Mesh(
     new THREE.BoxGeometry(3.2, 0.42, 0.9),
     memoryTrimMat
   );
-  bench.position.set(0, 0.32, 3.4);
+  bench.position.set(0.8, 0.32, 3.15);
+  bench.rotation.y = 0.08;
   memoryWorldGroup.add(bench);
+
+  const loungeChairSeat = new THREE.Mesh(
+    new THREE.BoxGeometry(1.15, 0.22, 1.05),
+    new THREE.MeshStandardMaterial({
+      color: 0x4a4250,
+      roughness: 0.9,
+      metalness: 0.03
+    })
+  );
+  loungeChairSeat.position.set(-3.9, 0.55, 1.7);
+  memoryWorldGroup.add(loungeChairSeat);
+  
+  const loungeChairBack = new THREE.Mesh(
+    new THREE.BoxGeometry(1.15, 1.0, 0.18),
+    new THREE.MeshStandardMaterial({
+      color: 0x544b5d,
+      roughness: 0.88,
+      metalness: 0.03
+    })
+  );
+  loungeChairBack.position.set(-3.9, 1.0, 1.18);
+  loungeChairBack.rotation.x = -0.18;
+  memoryWorldGroup.add(loungeChairBack);
+  
+  const chairLegA = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.5, 0.08), memoryTrimMat);
+  chairLegA.position.set(-4.3, 0.25, 1.28);
+  memoryWorldGroup.add(chairLegA);
+  
+  const chairLegB = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.5, 0.08), memoryTrimMat);
+  chairLegB.position.set(-3.5, 0.25, 1.28);
+  memoryWorldGroup.add(chairLegB);
+  
+  const chairLegC = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.5, 0.08), memoryTrimMat);
+  chairLegC.position.set(-4.3, 0.25, 2.1);
+  memoryWorldGroup.add(chairLegC);
+  
+  const chairLegD = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.5, 0.08), memoryTrimMat);
+  chairLegD.position.set(-3.5, 0.25, 2.1);
+  memoryWorldGroup.add(chairLegD);
   
   const memoryFramesInside = [];
   for (let i = 0; i < 3; i++) {
@@ -1659,6 +1739,9 @@
     const t = Number(timeline.value) / 100;
     const time = performance.now() * 0.001;
 
+    const memoryZoomZ = THREE.MathUtils.lerp(5.2, 2.6, t);
+    memoryCameraPos.set(0, 1.96, memoryZoomZ);
+
     let desiredTarget = hubTarget;
     let targetDistance = 18.5 - t * 16.6;
 
@@ -1857,7 +1940,7 @@
     }
 
     if (memoryWorldGroup.visible) {
-      memoryWindow.material.emissiveIntensity = 0.26 + (Math.sin(time * 1.1) + 1) * 0.06;
+      memoryWindow.material.emissiveIntensity = 0.16 + (Math.sin(time * 0.75) + 1) * 0.035;
     
       for (let i = 0; i < memoryFramesInside.length; i++) {
         memoryFramesInside[i].rotation.z = Math.sin(time * 0.5 + i * 0.8) * 0.01;
