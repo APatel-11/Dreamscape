@@ -969,6 +969,18 @@
   memoryFloor.rotation.x = -Math.PI / 2;
   memoryFloor.position.set(0, 0, 0);
   memoryWorldGroup.add(memoryFloor);
+
+  const areaRug = new THREE.Mesh(
+    new THREE.PlaneGeometry(6.2, 3.8),
+    new THREE.MeshStandardMaterial({
+      color: 0x6a5a6f,
+      roughness: 0.98,
+      metalness: 0.0
+    })
+  );
+  areaRug.rotation.x = -Math.PI / 2;
+  areaRug.position.set(0.1, 0.01, -1.15);
+  memoryWorldGroup.add(areaRug);
   
   const backWall = new THREE.Mesh(
     new THREE.PlaneGeometry(14, 6),
@@ -992,6 +1004,37 @@
   rightWall.rotation.y = -Math.PI / 2;
   rightWall.position.set(7, 3, 0);
   memoryWorldGroup.add(rightWall);
+
+  const memoryDoor = new THREE.Mesh(
+    new THREE.BoxGeometry(1.25, 2.55, 0.12),
+    new THREE.MeshStandardMaterial({
+      color: 0x4b3b34,
+      roughness: 0.9,
+      metalness: 0.03
+    })
+  );
+  memoryDoor.position.set(6.92, 1.28, 2.15);
+  memoryDoor.rotation.y = -Math.PI / 2;
+  memoryWorldGroup.add(memoryDoor);
+  
+  const memoryDoorFrame = new THREE.Mesh(
+    new THREE.BoxGeometry(1.45, 2.75, 0.08),
+    memoryTrimMat
+  );
+  memoryDoorFrame.position.set(6.88, 1.38, 2.15);
+  memoryDoorFrame.rotation.y = -Math.PI / 2;
+  memoryWorldGroup.add(memoryDoorFrame);
+  
+  const memoryDoorKnob = new THREE.Mesh(
+    new THREE.SphereGeometry(0.05, 16, 16),
+    new THREE.MeshStandardMaterial({
+      color: 0xc9b37f,
+      roughness: 0.35,
+      metalness: 0.75
+    })
+  );
+  memoryDoorKnob.position.set(6.83, 1.25, 1.72);
+  memoryWorldGroup.add(memoryDoorKnob);
   
   const ceilingPanel = new THREE.Mesh(
     new THREE.PlaneGeometry(14, 12),
@@ -1137,14 +1180,59 @@
     new THREE.BoxGeometry(1.4, 2.2, 0.8),
     memoryTrimMat
   );
-  leftCabinet.position.set(-4.7, 1.1, -4.8);
+  leftCabinet.position.set(-5.2, 1.1, -4.45);
   memoryWorldGroup.add(leftCabinet);
+
+  const wallShelf = new THREE.Mesh(
+    new THREE.BoxGeometry(2.0, 0.12, 0.38),
+    new THREE.MeshStandardMaterial({
+      color: 0x5f4b42,
+      roughness: 0.86,
+      metalness: 0.02
+    })
+  );
+  wallShelf.position.set(-4.2, 2.35, -2.6);
+  memoryWorldGroup.add(wallShelf);
+  
+  const book1 = new THREE.Mesh(
+    new THREE.BoxGeometry(0.18, 0.62, 0.24),
+    new THREE.MeshStandardMaterial({
+      color: 0x8477b9,
+      roughness: 0.82,
+      metalness: 0.04
+    })
+  );
+  book1.position.set(-4.9, 2.67, -2.58);
+  memoryWorldGroup.add(book1);
+  
+  const book2 = new THREE.Mesh(
+    new THREE.BoxGeometry(0.15, 0.54, 0.24),
+    new THREE.MeshStandardMaterial({
+      color: 0xb07a6e,
+      roughness: 0.82,
+      metalness: 0.04
+    })
+  );
+  book2.position.set(-4.68, 2.63, -2.56);
+  book2.rotation.z = 0.06;
+  memoryWorldGroup.add(book2);
+  
+  const book3 = new THREE.Mesh(
+    new THREE.BoxGeometry(0.2, 0.7, 0.24),
+    new THREE.MeshStandardMaterial({
+      color: 0x6d89b8,
+      roughness: 0.82,
+      metalness: 0.04
+    })
+  );
+  book3.position.set(-4.42, 2.71, -2.58);
+  memoryWorldGroup.add(book3);
   
   const rightCabinet = new THREE.Mesh(
     new THREE.BoxGeometry(1.8, 1.6, 0.9),
     memoryTrimMat
   );
-  rightCabinet.position.set(4.95, 0.8, -4.2);
+  rightCabinet.position.set(5.45, 0.8, -3.95);
   rightCabinet.rotation.y = -0.12;
   memoryWorldGroup.add(rightCabinet);
   
@@ -1152,7 +1240,7 @@
     new THREE.BoxGeometry(3.2, 0.42, 0.9),
     memoryTrimMat
   );
-  bench.position.set(0.8, 0.32, 3.15);
+  bench.position.set(1.55, 0.32, 3.45);
   bench.rotation.y = 0.08;
   memoryWorldGroup.add(bench);
 
@@ -1205,6 +1293,32 @@
     memoryWorldGroup.add(artFrame);
     memoryFramesInside.push(artFrame);
   }
+
+  const sideArtworkFrame = new THREE.Mesh(
+    new THREE.BoxGeometry(1.35, 1.0, 0.08),
+    new THREE.MeshStandardMaterial({
+      color: 0x5b493e,
+      roughness: 0.82,
+      metalness: 0.05
+    })
+  );
+  sideArtworkFrame.position.set(-6.15, 2.55, -1.15);
+  sideArtworkFrame.rotation.y = Math.PI / 2;
+  memoryWorldGroup.add(sideArtworkFrame);
+  
+  const sideArtworkInner = new THREE.Mesh(
+    new THREE.PlaneGeometry(1.0, 0.72),
+    new THREE.MeshStandardMaterial({
+      color: 0x8d9ac5,
+      emissive: 0x1f2647,
+      emissiveIntensity: 0.08,
+      roughness: 0.72,
+      metalness: 0.02
+    })
+  );
+  sideArtworkInner.position.set(-6.07, 2.55, -1.15);
+  sideArtworkInner.rotation.y = Math.PI / 2;
+  memoryWorldGroup.add(sideArtworkInner);
   
   const hud = document.getElementById("hud");
   const timeline = document.getElementById("timeline");
