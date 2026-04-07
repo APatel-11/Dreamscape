@@ -973,7 +973,7 @@
   const areaRug = new THREE.Mesh(
     new THREE.PlaneGeometry(5.8, 3.4),
     new THREE.MeshStandardMaterial({
-      color: 0x4f434f,
+      color: 0x584b58,
       roughness: 1.0,
       metalness: 0.0
     })
@@ -1176,12 +1176,53 @@
   keepsakeBox.position.set(0.82, 1.33, -2.12);
   memoryWorldGroup.add(keepsakeBox);
   
-  const leftCabinet = new THREE.Mesh(
+  const leftCabinetGroup = new THREE.Group();
+
+  const leftCabinetBody = new THREE.Mesh(
     new THREE.BoxGeometry(1.4, 2.2, 0.8),
-    memoryTrimMat
+    new THREE.MeshStandardMaterial({
+      color: 0x4a4250,
+      roughness: 0.9,
+      metalness: 0.03
+    })
   );
-  leftCabinet.position.set(-5.2, 1.1, -4.45);
-  memoryWorldGroup.add(leftCabinet);
+  leftCabinetGroup.add(leftCabinetBody);
+  
+  const leftCabinetDoorLine = new THREE.Mesh(
+    new THREE.BoxGeometry(0.04, 1.85, 0.03),
+    new THREE.MeshStandardMaterial({
+      color: 0x2d2731,
+      roughness: 0.95,
+      metalness: 0.02
+    })
+  );
+  leftCabinetDoorLine.position.set(0, 0.05, 0.415);
+  leftCabinetGroup.add(leftCabinetDoorLine);
+  
+  const leftCabinetHandle1 = new THREE.Mesh(
+    new THREE.BoxGeometry(0.05, 0.32, 0.04),
+    new THREE.MeshStandardMaterial({
+      color: 0xb8a48a,
+      roughness: 0.5,
+      metalness: 0.35
+    })
+  );
+  leftCabinetHandle1.position.set(-0.18, 0.18, 0.43);
+  leftCabinetGroup.add(leftCabinetHandle1);
+  
+  const leftCabinetHandle2 = new THREE.Mesh(
+    new THREE.BoxGeometry(0.05, 0.32, 0.04),
+    new THREE.MeshStandardMaterial({
+      color: 0xb8a48a,
+      roughness: 0.5,
+      metalness: 0.35
+    })
+  );
+  leftCabinetHandle2.position.set(0.18, 0.18, 0.43);
+  leftCabinetGroup.add(leftCabinetHandle2);
+  
+  leftCabinetGroup.position.set(-4.7, 1.1, -4.8);
+  memoryWorldGroup.add(leftCabinetGroup);
 
   const wallShelf = new THREE.Mesh(
     new THREE.BoxGeometry(1.9, 0.12, 0.32),
@@ -1232,13 +1273,76 @@
   book3.rotation.y = Math.PI / 2;
   memoryWorldGroup.add(book3);
   
-  const rightCabinet = new THREE.Mesh(
+  const rightCabinetGroup = new THREE.Group();
+
+  const rightCabinetBody = new THREE.Mesh(
     new THREE.BoxGeometry(1.8, 1.6, 0.9),
-    memoryTrimMat
+    new THREE.MeshStandardMaterial({
+      color: 0x4d4653,
+      roughness: 0.9,
+      metalness: 0.03
+    })
   );
-  rightCabinet.position.set(5.45, 0.8, -3.95);
-  rightCabinet.rotation.y = -0.12;
-  memoryWorldGroup.add(rightCabinet);
+  rightCabinetGroup.add(rightCabinetBody);
+  
+  const rightCabinetTop = new THREE.Mesh(
+    new THREE.BoxGeometry(1.92, 0.08, 0.98),
+    new THREE.MeshStandardMaterial({
+      color: 0x615247,
+      roughness: 0.82,
+      metalness: 0.04
+    })
+  );
+  rightCabinetTop.position.set(0, 0.84, 0);
+  rightCabinetGroup.add(rightCabinetTop);
+  
+  const rightDoorLine1 = new THREE.Mesh(
+    new THREE.BoxGeometry(0.03, 1.2, 0.03),
+    new THREE.MeshStandardMaterial({
+      color: 0x2d2731,
+      roughness: 0.95,
+      metalness: 0.02
+    })
+  );
+  rightDoorLine1.position.set(-0.3, 0, 0.46);
+  rightCabinetGroup.add(rightDoorLine1);
+  
+  const rightDoorLine2 = new THREE.Mesh(
+    new THREE.BoxGeometry(0.03, 1.2, 0.03),
+    new THREE.MeshStandardMaterial({
+      color: 0x2d2731,
+      roughness: 0.95,
+      metalness: 0.02
+    })
+  );
+  rightDoorLine2.position.set(0.3, 0, 0.46);
+  rightCabinetGroup.add(rightDoorLine2);
+  
+  const rightHandle1 = new THREE.Mesh(
+    new THREE.BoxGeometry(0.05, 0.24, 0.04),
+    new THREE.MeshStandardMaterial({
+      color: 0xb8a48a,
+      roughness: 0.5,
+      metalness: 0.35
+    })
+  );
+  rightHandle1.position.set(-0.58, 0.02, 0.48);
+  rightCabinetGroup.add(rightHandle1);
+  
+  const rightHandle2 = new THREE.Mesh(
+    new THREE.BoxGeometry(0.05, 0.24, 0.04),
+    new THREE.MeshStandardMaterial({
+      color: 0xb8a48a,
+      roughness: 0.5,
+      metalness: 0.35
+    })
+  );
+  rightHandle2.position.set(0.58, 0.02, 0.48);
+  rightCabinetGroup.add(rightHandle2);
+  
+  rightCabinetGroup.position.set(4.95, 0.8, -4.2);
+  rightCabinetGroup.rotation.y = -0.12;
+  memoryWorldGroup.add(rightCabinetGroup);
   
   const bench = new THREE.Mesh(
     new THREE.BoxGeometry(3.2, 0.42, 0.9),
@@ -1267,8 +1371,8 @@
       metalness: 0.03
     })
   );
-  loungeChairBack.position.set(-3.9, 1.0, 1.18);
-  loungeChairBack.rotation.x = -0.18;
+  loungeChairBack.position.set(-3.9, 1.0, 2.22);
+  loungeChairBack.rotation.x = 0.18;
   memoryWorldGroup.add(loungeChairBack);
   
   const chairLegA = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.5, 0.08), memoryTrimMat);
