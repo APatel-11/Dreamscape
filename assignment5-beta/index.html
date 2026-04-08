@@ -952,7 +952,8 @@
   const memoryRoomMat = new THREE.MeshStandardMaterial({
     color: 0x2a2330,
     roughness: 0.95,
-    metalness: 0.03
+    metalness: 0.03,
+    side: THREE.DoubleSide
   });
   
   const memoryTrimMat = new THREE.MeshStandardMaterial({
@@ -1000,6 +1001,7 @@
     memoryRoomMat
   );
   backWall.position.set(0, 3, -6);
+  backWall.receiveShadow = true;
   memoryWorldGroup.add(backWall);
   
   const leftWall = new THREE.Mesh(
@@ -1008,6 +1010,7 @@
   );
   leftWall.rotation.y = Math.PI / 2;
   leftWall.position.set(-7, 3, 0);
+  leftWall.receiveShadow = true;
   memoryWorldGroup.add(leftWall);
   
   const rightWall = new THREE.Mesh(
@@ -1016,6 +1019,7 @@
   );
   rightWall.rotation.y = -Math.PI / 2;
   rightWall.position.set(7, 3, 0);
+  rigghtWall.receiveShadow = true;
   memoryWorldGroup.add(rightWall);
 
   const baseboardMat = new THREE.MeshStandardMaterial({
@@ -1025,33 +1029,37 @@
   });
   
   const backBaseboard = new THREE.Mesh(
-    new THREE.BoxGeometry(13.8, 0.16, 0.14),
+    new THREE.BoxGeometry(13.86, 0.16, 0.14),
     baseboardMat
   );
   backBaseboard.position.set(0, 0.08, -5.93);
+  backBaseboard.receiveShadow = true;
   memoryWorldGroup.add(backBaseboard);
   
   const leftBaseboard = new THREE.Mesh(
-    new THREE.BoxGeometry(0.14, 0.16, 11.8),
+    new THREE.BoxGeometry(0.14, 0.16, 11.86),
     baseboardMat
   );
   leftBaseboard.position.set(-6.93, 0.08, 0);
+  leftBaseboard.receiveShadow = true;
   memoryWorldGroup.add(leftBaseboard);
   
   const rightBaseboardFront = new THREE.Mesh(
-    new THREE.BoxGeometry(0.14, 0.16, 7.1),
+    new THREE.BoxGeometry(0.14, 0.16, 7.95),
     baseboardMat
   );
-  rightBaseboardFront.position.set(6.93, 0.08, -2.45);
+  rightBaseboardFront.position.set(6.93, 0.08, -2.98);
+  rightBaseboardFront.receiveShadow = true;
   memoryWorldGroup.add(rightBaseboardFront);
   
   const rightBaseboardBack = new THREE.Mesh(
-    new THREE.BoxGeometry(0.14, 0.16, 3.2),
+    new THREE.BoxGeometry(0.14, 0.16, 2.95),
     baseboardMat
   );
-  rightBaseboardBack.position.set(6.93, 0.08, 4.35);
+  rightBaseboardBack.position.set(6.93, 0.08, 4.48);
+  rightBaseboardBack.receiveShadow = true;
   memoryWorldGroup.add(rightBaseboardBack);
-
+  
   const memoryDoor = new THREE.Mesh(
     new THREE.BoxGeometry(1.25, 2.55, 0.12),
     new THREE.MeshStandardMaterial({
@@ -1315,7 +1323,7 @@
       metalness: 0.02
     })
   );
-  wallShelf.position.set(-6.15, 2.2, -1.15);
+  wallShelf.position.set(-6.18, 2.08, -1.15);
   wallShelf.rotation.y = Math.PI / 2;
   wallShelf.castShadow = true;
   wallShelf.receiveShadow = true;
@@ -1456,62 +1464,66 @@
   bench.receiveShadow = true;
   memoryWorldGroup.add(bench);
 
+  const chairGroup = new THREE.Group();
+
+  const chairSeatMat = new THREE.MeshStandardMaterial({
+    color: 0x4a4250,
+    roughness: 0.9,
+    metalness: 0.03
+  });
+  
+  const chairBackMat = new THREE.MeshStandardMaterial({
+    color: 0x544b5d,
+    roughness: 0.88,
+    metalness: 0.03
+  });
+  
   const loungeChairSeat = new THREE.Mesh(
     new THREE.BoxGeometry(1.15, 0.22, 1.05),
-    new THREE.MeshStandardMaterial({
-      color: 0x4a4250,
-      roughness: 0.9,
-      metalness: 0.03
-    })
+    chairSeatMat
   );
-  loungeChairSeat.position.set(-4.15, 0.55, 1.45);
-  loungeChairSeat.rotation.y = 0.42;
+  loungeChairSeat.position.set(0, 0.55, 0);
   loungeChairSeat.castShadow = true;
   loungeChairSeat.receiveShadow = true;
-  memoryWorldGroup.add(loungeChairSeat);
+  chairGroup.add(loungeChairSeat);
   
   const loungeChairBack = new THREE.Mesh(
     new THREE.BoxGeometry(1.15, 1.0, 0.18),
-    new THREE.MeshStandardMaterial({
-      color: 0x544b5d,
-      roughness: 0.88,
-      metalness: 0.03
-    })
+    chairBackMat
   );
-  loungeChairBack.position.set(-3.66, 1.0, 1.93);
-  loungeChairBack.rotation.x = 0.18;
-  loungeChairBack.rotation.y = 0.42;
+  loungeChairBack.position.set(0, 1.0, -0.43);
+  loungeChairBack.rotation.x = -0.10;
   loungeChairBack.castShadow = true;
   loungeChairBack.receiveShadow = true;
-  memoryWorldGroup.add(loungeChairBack);
+  chairGroup.add(loungeChairBack);
   
   const chairLegA = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.5, 0.08), memoryTrimMat);
-  chairLegA.position.set(-4.58, 0.25, 1.16);
-  chairLegA.rotation.y = 0.42;
+  chairLegA.position.set(-0.42, 0.25, -0.38);
   chairLegA.castShadow = true;
   chairLegA.receiveShadow = true;
-  memoryWorldGroup.add(chairLegA);
+  chairGroup.add(chairLegA);
   
   const chairLegB = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.5, 0.08), memoryTrimMat);
-  chairLegB.position.set(-3.83, 0.25, 0.83);
-  chairLegB.rotation.y = 0.42;
+  chairLegB.position.set(0.42, 0.25, -0.38);
   chairLegB.castShadow = true;
   chairLegB.receiveShadow = true;
-  memoryWorldGroup.add(chairLegB);
+  chairGroup.add(chairLegB);
   
   const chairLegC = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.5, 0.08), memoryTrimMat);
-  chairLegC.position.set(-4.48, 0.25, 2.03);
-  chairLegC.rotation.y = 0.42;
+  chairLegC.position.set(-0.42, 0.25, 0.38);
   chairLegC.castShadow = true;
   chairLegC.receiveShadow = true;
-  memoryWorldGroup.add(chairLegC);
+  chairGroup.add(chairLegC);
   
   const chairLegD = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.5, 0.08), memoryTrimMat);
-  chairLegD.position.set(-3.73, 0.25, 1.70);
-  chairLegD.rotation.y = 0.42;
+  chairLegD.position.set(0.42, 0.25, 0.38);
   chairLegD.castShadow = true;
   chairLegD.receiveShadow = true;
-  memoryWorldGroup.add(chairLegD);
+  chairGroup.add(chairLegD);
+  
+  chairGroup.position.set(-4.15, 0, 1.45);
+  chairGroup.rotation.y = -0.62;
+  memoryWorldGroup.add(chairGroup);
   
   const memoryFramesInside = [];
   for (let i = 0; i < 3; i++) {
@@ -1532,7 +1544,7 @@
       metalness: 0.05
     })
   );
-  sideArtworkFrame.position.set(-6.15, 2.55, -1.15);
+  sideArtworkFrame.position.set(-6.10, 2.63, -1.15);
   sideArtworkFrame.rotation.y = Math.PI / 2;
   memoryWorldGroup.add(sideArtworkFrame);
   
@@ -1546,7 +1558,7 @@
       metalness: 0.02
     })
   );
-  sideArtworkInner.position.set(-6.07, 2.55, -1.15);
+  sideArtworkInner.position.set(-6.02, 2.63, -1.15);
   sideArtworkInner.rotation.y = Math.PI / 2;
   memoryWorldGroup.add(sideArtworkInner);
   
