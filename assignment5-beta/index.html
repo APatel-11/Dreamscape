@@ -530,6 +530,7 @@
 
   let memoryControlsInitialized = false;
   let memoryObjectFloatEnabled = false;
+  let doorOpenAmount = 0;
   
   function saveMemories() {
     const names = memories.map(m => m.name);
@@ -1036,23 +1037,115 @@
   baseboardRight.position.set(6.85, 0.08, 0);
   memoryWorldGroup.add(baseboardRight);
   
-  const doorFrame = new THREE.Mesh(
-    new THREE.BoxGeometry(1.4, 2.6, 0.25),
-    new THREE.MeshStandardMaterial({ color: 0x3a3038 })
-  );
-  doorFrame.position.set(6.75, 1.3, 2);
-  memoryWorldGroup.add(doorFrame);
-  
-  const door = new THREE.Mesh(
-    new THREE.BoxGeometry(1.1, 2.2, 0.1),
-    new THREE.MeshStandardMaterial({ color: 0xe6e6ea })
-  );
-  door.position.set(6.7, 1.3, 2);
-  memoryWorldGroup.add(door);
+  const doorwayGroup = new THREE.Group();
+  memoryWorldGroup.add(doorwayGroup);
 
-  const outsideLight = new THREE.PointLight(0x87a9ff, 1.2, 20);
-  outsideLight.position.set(9, 2, 2);
-  memoryWorldGroup.add(outsideLight);
+  const doorTrimMat = new THREE.MeshStandardMaterial({
+    color: 0x4a4048,
+    roughness: 0.9,
+    metalness: 0.03
+  });
+
+  const doorMat = new THREE.MeshStandardMaterial({
+    color: 0xe3e1e6,
+    roughness: 0.82,
+    metalness: 0.02
+  });
+
+  const knobMat = new THREE.MeshStandardMaterial({
+    color: 0xc8b07d,
+    roughness: 0.35,
+    metalness: 0.8
+  });
+
+  const doorwayBack = new THREE.Mesh(
+    new THREE.PlaneGeometry(1.32, 2.42),
+    new THREE.MeshStandardMaterial({
+      color: 0x11131a,
+      roughness: 1.0,
+      metalness: 0.0
+    })
+  );
+  doorwayBack.position.set(6.86, 1.28, 2.0);
+  doorwayBack.rotation.y = -Math.PI / 2;
+  doorwayGroup.add(doorwayBack);
+
+  const frameLeft = new THREE.Mesh(
+    new THREE.BoxGeometry(0.12, 2.58, 0.18),
+    doorTrimMat
+  );
+  frameLeft.position.set(6.90, 1.29, 2.62);
+  doorwayGroup.add(frameLeft);
+
+  const frameRight = new THREE.Mesh(
+    new THREE.BoxGeometry(0.12, 2.58, 0.18),
+    doorTrimMat
+  );
+  frameRight.position.set(6.90, 1.29, 1.38);
+  doorwayGroup.add(frameRight);
+
+  const frameTop = new THREE.Mesh(
+    new THREE.BoxGeometry(0.12, 0.12, 1.42),
+    doorTrimMat
+  );
+  frameTop.position.set(6.90, 2.55, 2.0);
+  doorwayGroup.add(frameTop);
+
+  const doorStop = new THREE.Mesh(
+    new THREE.BoxGeometry(0.03, 2.34, 1.20),
+    new THREE.MeshStandardMaterial({
+      color: 0x362f36,
+      roughness: 0.95,
+      metalness: 0.02
+    })
+  );
+  doorStop.position.set(6.80, 1.24, 2.0);
+  doorwayGroup.add(doorStop);
+
+  const doorPivot = new THREE.Group();
+  doorPivot.position.set(6.76, 0.18, 2.56);
+  doorwayGroup.add(doorPivot);
+
+  const door = new THREE.Mesh(
+    new THREE.BoxGeometry(0.08, 2.20, 1.12),
+    doorMat
+  );
+  door.position.set(0, 1.10, -0.56);
+  door.castShadow = true;
+  door.receiveShadow = true;
+  doorPivot.add(door);
+
+  const doorPanelInset = new THREE.Mesh(
+    new THREE.BoxGeometry(0.02, 1.72, 0.78),
+    new THREE.MeshStandardMaterial({
+      color: 0xd6d4da,
+      roughness: 0.88,
+      metalness: 0.01
+    })
+  );
+  doorPanelInset.position.set(-0.031, 1.10, -0.56);
+  doorPivot.add(doorPanelInset);
+
+  const knob = new THREE.Mesh(
+    new THREE.SphereGeometry(0.045, 18, 18),
+    knobMat
+  );
+  knob.position.set(-0.07, 1.12, -1.02);
+  doorPivot.add(knob);
+
+  const knobStem = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.012, 0.012, 0.08, 12),
+    knobMat
+  );
+  knobStem.rotation.z = Math.PI / 2;
+  knobStem.position.set(-0.04, 1.12, -1.02);
+  doorPivot.add(knobStem);
+
+  doorPivot.rotation.y = 0;
+
+  const doorwayGlow = new THREE.PointLight(0x8dafff, 0.45, 8);
+  doorwayGlow.position.set(6.2, 1.8, 2.0);
+  memoryWorldGroup.add(doorwayGlow);
   
   const windowOuterFrame = new THREE.Mesh(
     new THREE.BoxGeometry(9.1, 3.7, 0.18),
@@ -1109,7 +1202,7 @@
     new THREE.BoxGeometry(8.3, 0.14, 0.35),
     memoryTrimMat
   );
-  windowSill.position.set(0, 1.48, -5.67);
+  windowSill.position.set(0, 1.48, -5.60);
   windowSill.castShadow = true;
   windowSill.receiveShadow = true;
   memoryWorldGroup.add(windowSill);
@@ -1258,62 +1351,85 @@
   });
   memoryWorldGroup.add(leftCabinetGroup);
 
+  const shelfGroup = new THREE.Group();
+  memoryWorldGroup.add(shelfGroup);
+
   const wallShelf = new THREE.Mesh(
-    new THREE.BoxGeometry(1.9, 0.12, 0.32),
+    new THREE.BoxGeometry(1.55, 0.10, 0.28),
     new THREE.MeshStandardMaterial({
       color: 0x5a473f,
       roughness: 0.9,
       metalness: 0.02
     })
   );
-  wallShelf.position.set(-6.7, 2.1, -1.15);
+  wallShelf.position.set(-6.80, 2.08, -1.15);
   wallShelf.rotation.y = Math.PI / 2;
   wallShelf.castShadow = true;
   wallShelf.receiveShadow = true;
-  memoryWorldGroup.add(wallShelf);
-  
+  shelfGroup.add(wallShelf);
+
+  const shelfBracketTop = new THREE.Mesh(
+    new THREE.BoxGeometry(0.08, 0.34, 0.08),
+    memoryTrimMat
+  );
+  shelfBracketTop.position.set(-6.73, 1.92, -1.45);
+  shelfBracketTop.rotation.z = 0.6;
+  shelfBracketTop.castShadow = true;
+  shelfBracketTop.receiveShadow = true;
+  shelfGroup.add(shelfBracketTop);
+
+  const shelfBracketBottom = new THREE.Mesh(
+    new THREE.BoxGeometry(0.08, 0.34, 0.08),
+    memoryTrimMat
+  );
+  shelfBracketBottom.position.set(-6.73, 1.92, -0.85);
+  shelfBracketBottom.rotation.z = 0.6;
+  shelfBracketBottom.castShadow = true;
+  shelfBracketBottom.receiveShadow = true;
+  shelfGroup.add(shelfBracketBottom);
+
   const book1 = new THREE.Mesh(
-    new THREE.BoxGeometry(0.18, 0.62, 0.24),
+    new THREE.BoxGeometry(0.18, 0.54, 0.22),
     new THREE.MeshStandardMaterial({
       color: 0x8477b9,
       roughness: 0.82,
       metalness: 0.04
     })
   );
-  book1.position.set(-6.55, 2.52, -1.62);
+  book1.position.set(-6.68, 2.40, -1.40);
   book1.rotation.y = Math.PI / 2;
   book1.castShadow = true;
   book1.receiveShadow = true;
-  memoryWorldGroup.add(book1);
-  
+  shelfGroup.add(book1);
+
   const book2 = new THREE.Mesh(
-    new THREE.BoxGeometry(0.15, 0.54, 0.24),
+    new THREE.BoxGeometry(0.15, 0.48, 0.22),
     new THREE.MeshStandardMaterial({
       color: 0xb07a6e,
       roughness: 0.82,
       metalness: 0.04
     })
   );
-  book2.position.set(-6.55, 2.49, -1.38);
+  book2.position.set(-6.68, 2.37, -1.18);
   book2.rotation.y = Math.PI / 2;
   book2.rotation.z = 0.08;
   book2.castShadow = true;
   book2.receiveShadow = true;
-  memoryWorldGroup.add(book2);
-  
+  shelfGroup.add(book2);
+
   const book3 = new THREE.Mesh(
-    new THREE.BoxGeometry(0.2, 0.7, 0.24),
+    new THREE.BoxGeometry(0.20, 0.60, 0.22),
     new THREE.MeshStandardMaterial({
       color: 0x6d89b8,
       roughness: 0.82,
       metalness: 0.04
     })
   );
-  book3.position.set(-6.55, 2.56, -1.1);
+  book3.position.set(-6.68, 2.43, -0.94);
   book3.rotation.y = Math.PI / 2;
   book3.castShadow = true;
   book3.receiveShadow = true;
-  memoryWorldGroup.add(book3);
+  shelfGroup.add(book3);
   
   const rightCabinetGroup = new THREE.Group();
 
@@ -1487,7 +1603,7 @@
       metalness: 0.05
     })
   );
-  sideArtworkFrame.position.set(-6.10, 2.63, -1.15);
+  sideArtworkFrame.position.set(-6.94, 2.63, -1.15);
   sideArtworkFrame.rotation.y = Math.PI / 2;
   memoryWorldGroup.add(sideArtworkFrame);
   
@@ -1501,7 +1617,7 @@
       metalness: 0.02
     })
   );
-  sideArtworkInner.position.set(-6.02, 2.63, -1.15);
+  sideArtworkInner.position.set(-6.89, 2.63, -1.15);
   sideArtworkInner.rotation.y = Math.PI / 2;
   memoryWorldGroup.add(sideArtworkInner);
   
@@ -1855,7 +1971,7 @@
 
     selectedMemoryId = 0;
     selectedFrame = frameMeshes[0] || null;
-    previewFrameActive = selectedFrame !== null;;
+    previewFrameActive = selectedFrame !== null;
     isMemoryTransitioning = false;
     memoryTransitionProgress = 0;
 
