@@ -996,120 +996,63 @@
   areaRug.receiveShadow = true;
   memoryWorldGroup.add(areaRug);
   
-  const backWall = new THREE.Mesh(
-    new THREE.PlaneGeometry(14, 6),
-    memoryRoomMat
+  const room = new THREE.Mesh(
+    new THREE.BoxGeometry(14, 6, 12),
+    new THREE.MeshStandardMaterial({
+      color: 0x2a2330,
+      roughness: 0.95,
+      metalness: 0.03,
+      side: THREE.BackSide
+    })
   );
-  backWall.position.set(0, 3, -6);
-  backWall.receiveShadow = true;
-  memoryWorldGroup.add(backWall);
   
-  const leftWall = new THREE.Mesh(
-    new THREE.PlaneGeometry(12, 6),
-    memoryRoomMat
-  );
-  leftWall.rotation.y = Math.PI / 2;
-  leftWall.position.set(-7, 3, 0);
-  leftWall.receiveShadow = true;
-  memoryWorldGroup.add(leftWall);
-  
-  const rightWall = new THREE.Mesh(
-    new THREE.PlaneGeometry(12, 6),
-    memoryRoomMat
-  );
-  rightWall.rotation.y = -Math.PI / 2;
-  rightWall.position.set(7, 3, 0);
-  rightWall.receiveShadow = true;
-  memoryWorldGroup.add(rightWall);
+  room.position.set(0, 3, 0);
+  room.receiveShadow = true;
+  memoryWorldGroup.add(room);
 
   const baseboardMat = new THREE.MeshStandardMaterial({
     color: 0x4a3f4d,
-    roughness: 0.92,
-    metalness: 0.02
+    roughness: 0.92
   });
   
-  const backBaseboard = new THREE.Mesh(
-    new THREE.BoxGeometry(13.86, 0.16, 0.14),
+  const baseboardBack = new THREE.Mesh(
+    new THREE.BoxGeometry(13.9, 0.15, 0.15),
     baseboardMat
   );
-  backBaseboard.position.set(0, 0.08, -5.93);
-  backBaseboard.receiveShadow = true;
-  memoryWorldGroup.add(backBaseboard);
+  baseboardBack.position.set(0, 0.08, -5.85);
+  memoryWorldGroup.add(baseboardBack);
   
-  const leftBaseboard = new THREE.Mesh(
-    new THREE.BoxGeometry(0.14, 0.16, 11.86),
+  const baseboardLeft = new THREE.Mesh(
+    new THREE.BoxGeometry(0.15, 0.15, 11.9),
     baseboardMat
   );
-  leftBaseboard.position.set(-6.93, 0.08, 0);
-  leftBaseboard.receiveShadow = true;
-  memoryWorldGroup.add(leftBaseboard);
+  baseboardLeft.position.set(-6.85, 0.08, 0);
+  memoryWorldGroup.add(baseboardLeft);
   
-  const rightBaseboardFront = new THREE.Mesh(
-    new THREE.BoxGeometry(0.14, 0.16, 7.95),
+  const baseboardRight = new THREE.Mesh(
+    new THREE.BoxGeometry(0.15, 0.15, 11.9),
     baseboardMat
   );
-  rightBaseboardFront.position.set(6.93, 0.08, -2.98);
-  rightBaseboardFront.receiveShadow = true;
-  memoryWorldGroup.add(rightBaseboardFront);
+  baseboardRight.position.set(6.85, 0.08, 0);
+  memoryWorldGroup.add(baseboardRight);
   
-  const rightBaseboardBack = new THREE.Mesh(
-    new THREE.BoxGeometry(0.14, 0.16, 2.95),
-    baseboardMat
+  const doorFrame = new THREE.Mesh(
+    new THREE.BoxGeometry(1.4, 2.6, 0.25),
+    new THREE.MeshStandardMaterial({ color: 0x3a3038 })
   );
-  rightBaseboardBack.position.set(6.93, 0.08, 4.48);
-  rightBaseboardBack.receiveShadow = true;
-  memoryWorldGroup.add(rightBaseboardBack);
+  doorFrame.position.set(6.75, 1.3, 2);
+  memoryWorldGroup.add(doorFrame);
   
-  const memoryDoor = new THREE.Mesh(
-    new THREE.BoxGeometry(1.25, 2.55, 0.12),
-    new THREE.MeshStandardMaterial({
-      color: 0x4b3b34,
-      roughness: 0.9,
-      metalness: 0.03
-    })
+  const door = new THREE.Mesh(
+    new THREE.BoxGeometry(1.1, 2.2, 0.1),
+    new THREE.MeshStandardMaterial({ color: 0xe6e6ea })
   );
-  memoryDoor.position.set(6.92, 1.28, 2.15);
-  memoryDoor.rotation.y = -Math.PI / 2;
-  memoryDoor.castShadow = true;
-  memoryDoor.receiveShadow = true;
-  memoryWorldGroup.add(memoryDoor);
-  
-  const memoryDoorFrame = new THREE.Mesh(
-    new THREE.BoxGeometry(1.52, 2.82, 0.08),
-    new THREE.MeshStandardMaterial({
-      color: 0x5b4d57,
-      roughness: 0.88,
-      metalness: 0.03
-    })
-  );
-  memoryDoorFrame.position.set(6.88, 1.41, 2.15);
-  memoryDoorFrame.rotation.y = -Math.PI / 2;
-  memoryDoorFrame.castShadow = true;
-  memoryDoorFrame.receiveShadow = true;
-  memoryWorldGroup.add(memoryDoorFrame);
-  
-  const memoryDoorKnob = new THREE.Mesh(
-    new THREE.SphereGeometry(0.05, 16, 16),
-    new THREE.MeshStandardMaterial({
-      color: 0xc9b37f,
-      roughness: 0.35,
-      metalness: 0.75
-    })
-  );
-  memoryDoorKnob.position.set(6.83, 1.25, 1.72);
-  memoryWorldGroup.add(memoryDoorKnob);
-  
-  const ceilingPanel = new THREE.Mesh(
-    new THREE.PlaneGeometry(14, 12),
-    new THREE.MeshStandardMaterial({
-      color: 0x17141d,
-      roughness: 1,
-      metalness: 0
-    })
-  );
-  ceilingPanel.rotation.x = Math.PI / 2;
-  ceilingPanel.position.set(0, 5.95, 0);
-  memoryWorldGroup.add(ceilingPanel);
+  door.position.set(6.7, 1.3, 2);
+  memoryWorldGroup.add(door);
+
+  const outsideLight = new THREE.PointLight(0x87a9ff, 1.2, 20);
+  outsideLight.position.set(9, 2, 2);
+  memoryWorldGroup.add(outsideLight);
   
   const windowOuterFrame = new THREE.Mesh(
     new THREE.BoxGeometry(9.1, 3.7, 0.18),
@@ -1323,7 +1266,7 @@
       metalness: 0.02
     })
   );
-  wallShelf.position.set(-6.18, 2.08, -1.15);
+  wallShelf.position.set(-6.7, 2.1, -1.15);
   wallShelf.rotation.y = Math.PI / 2;
   wallShelf.castShadow = true;
   wallShelf.receiveShadow = true;
@@ -1337,7 +1280,7 @@
       metalness: 0.04
     })
   );
-  book1.position.set(-6.12, 2.52, -1.62);
+  book1.position.set(-6.55, 2.52, -1.62);
   book1.rotation.y = Math.PI / 2;
   book1.castShadow = true;
   book1.receiveShadow = true;
@@ -1351,7 +1294,7 @@
       metalness: 0.04
     })
   );
-  book2.position.set(-6.12, 2.49, -1.38);
+  book2.position.set(-6.55, 2.49, -1.38);
   book2.rotation.y = Math.PI / 2;
   book2.rotation.z = 0.08;
   book2.castShadow = true;
@@ -1366,7 +1309,7 @@
       metalness: 0.04
     })
   );
-  book3.position.set(-6.12, 2.56, -1.1);
+  book3.position.set(-6.55, 2.56, -1.1);
   book3.rotation.y = Math.PI / 2;
   book3.castShadow = true;
   book3.receiveShadow = true;
@@ -1888,6 +1831,8 @@
     updateMemoryPanel();
     highlightFrames();
     updateHud();
+    updateMemoryFocusTarget();
+    updateMemoryEntryTarget();
   }
 
   function resetArchive() {
@@ -1910,7 +1855,7 @@
 
     selectedMemoryId = 0;
     selectedFrame = frameMeshes[0] || null;
-    previewFrameActive = !!selectedFrame;
+    previewFrameActive = selectedFrame !== null;;
     isMemoryTransitioning = false;
     memoryTransitionProgress = 0;
 
@@ -1980,6 +1925,10 @@
     memoryWorldGroup.visible = false;
     previewFrameActive = !!selectedFrame;
     controls.enabled = true;
+    
+    controls.target.copy(hubTarget);
+    controls.update();
+    
     setAppState("hub");
   });
 
@@ -1992,6 +1941,11 @@
   });
 
   backToMenuBtn.addEventListener("click", () => {
+    isMemoryTransitioning = false;
+    memoryTransitionProgress = 0;
+    memoryWorldGroup.visible = false;
+    previewFrameActive = false;
+    
     setAppState("menu");
   });
 
