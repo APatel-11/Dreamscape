@@ -1066,7 +1066,7 @@
       metalness: 0.0
     })
   );
-  doorwayBack.position.set(6.95, 1.28, 2.0);
+  doorwayBack.position.set(6.86, 1.28, 2.0);
   doorwayBack.rotation.y = -Math.PI / 2;
   doorwayGroup.add(doorwayBack);
   
@@ -1074,21 +1074,21 @@
     new THREE.BoxGeometry(0.16, 2.58, 0.18),
     doorTrimMat
   );
-  frameLeft.position.set(6.98, 1.29, 2.62);
+  frameLeft.position.set(6.90, 1.29, 2.62);
   doorwayGroup.add(frameLeft);
   
   const frameRight = new THREE.Mesh(
     new THREE.BoxGeometry(0.16, 2.58, 0.18),
     doorTrimMat
   );
-  frameRight.position.set(6.98, 1.29, 1.38);
+  frameRight.position.set(6.90, 1.29, 1.38);
   doorwayGroup.add(frameRight);
   
   const frameTop = new THREE.Mesh(
     new THREE.BoxGeometry(0.16, 0.12, 1.42),
     doorTrimMat
   );
-  frameTop.position.set(6.98, 2.55, 2.0);
+  frameTop.position.set(6.90, 2.55, 2.0);
   doorwayGroup.add(frameTop);
   
   const doorStop = new THREE.Mesh(
@@ -1099,11 +1099,11 @@
       metalness: 0.02
     })
   );
-  doorStop.position.set(6.90, 1.24, 2.0);
+  doorStop.position.set(6.84, 1.24, 2.0);
   doorwayGroup.add(doorStop);
   
   const doorPivot = new THREE.Group();
-  doorPivot.position.set(6.90, 0.18, 2.56);
+  doorPivot.position.set(6.85, 0.18, 2.56);
   doorwayGroup.add(doorPivot);
   
   const door = new THREE.Mesh(
@@ -1376,7 +1376,7 @@
       metalness: 0.04
     })
   );
-  book1.position.set(-6.68, 2.40, -1.40);
+  book1.position.set(-6.76, 2.40, -1.40);
   book1.rotation.y = Math.PI / 2;
   book1.castShadow = true;
   book1.receiveShadow = true;
@@ -1390,7 +1390,7 @@
       metalness: 0.04
     })
   );
-  book2.position.set(-6.68, 2.37, -1.18);
+  book2.position.set(-6.76, 2.37, -1.18);
   book2.rotation.y = Math.PI / 2;
   book2.rotation.z = 0.08;
   book2.castShadow = true;
@@ -1405,7 +1405,7 @@
       metalness: 0.04
     })
   );
-  book3.position.set(-6.68, 2.43, -0.94);
+  book3.position.set(-6.76, 2.43, -0.94);
   book3.rotation.y = Math.PI / 2;
   book3.castShadow = true;
   book3.receiveShadow = true;
