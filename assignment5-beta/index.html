@@ -68,7 +68,7 @@
   #editPanel {
     position: fixed;
     left: 16px;
-    bottom: 84px;
+    bottom: 110px;
     width: 300px;
     background: rgba(5, 8, 20, 0.74);
     border: 1px solid rgba(122, 188, 255, 0.25);
@@ -367,40 +367,40 @@
       Drag to orbit. The slider controls perspective and memory clarity.
     </div>
   </div>
+</div>
 
-  <div id="editPanel">
-    <div id="editPanelTop">
-      <h3>Memory Edit Tools</h3>
-      <button id="toggleEditPanelBtn">Minimize</button>
+<div id="editPanel">
+  <div id="editPanelTop">
+    <h3>Memory Edit Tools</h3>
+    <button id="toggleEditPanelBtn">Minimize</button>
+  </div>
+
+  <div id="editPanelBody">
+    <div class="label">Object Type</div>
+    <select id="objectTypeSelect">
+      <option value="cube">Cube</option>
+      <option value="tallBox">Tall Box</option>
+      <option value="sphere">Sphere</option>
+      <option value="cylinderStool">Cylinder Stool</option>
+      <option value="conePlant">Cone Plant</option>
+      <option value="smallTable">Small Table</option>
+      <option value="lamp">Lamp</option>
+      <option value="vase">Vase</option>
+      <option value="memoryPillar">Memory Pillar</option>
+      <option value="crystal">Crystal</option>
+    </select>
+
+    <div class="btnRow">
+      <button id="addObjectBtn">Add Object</button>
+      <button id="removeObjectBtn" class="secondary">Remove Object</button>
     </div>
-  
-    <div id="editPanelBody">
-      <div class="label">Object Type</div>
-      <select id="objectTypeSelect">
-        <option value="cube">Cube</option>
-        <option value="tallBox">Tall Box</option>
-        <option value="sphere">Sphere</option>
-        <option value="cylinderStool">Cylinder Stool</option>
-        <option value="conePlant">Cone Plant</option>
-        <option value="smallTable">Small Table</option>
-        <option value="lamp">Lamp</option>
-        <option value="vase">Vase</option>
-        <option value="memoryPillar">Memory Pillar</option>
-        <option value="crystal">Crystal</option>
-      </select>
-  
-      <div class="btnRow">
-        <button id="addObjectBtn">Add Object</button>
-        <button id="removeObjectBtn" class="secondary">Remove Object</button>
-      </div>
-  
-      <div id="editControlsHint">
-        In memory mode: click objects to select them.<br>
-        Arrow keys move selected object.<br>
-        W / E rotate selected object.<br>
-        Q / R scale selected object down or up.<br>
-        Use Add Object and Remove Object for editable memory fragments.
-      </div>
+
+    <div id="editControlsHint">
+      In memory mode: click objects to select them.<br>
+      Arrow keys move selected object.<br>
+      W / E rotate selected object.<br>
+      Q / R scale selected object down or up.<br>
+      Use Add Object and Remove Object for editable memory fragments.
     </div>
   </div>
 </div>
