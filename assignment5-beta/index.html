@@ -1066,7 +1066,7 @@
       metalness: 0.0
     })
   );
-  doorwayBack.position.set(6.86, 1.28, 2.0);
+  doorwayBack.position.set(6.82, 1.28, 2.0);
   doorwayBack.rotation.y = -Math.PI / 2;
   doorwayGroup.add(doorwayBack);
   
@@ -1074,21 +1074,21 @@
     new THREE.BoxGeometry(0.16, 2.58, 0.18),
     doorTrimMat
   );
-  frameLeft.position.set(6.90, 1.29, 2.62);
+  frameLeft.position.set(6.86, 1.29, 2.62);
   doorwayGroup.add(frameLeft);
   
   const frameRight = new THREE.Mesh(
     new THREE.BoxGeometry(0.16, 2.58, 0.18),
     doorTrimMat
   );
-  frameRight.position.set(6.90, 1.29, 1.38);
+  frameRight.position.set(6.86, 1.29, 1.38);
   doorwayGroup.add(frameRight);
   
   const frameTop = new THREE.Mesh(
     new THREE.BoxGeometry(0.16, 0.12, 1.42),
     doorTrimMat
   );
-  frameTop.position.set(6.90, 2.55, 2.0);
+  frameTop.position.set(6.86, 2.55, 2.0);
   doorwayGroup.add(frameTop);
   
   const doorStop = new THREE.Mesh(
@@ -1107,23 +1107,23 @@
   doorwayGroup.add(doorPivot);
   
   const door = new THREE.Mesh(
-    new THREE.BoxGeometry(0.08, 2.20, 1.12),
+    new THREE.BoxGeometry(0.08, 2.34, 1.12),
     doorMat
   );
-  door.position.set(0, 1.10, -0.56);
+  door.position.set(0, 1.17, -0.56);
   door.castShadow = true;
   door.receiveShadow = true;
   doorPivot.add(door);
 
   const doorPanelInset = new THREE.Mesh(
-    new THREE.BoxGeometry(0.02, 1.72, 0.78),
+    new THREE.BoxGeometry(0.02, 1.86, 0.78),
     new THREE.MeshStandardMaterial({
       color: 0xd6d4da,
       roughness: 0.88,
       metalness: 0.01
     })
   );
-  doorPanelInset.position.set(-0.031, 1.10, -0.56);
+  doorPanelInset.position.set(-0.031, 1.17, -0.56);
   doorPivot.add(doorPanelInset);
 
   const knob = new THREE.Mesh(
