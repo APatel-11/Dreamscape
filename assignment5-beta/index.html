@@ -121,6 +121,18 @@
     outline: none;
   }
 
+  #objectTypeSelect {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 9px 10px;
+    border-radius: 10px;
+    border: 1px solid rgba(160, 210, 255, 0.18);
+    background: rgba(20, 26, 46, 0.8);
+    color: white;
+    outline: none;
+    margin-top: 2px;
+  }
+
   #memoryMeta {
     margin-top: 10px;
     font-size: 13px;
@@ -275,6 +287,20 @@
     <div class="btnRow">
       <button id="resetArchiveBtn" class="secondary">Reset Archive</button>
     </div>
+
+    <div class="label">Object Type</div>
+    <select id="objectTypeSelect">
+      <option value="cube">Cube</option>
+      <option value="tallBox">Tall Box</option>
+      <option value="sphere">Sphere</option>
+      <option value="cylinderStool">Cylinder Stool</option>
+      <option value="conePlant">Cone Plant</option>
+      <option value="smallTable">Small Table</option>
+      <option value="lamp">Lamp</option>
+      <option value="vase">Vase</option>
+      <option value="memoryPillar">Memory Pillar</option>
+      <option value="crystal">Crystal</option>
+    </select>
 
     <div class="btnRow">
       <button id="addObjectBtn">Add Object</button>
@@ -2225,11 +2251,11 @@
   window.addEventListener("keydown", (e) => {
     const typingInInput = document.activeElement === memoryNameInput;
   
-    if (e.key === "r" || e.key === "R") {
+    if (!typingInInput && (e.key === "r" || e.key === "R")) {
       saveSelectedMemoryName();
     }
   
-    if (e.key === "u" || e.key === "U") {
+    if (!typingInInput && (e.key === "u" || e.key === "U")) {
       undoMemoryName();
     }
   
