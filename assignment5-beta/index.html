@@ -314,6 +314,7 @@
       Add, erase, or reset the archive from this console.<br>
       In memory mode: click objects to select them.<br>
       Arrow keys move selected object. W / E rotate it.<br>
+      Q / R scale selected object down or up.<br>
       Use Add Object and Remove Object for editable memory fragments.<br>
       Drag to orbit. The slider controls perspective and memory clarity.
     </div>
@@ -1750,6 +1751,16 @@
     if (!selectedMemoryObject) return;
     selectedMemoryObject.rotation.y += amount;
   }
+
+  function scaleSelectedMemoryObject(amount) {
+    if (!selectedMemoryObject) return;
+  
+    const nextScaleX = THREE.MathUtils.clamp(selectedMemoryObject.scale.x + amount, 0.4, 2.2);
+    const nextScaleY = THREE.MathUtils.clamp(selectedMemoryObject.scale.y + amount, 0.4, 2.2);
+    const nextScaleZ = THREE.MathUtils.clamp(selectedMemoryObject.scale.z + amount, 0.4, 2.2);
+  
+    selectedMemoryObject.scale.set(nextScaleX, nextScaleY, nextScaleZ);
+  }
   
   function setCastReceiveShadowDeep(root) {
     root.traverse((obj) => {
@@ -2511,7 +2522,7 @@
   window.addEventListener("keydown", (e) => {
     const typingInInput = document.activeElement === memoryNameInput;
   
-    if (!typingInInput && (e.key === "r" || e.key === "R")) {
+    if (!typingInInput && appState !== "memory" && (e.key === "r" || e.key === "R")) {
       saveSelectedMemoryName();
     }
   
@@ -2544,12 +2555,22 @@
         e.preventDefault();
         rotateSelectedMemoryObject(0.12);
       }
-  
+
       if (e.key === "e" || e.key === "E") {
         e.preventDefault();
         rotateSelectedMemoryObject(-0.12);
       }
-  
+
+      if (e.key === "q" || e.key === "Q") {
+        e.preventDefault();
+        scaleSelectedMemoryObject(-0.08);
+      }
+
+      if (e.key === "r" || e.key === "R") {
+        e.preventDefault();
+        scaleSelectedMemoryObject(0.08);
+      }
+
       if (e.key === "Delete" || e.key === "Backspace") {
         e.preventDefault();
         removeSelectedMemoryObject();
