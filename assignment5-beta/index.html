@@ -1020,21 +1020,21 @@
     new THREE.BoxGeometry(13.9, 0.15, 0.15),
     baseboardMat
   );
-  baseboardBack.position.set(0, 0.08, -5.85);
+  baseboardBack.position.set(0, 0.08, -5.925);
   memoryWorldGroup.add(baseboardBack);
   
   const baseboardLeft = new THREE.Mesh(
     new THREE.BoxGeometry(0.15, 0.15, 11.9),
     baseboardMat
   );
-  baseboardLeft.position.set(-6.85, 0.08, 0);
+  baseboardLeft.position.set(-6.925, 0.08, 0);
   memoryWorldGroup.add(baseboardLeft);
   
   const baseboardRight = new THREE.Mesh(
     new THREE.BoxGeometry(0.15, 0.15, 11.9),
     baseboardMat
   );
-  baseboardRight.position.set(6.85, 0.08, 0);
+  baseboardRight.position.set(6.925, 0.08, 0);
   memoryWorldGroup.add(baseboardRight);
   
   const doorwayGroup = new THREE.Group();
@@ -1103,7 +1103,7 @@
   doorwayGroup.add(doorStop);
   
   const doorPivot = new THREE.Group();
-  doorPivot.position.set(6.88, 0.18, 2.56);
+  doorPivot.position.set(6.90, 0.18, 2.56);
   doorwayGroup.add(doorPivot);
   
   const door = new THREE.Mesh(
@@ -1367,26 +1367,6 @@
   wallShelf.castShadow = true;
   wallShelf.receiveShadow = true;
   shelfGroup.add(wallShelf);
-
-  const shelfBracketTop = new THREE.Mesh(
-    new THREE.BoxGeometry(0.08, 0.34, 0.08),
-    memoryTrimMat
-  );
-  shelfBracketTop.position.set(-6.73, 1.92, -1.45);
-  shelfBracketTop.rotation.z = -0.6;
-  shelfBracketTop.castShadow = true;
-  shelfBracketTop.receiveShadow = true;
-  shelfGroup.add(shelfBracketTop);
-
-  const shelfBracketBottom = new THREE.Mesh(
-    new THREE.BoxGeometry(0.08, 0.34, 0.08),
-    memoryTrimMat
-  );
-  shelfBracketBottom.position.set(-6.73, 1.92, -0.85);
-  shelfBracketBottom.rotation.z = -0.6;
-  shelfBracketBottom.castShadow = true;
-  shelfBracketBottom.receiveShadow = true;
-  shelfGroup.add(shelfBracketBottom);
 
   const book1 = new THREE.Mesh(
     new THREE.BoxGeometry(0.18, 0.54, 0.22),
