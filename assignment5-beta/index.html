@@ -1645,7 +1645,26 @@
     root.userData.removable = removable;
   
     root.traverse((obj) => {
-      if (obj.isMesh && obj.material && "emissive" in obj.material) {
+      if (!obj.isMesh || !obj.material) return;
+  
+      if (Array.isArray(obj.material)) {
+        obj.material = obj.material.map((mat) => {
+          const cloned = mat.clone();
+          return cloned;
+        });
+      } else {
+        obj.material = obj.material.clone();
+      }
+  
+      if (Array.isArray(obj.material)) {
+        for (const mat of obj.material) {
+          if ("emissive" in mat) {
+            obj.userData.baseEmissive = mat.emissive.clone();
+            obj.userData.baseEmissiveIntensity = mat.emissiveIntensity || 0;
+            break;
+          }
+        }
+      } else if ("emissive" in obj.material) {
         obj.userData.baseEmissive = obj.material.emissive.clone();
         obj.userData.baseEmissiveIntensity = obj.material.emissiveIntensity || 0;
       }
@@ -1733,14 +1752,17 @@
     if (!selectedMemoryObject) return;
     if (!selectedMemoryObject.userData.removable) return;
   
-    memoryWorldGroup.remove(selectedMemoryObject);
+    const objectToRemove = selectedMemoryObject;
   
-    const selectableIndex = memorySelectableRoots.indexOf(selectedMemoryObject);
+    applyMemoryObjectHighlight(objectToRemove, false);
+    memoryWorldGroup.remove(objectToRemove);
+  
+    const selectableIndex = memorySelectableRoots.indexOf(objectToRemove);
     if (selectableIndex >= 0) {
       memorySelectableRoots.splice(selectableIndex, 1);
     }
   
-    const spawnedIndex = spawnedMemoryObjects.indexOf(selectedMemoryObject);
+    const spawnedIndex = spawnedMemoryObjects.indexOf(objectToRemove);
     if (spawnedIndex >= 0) {
       spawnedMemoryObjects.splice(spawnedIndex, 1);
     }
@@ -2111,6 +2133,13 @@
   
   window.addEventListener("pointerup", (event) => {
     if (pointerMoved) return;
+  
+    const clickedUI =
+      memoryPanel.contains(event.target) ||
+      startOverlay.contains(event.target) ||
+      event.target === timeline;
+  
+    if (clickedUI) return;
   
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
