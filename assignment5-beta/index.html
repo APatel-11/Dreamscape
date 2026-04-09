@@ -2520,7 +2520,9 @@
   });
 
   window.addEventListener("keydown", (e) => {
-    const typingInInput = document.activeElement === memoryNameInput;
+    const typingInInput =
+      document.activeElement === memoryNameInput ||
+      document.activeElement === objectTypeSelect;
   
     if (!typingInInput && appState !== "memory" && (e.key === "r" || e.key === "R")) {
       saveSelectedMemoryName();
