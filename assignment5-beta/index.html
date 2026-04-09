@@ -1652,6 +1652,7 @@
   const addObjectBtn = document.getElementById("addObjectBtn");
   const removeObjectBtn = document.getElementById("removeObjectBtn");
   const selectedObjectText = document.getElementById("selectedObjectText");
+  const objectTypeSelect = document.getElementById("objectTypeSelect");
   
   const raycaster = new THREE.Raycaster();
   const mouse = new THREE.Vector2();
@@ -1750,28 +1751,274 @@
     selectedMemoryObject.rotation.y += amount;
   }
   
+  function setCastReceiveShadowDeep(root) {
+    root.traverse((obj) => {
+      if (obj.isMesh) {
+        obj.castShadow = true;
+        obj.receiveShadow = true;
+      }
+    });
+  }
+  
+  function buildSpawnedObject(type) {
+    let root;
+    let label;
+  
+    if (type === "cube") {
+      root = new THREE.Mesh(
+        new THREE.BoxGeometry(0.42, 0.42, 0.42),
+        new THREE.MeshStandardMaterial({
+          color: 0x8ea2ff,
+          emissive: 0x2c3470,
+          emissiveIntensity: 0.16,
+          roughness: 0.5,
+          metalness: 0.12
+        })
+      );
+      root.position.y = 0.21;
+      label = "cube";
+    }
+  
+    if (type === "tallBox") {
+      root = new THREE.Mesh(
+        new THREE.BoxGeometry(0.36, 0.82, 0.36),
+        new THREE.MeshStandardMaterial({
+          color: 0xa48cff,
+          emissive: 0x34255e,
+          emissiveIntensity: 0.14,
+          roughness: 0.52,
+          metalness: 0.10
+        })
+      );
+      root.position.y = 0.41;
+      label = "tall box";
+    }
+  
+    if (type === "sphere") {
+      root = new THREE.Mesh(
+        new THREE.SphereGeometry(0.26, 24, 24),
+        new THREE.MeshStandardMaterial({
+          color: 0x9ac6ff,
+          emissive: 0x233b68,
+          emissiveIntensity: 0.16,
+          roughness: 0.35,
+          metalness: 0.18
+        })
+      );
+      root.position.y = 0.26;
+      label = "sphere";
+    }
+  
+    if (type === "cylinderStool") {
+      root = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.24, 0.28, 0.48, 24),
+        new THREE.MeshStandardMaterial({
+          color: 0x8d6e63,
+          emissive: 0x241714,
+          emissiveIntensity: 0.10,
+          roughness: 0.78,
+          metalness: 0.04
+        })
+      );
+      root.position.y = 0.24;
+      label = "stool";
+    }
+  
+    if (type === "conePlant") {
+      root = new THREE.Group();
+  
+      const pot = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.16, 0.20, 0.22, 20),
+        new THREE.MeshStandardMaterial({
+          color: 0x7a5a4f,
+          roughness: 0.82,
+          metalness: 0.04
+        })
+      );
+      pot.position.y = 0.11;
+      root.add(pot);
+  
+      const leaves = new THREE.Mesh(
+        new THREE.ConeGeometry(0.24, 0.58, 20),
+        new THREE.MeshStandardMaterial({
+          color: 0x6fa06d,
+          emissive: 0x1d331d,
+          emissiveIntensity: 0.08,
+          roughness: 0.84,
+          metalness: 0.02
+        })
+      );
+      leaves.position.y = 0.48;
+      root.add(leaves);
+  
+      label = "plant";
+    }
+  
+    if (type === "smallTable") {
+      root = new THREE.Group();
+  
+      const top = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.34, 0.34, 0.06, 24),
+        new THREE.MeshStandardMaterial({
+          color: 0x6b5248,
+          roughness: 0.82,
+          metalness: 0.04
+        })
+      );
+      top.position.y = 0.46;
+      root.add(top);
+  
+      const leg = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.05, 0.06, 0.46, 16),
+        new THREE.MeshStandardMaterial({
+          color: 0x4b3c36,
+          roughness: 0.84,
+          metalness: 0.04
+        })
+      );
+      leg.position.y = 0.23;
+      root.add(leg);
+  
+      const base = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.18, 0.20, 0.04, 20),
+        new THREE.MeshStandardMaterial({
+          color: 0x4b3c36,
+          roughness: 0.84,
+          metalness: 0.04
+        })
+      );
+      base.position.y = 0.02;
+      root.add(base);
+  
+      label = "small table";
+    }
+  
+    if (type === "lamp") {
+      root = new THREE.Group();
+  
+      const base = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.16, 0.18, 0.05, 20),
+        new THREE.MeshStandardMaterial({
+          color: 0x7f6d5f,
+          roughness: 0.72,
+          metalness: 0.16
+        })
+      );
+      base.position.y = 0.025;
+      root.add(base);
+  
+      const stem = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.03, 0.03, 0.48, 14),
+        new THREE.MeshStandardMaterial({
+          color: 0xb9a48d,
+          roughness: 0.48,
+          metalness: 0.35
+        })
+      );
+      stem.position.y = 0.29;
+      root.add(stem);
+  
+      const shade = new THREE.Mesh(
+        new THREE.ConeGeometry(0.22, 0.28, 20, 1, true),
+        new THREE.MeshStandardMaterial({
+          color: 0xd9d0c8,
+          emissive: 0x3d3126,
+          emissiveIntensity: 0.10,
+          roughness: 0.84,
+          metalness: 0.02,
+          side: THREE.DoubleSide
+        })
+      );
+      shade.position.y = 0.63;
+      shade.rotation.x = Math.PI;
+      root.add(shade);
+  
+      label = "lamp";
+    }
+  
+    if (type === "vase") {
+      root = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.10, 0.16, 0.44, 20),
+        new THREE.MeshStandardMaterial({
+          color: 0x8eb8c8,
+          emissive: 0x203746,
+          emissiveIntensity: 0.08,
+          roughness: 0.34,
+          metalness: 0.18
+        })
+      );
+      root.position.y = 0.22;
+      label = "vase";
+    }
+  
+    if (type === "memoryPillar") {
+      root = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.16, 0.20, 0.92, 20),
+        new THREE.MeshStandardMaterial({
+          color: 0x7c86d6,
+          emissive: 0x27307c,
+          emissiveIntensity: 0.18,
+          roughness: 0.42,
+          metalness: 0.14
+        })
+      );
+      root.position.y = 0.46;
+      label = "memory pillar";
+    }
+  
+    if (type === "crystal") {
+      root = new THREE.Mesh(
+        new THREE.OctahedronGeometry(0.26),
+        new THREE.MeshStandardMaterial({
+          color: 0x9fe7ff,
+          emissive: 0x1e4c5d,
+          emissiveIntensity: 0.16,
+          roughness: 0.28,
+          metalness: 0.22
+        })
+      );
+      root.position.y = 0.26;
+      label = "crystal";
+    }
+  
+    if (!root) {
+      root = new THREE.Mesh(
+        new THREE.BoxGeometry(0.42, 0.42, 0.42),
+        new THREE.MeshStandardMaterial({
+          color: 0x8ea2ff,
+          emissive: 0x2c3470,
+          emissiveIntensity: 0.16,
+          roughness: 0.5,
+          metalness: 0.12
+        })
+      );
+      root.position.y = 0.21;
+      label = "cube";
+    }
+  
+    setCastReceiveShadowDeep(root);
+    return { root, label };
+  }
+  
   function addMemoryObject() {
     if (appState !== "memory") return;
   
-    const fragment = new THREE.Mesh(
-      new THREE.BoxGeometry(0.42, 0.42, 0.42),
-      new THREE.MeshStandardMaterial({
-        color: 0x8ea2ff,
-        emissive: 0x2c3470,
-        emissiveIntensity: 0.16,
-        roughness: 0.5,
-        metalness: 0.12
-      })
+    const chosenType = objectTypeSelect.value;
+    const built = buildSpawnedObject(chosenType);
+    const objectRoot = built.root;
+    const objectLabel = built.label;
+  
+    objectRoot.position.x = 0;
+    objectRoot.position.z = 1.2;
+  
+    memoryWorldGroup.add(objectRoot);
+    registerMemorySelectable(
+      objectRoot,
+      `${objectLabel} ${spawnedMemoryObjects.length + 1}`,
+      true
     );
-  
-    fragment.position.set(0, 0.21, 1.2);
-    fragment.castShadow = true;
-    fragment.receiveShadow = true;
-  
-    memoryWorldGroup.add(fragment);
-    registerMemorySelectable(fragment, `fragment ${spawnedMemoryObjects.length + 1}`, true);
-    spawnedMemoryObjects.push(fragment);
-    selectMemoryObject(fragment);
+    spawnedMemoryObjects.push(objectRoot);
+    selectMemoryObject(objectRoot);
   }
   
   function removeSelectedMemoryObject() {
@@ -2107,9 +2354,22 @@
 
   function resetArchive() {
     localStorage.removeItem("dreamscape_memory_names");
-
+  
+    while (spawnedMemoryObjects.length > 0) {
+      const spawned = spawnedMemoryObjects.pop();
+      memoryWorldGroup.remove(spawned);
+  
+      const selectableIndex = memorySelectableRoots.indexOf(spawned);
+      if (selectableIndex >= 0) {
+        memorySelectableRoots.splice(selectableIndex, 1);
+      }
+    }
+  
+    selectedMemoryObject = null;
+    selectedObjectText.textContent = "none";
+  
     memories.length = 0;
-
+  
     for (let i = 0; i < DEFAULT_MEMORY_COUNT; i++) {
       memories.push({
         id: i,
@@ -2120,15 +2380,15 @@
         history: []
       });
     }
-
+  
     layoutFrames();
-
+  
     selectedMemoryId = 0;
     selectedFrame = frameMeshes[0] || null;
     previewFrameActive = selectedFrame !== null;
     isMemoryTransitioning = false;
     memoryTransitionProgress = 0;
-
+  
     updatePreviewFrameTarget();
     updateMemoryFocusTarget();
     updateMemoryEntryTarget();
