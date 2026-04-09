@@ -1103,27 +1103,27 @@
   doorwayGroup.add(doorStop);
   
   const doorPivot = new THREE.Group();
-  doorPivot.position.set(6.85, 0.18, 2.56);
+  doorPivot.position.set(6.90, 0.18, 2.56);
   doorwayGroup.add(doorPivot);
   
   const door = new THREE.Mesh(
-    new THREE.BoxGeometry(0.08, 2.34, 1.12),
+    new THREE.BoxGeometry(0.08, 2.40, 1.12),
     doorMat
   );
-  door.position.set(0, 1.17, -0.56);
+  door.position.set(0, 1.20, -0.56);
   door.castShadow = true;
   door.receiveShadow = true;
   doorPivot.add(door);
 
   const doorPanelInset = new THREE.Mesh(
-    new THREE.BoxGeometry(0.02, 1.86, 0.78),
+    new THREE.BoxGeometry(0.02, 1.92, 0.78),
     new THREE.MeshStandardMaterial({
       color: 0xd6d4da,
       roughness: 0.88,
       metalness: 0.01
     })
   );
-  doorPanelInset.position.set(-0.031, 1.17, -0.56);
+  doorPanelInset.position.set(-0.031, 1.20, -0.56);
   doorPivot.add(doorPanelInset);
 
   const knob = new THREE.Mesh(
