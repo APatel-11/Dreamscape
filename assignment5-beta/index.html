@@ -65,6 +65,76 @@
     overflow: hidden;
   }
 
+  #editPanel {
+    position: fixed;
+    right: 16px;
+    bottom: 84px;
+    width: 300px;
+    background: rgba(5, 8, 20, 0.74);
+    border: 1px solid rgba(122, 188, 255, 0.25);
+    border-radius: 14px;
+    padding: 14px;
+    color: white;
+    z-index: 20;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 0 24px rgba(60, 100, 255, 0.12);
+    transition: width 0.22s ease, padding 0.22s ease;
+    overflow: hidden;
+    display: none;
+  }
+
+  #editPanel.minimized {
+    width: 168px;
+    padding: 12px;
+  }
+
+  #editPanelTop {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  #editPanel h3 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 700;
+    color: #dff4ff;
+  }
+
+  #toggleEditPanelBtn {
+    border: 1px solid rgba(160, 210, 255, 0.18);
+    background: rgba(20, 26, 46, 0.8);
+    color: white;
+    border-radius: 10px;
+    padding: 7px 10px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+
+  #editPanelBody {
+    display: block;
+  }
+
+  #editPanel.minimized #editPanelBody {
+    display: none;
+  }
+
+  #editPanel .label {
+    font-size: 12px;
+    color: #9db6d8;
+    margin-top: 8px;
+    margin-bottom: 4px;
+  }
+
+  #editControlsHint {
+    margin-top: 10px;
+    font-size: 11px;
+    color: #9fb8d8;
+    line-height: 1.45;
+  }
+
   #memoryPanel.minimized {
     width: 168px;
     padding: 12px;
@@ -288,35 +358,49 @@
       <button id="resetArchiveBtn" class="secondary">Reset Archive</button>
     </div>
 
-    <div class="label">Object Type</div>
-    <select id="objectTypeSelect">
-      <option value="cube">Cube</option>
-      <option value="tallBox">Tall Box</option>
-      <option value="sphere">Sphere</option>
-      <option value="cylinderStool">Cylinder Stool</option>
-      <option value="conePlant">Cone Plant</option>
-      <option value="smallTable">Small Table</option>
-      <option value="lamp">Lamp</option>
-      <option value="vase">Vase</option>
-      <option value="memoryPillar">Memory Pillar</option>
-      <option value="crystal">Crystal</option>
-    </select>
-
-    <div class="btnRow">
-      <button id="addObjectBtn">Add Object</button>
-      <button id="removeObjectBtn" class="secondary">Remove Object</button>
-    </div>
-
     <div id="controlsHint">
       Select a memory frame to focus it.<br>
       Save Name updates the selected memory.<br>
       Undo restores the previous saved name.<br>
       Add, erase, or reset the archive from this console.<br>
-      In memory mode: click objects to select them.<br>
-      Arrow keys move selected object. W / E rotate it.<br>
-      Q / R scale selected object down or up.<br>
-      Use Add Object and Remove Object for editable memory fragments.<br>
+      Enter Memory opens the focused memory scene.<br>
       Drag to orbit. The slider controls perspective and memory clarity.
+    </div>
+  </div>
+
+  <div id="editPanel">
+    <div id="editPanelTop">
+      <h3>Memory Edit Tools</h3>
+      <button id="toggleEditPanelBtn">Minimize</button>
+    </div>
+  
+    <div id="editPanelBody">
+      <div class="label">Object Type</div>
+      <select id="objectTypeSelect">
+        <option value="cube">Cube</option>
+        <option value="tallBox">Tall Box</option>
+        <option value="sphere">Sphere</option>
+        <option value="cylinderStool">Cylinder Stool</option>
+        <option value="conePlant">Cone Plant</option>
+        <option value="smallTable">Small Table</option>
+        <option value="lamp">Lamp</option>
+        <option value="vase">Vase</option>
+        <option value="memoryPillar">Memory Pillar</option>
+        <option value="crystal">Crystal</option>
+      </select>
+  
+      <div class="btnRow">
+        <button id="addObjectBtn">Add Object</button>
+        <button id="removeObjectBtn" class="secondary">Remove Object</button>
+      </div>
+  
+      <div id="editControlsHint">
+        In memory mode: click objects to select them.<br>
+        Arrow keys move selected object.<br>
+        W / E rotate selected object.<br>
+        Q / R scale selected object down or up.<br>
+        Use Add Object and Remove Object for editable memory fragments.
+      </div>
     </div>
   </div>
 </div>
@@ -1637,6 +1721,8 @@
 
   const memoryPanel = document.getElementById("memoryPanel");
   const togglePanelBtn = document.getElementById("togglePanelBtn");
+  const editPanel = document.getElementById("editPanel");
+  const toggleEditPanelBtn = document.getElementById("toggleEditPanelBtn");
   const memoryNameInput = document.getElementById("memoryName");
   const memoryIdText = document.getElementById("memoryIdText");
   const clarityText = document.getElementById("clarityText");
@@ -2408,9 +2494,9 @@
     updateHud();
   }
 
-  togglePanelBtn.addEventListener("click", () => {
-    memoryPanel.classList.toggle("minimized");
-    togglePanelBtn.textContent = memoryPanel.classList.contains("minimized") ? "Expand" : "Minimize";
+  toggleEditPanelBtn.addEventListener("click", () => {
+    editPanel.classList.toggle("minimized");
+    toggleEditPanelBtn.textContent = editPanel.classList.contains("minimized") ? "Expand" : "Minimize";
   });
 
   window.addEventListener("pointerdown", (event) => {
@@ -2433,6 +2519,7 @@
   
     const clickedUI =
       memoryPanel.contains(event.target) ||
+      editPanel.contains(event.target) ||
       startOverlay.contains(event.target) ||
       event.target === timeline;
   
@@ -2596,6 +2683,7 @@
       clearMemoryObjectSelection();
       startOverlay.style.display = "flex";
       memoryPanel.style.display = "none";
+      editPanel.style.display = "none";
       timeline.style.display = "none";
       timelineLabel.style.display = "none";
       updateHud();
@@ -2605,6 +2693,7 @@
       clearMemoryObjectSelection();
       startOverlay.style.display = "none";
       memoryPanel.style.display = "block";
+      editPanel.style.display = "none";
       timeline.style.display = "block";
       timelineLabel.style.display = "block";
       updateHud();
@@ -2635,6 +2724,7 @@
     if (nextState === "memory") {
       startOverlay.style.display = "none";
       memoryPanel.style.display = "block";
+      editPanel.style.display = "block";
       timeline.style.display = "block";
       timelineLabel.style.display = "block";
       updateHud();
