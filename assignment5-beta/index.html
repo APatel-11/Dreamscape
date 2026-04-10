@@ -651,13 +651,16 @@
   let transitionCurveP2 = new THREE.Vector3();
   let transitionCurveP3 = new THREE.Vector3();
   
-  let memoryCameraTarget = new THREE.Vector3(0, 1.72, -1.95);
-  let memoryCameraBasePos = new THREE.Vector3(0, 1.96, 4.2);
+  let memoryCameraTarget = new THREE.Vector3(0, 1.62, -1.95);
+  let memoryCameraBasePos = new THREE.Vector3(0, 1.62, 3.35);
   let memoryCameraPos = memoryCameraBasePos.clone();
-
+  
   let memoryControlsInitialized = false;
   let memoryObjectFloatEnabled = false;
   let doorOpenAmount = 0;
+  
+  let memoryLookYaw = 0;
+  let memoryLookPitch = -0.03;
   
   function saveMemories() {
     localStorage.setItem("dreamscape_memories", JSON.stringify(memories));
@@ -2496,18 +2499,26 @@
 
   function configureMemoryControls() {
     controls.enabled = true;
-    controls.enablePan = true;
-    controls.enableZoom = true;
+    controls.enablePan = false;
+    controls.enableZoom = false;
     controls.enableRotate = true;
     controls.enableDamping = true;
+    controls.rotateSpeed = 0.55;
   
-    controls.target.copy(memoryCameraTarget);
+    const eyePos = camera.position.clone();
+    const lookDir = new THREE.Vector3(
+      Math.sin(memoryLookYaw) * Math.cos(memoryLookPitch),
+      Math.sin(memoryLookPitch),
+      -Math.cos(memoryLookYaw) * Math.cos(memoryLookPitch)
+    );
   
-    controls.minDistance = 1.8;
-    controls.maxDistance = 9.5;
+    controls.target.copy(eyePos.clone().add(lookDir.multiplyScalar(3)));
   
-    controls.minPolarAngle = 0.95;
-    controls.maxPolarAngle = Math.PI / 2 + 0.22;
+    controls.minDistance = 3;
+    controls.maxDistance = 3;
+  
+    controls.minPolarAngle = Math.PI / 2 - 0.32;
+    controls.maxPolarAngle = Math.PI / 2 + 0.18;
   
     memoryControlsInitialized = true;
     controls.update();
@@ -2720,6 +2731,9 @@
 
   enterBtn.addEventListener("click", () => {
     if (!selectedFrame) return;
+
+    memoryLookYaw = 0;
+    memoryLookPitch = -0.03;
   
     loadSelectedMemoryObjects();
     beginMemoryTransition();
@@ -2932,8 +2946,8 @@
     const t = Number(timeline.value) / 100;
     const time = performance.now() * 0.001;
 
-    const memoryZoomZ = THREE.MathUtils.lerp(5.2, 2.6, t);
-    memoryCameraPos.set(0, 1.96, memoryZoomZ);
+    const memoryZoomZ = THREE.MathUtils.lerp(4.0, 2.9, t);
+    memoryCameraPos.set(0, 1.62, memoryZoomZ);
 
     let desiredTarget = hubTarget;
     let targetDistance = 18.5 - t * 16.6;
@@ -3071,10 +3085,27 @@
       platformGroup.visible = false;
       consoleGroup.visible = false;
       avatarGroup.visible = false;
-
+    
       if (!memoryControlsInitialized) {
         camera.position.copy(memoryCameraPos);
         configureMemoryControls();
+      } else {
+        camera.position.lerp(memoryCameraPos, 0.18);
+    
+        const offset = controls.target.clone().sub(camera.position);
+        const spherical = new THREE.Spherical().setFromVector3(offset);
+    
+        memoryLookYaw = spherical.theta;
+        memoryLookPitch = Math.PI / 2 - spherical.phi;
+        memoryLookPitch = THREE.MathUtils.clamp(memoryLookPitch, -0.18, 0.32);
+    
+        const clampedLookDir = new THREE.Vector3(
+          Math.sin(memoryLookYaw) * Math.cos(memoryLookPitch),
+          Math.sin(memoryLookPitch),
+          -Math.cos(memoryLookYaw) * Math.cos(memoryLookPitch)
+        );
+    
+        controls.target.copy(camera.position.clone().add(clampedLookDir.multiplyScalar(3)));
       }
     } else {
       memoryWorldGroup.visible = false;
