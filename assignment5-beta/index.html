@@ -1970,6 +1970,10 @@
     const nextScaleZ = THREE.MathUtils.clamp(selectedMemoryObject.scale.z + amount, 0.4, 2.2);
   
     selectedMemoryObject.scale.set(nextScaleX, nextScaleY, nextScaleZ);
+  
+    const bbox = new THREE.Box3().setFromObject(selectedMemoryObject);
+    selectedMemoryObject.position.y += (0 - bbox.min.y);
+  
     syncSelectedObjectToMemoryData();
   }
   
