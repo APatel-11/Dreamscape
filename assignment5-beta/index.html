@@ -2726,7 +2726,7 @@
         id: i,
         name: `Memory ${String(i + 1).padStart(2, "0")}`,
         clarity: 0.5,
-        tone: getToneForMemoryIndex(i);,
+        tone: getToneForMemoryIndex(i),
         edited: false,
         history: [],
         objects: []
@@ -2745,6 +2745,7 @@
     updateMemoryFocusTarget();
     updateMemoryEntryTarget();
     updateMemoryPanel();
+    applyMemoryTone();
     highlightFrames();
     updateHud();
   }
