@@ -612,7 +612,7 @@
           id: i,
           name: m.name || `Memory ${String(i + 1).padStart(2, "0")}`,
           clarity: typeof m.clarity === "number" ? m.clarity : 0.5,
-          tone: m.tone || "neutral",
+          tone: m.tone || getToneForMemoryIndex(i),
           edited: !!m.edited,
           history: Array.isArray(m.history) ? m.history : [],
           objects: Array.isArray(m.objects) ? m.objects : []
@@ -621,7 +621,7 @@
           id: i,
           name: `Memory ${String(i + 1).padStart(2, "0")}`,
           clarity: 0.5,
-          tone: "neutral",
+          tone: getToneForMemoryIndex(i),
           edited: false,
           history: [],
           objects: []
@@ -665,6 +665,11 @@
   
   function saveMemories() {
     localStorage.setItem("dreamscape_memories", JSON.stringify(memories));
+  }
+
+  function getToneForMemoryIndex(index) {
+    const tones = ["neutral", "warm", "cool", "dream", "echo"];
+    return tones[index % tones.length];
   }
 
   function getArchiveStats() {
@@ -2358,6 +2363,65 @@
     toneText.textContent = memory.tone;
   }
 
+  function applyMemoryTone() {
+    const memory = memories[selectedMemoryId];
+    if (!memory) return;
+  
+    const tone = memory.tone || "neutral";
+  
+    if (tone === "warm") {
+      scene.fog.color.set(0x2d1f1a);
+      museumSphere.material.color.set(0x1b1412);
+      memoryWarmBase = 1.18;
+      memoryCoolBase = 0.88;
+      memoryWindow.material.color.set(0xffd6b0);
+      windowInnerBacking.material.color.set(0x3a2c24);
+      windowInnerBacking.material.emissive.set(0x8a5a36);
+    }
+  
+    if (tone === "cool") {
+      scene.fog.color.set(0x1a2230);
+      museumSphere.material.color.set(0x111823);
+      memoryWarmBase = 0.72;
+      memoryCoolBase = 1.28;
+      memoryWindow.material.color.set(0xa8cfff);
+      windowInnerBacking.material.color.set(0x1d2c44);
+      windowInnerBacking.material.emissive.set(0x2e5f9c);
+    }
+  
+    if (tone === "dream") {
+      scene.fog.color.set(0x2a1830);
+      museumSphere.material.color.set(0x180f1d);
+      memoryWarmBase = 0.95;
+      memoryCoolBase = 1.05;
+      memoryWindow.material.color.set(0xf2b8ff);
+      windowInnerBacking.material.color.set(0x37234a);
+      windowInnerBacking.material.emissive.set(0x7a42a8);
+    }
+  
+    if (tone === "echo") {
+      scene.fog.color.set(0x232323);
+      museumSphere.material.color.set(0x111111);
+      memoryWarmBase = 0.62;
+      memoryCoolBase = 0.72;
+      memoryWindow.material.color.set(0xd8d8d8);
+      windowInnerBacking.material.color.set(0x2f3136);
+      windowInnerBacking.material.emissive.set(0x5a5f6a);
+    }
+  
+    if (tone === "neutral") {
+      scene.fog.color.set(0x24182e);
+      museumSphere.material.color.set(0x120f1a);
+      memoryWarmBase = 0.9;
+      memoryCoolBase = 1.15;
+      memoryWindow.material.color.set(0x9bc4ff);
+      windowInnerBacking.material.color.set(0x1f2740);
+      windowInnerBacking.material.emissive.set(0x273b72);
+    }
+  
+    toneText.textContent = tone;
+  }
+
   function highlightFrames() {
     const t = Number(timeline.value) / 100;
   
@@ -2388,6 +2452,7 @@
     updateMemoryFocusTarget();
     updateMemoryEntryTarget();
     updateMemoryPanel();
+    applyMemoryTone();
   
     if (appState === "memory") {
       loadSelectedMemoryObjects();
@@ -2594,7 +2659,7 @@
       id: nextId,
       name: `Memory ${String(nextId + 1).padStart(2, "0")}`,
       clarity: 0.5,
-      tone: "neutral",
+      tone: getToneForMemoryIndex(nextId),
       edited: false,
       history: [],
       objects: []
@@ -2932,9 +2997,8 @@
       controls.enabled = false;
       memoryControlsInitialized = false;
       
-      scene.fog.color.set(0x24182e);
       scene.fog.density = 0.05;
-      museumSphere.material.color.set(0x120f1a);
+      applyMemoryTone();
     
       framesGroup.visible = true;
       platformGroup.visible = true;
@@ -2958,6 +3022,7 @@
   }
   
   updateMemoryPanel();
+  applyMemoryTone();
   highlightFrames();
   updateHud();
   setAppState("menu");
