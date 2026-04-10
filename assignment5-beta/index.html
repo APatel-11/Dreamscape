@@ -656,12 +656,25 @@
   let transitionCurveP3 = new THREE.Vector3();
   
   let memoryCameraTarget = new THREE.Vector3(0, 1.62, -1.95);
+  const PLAYER_HEIGHT = 1.62;
   let memoryCameraBasePos = new THREE.Vector3(0, 1.72, 3.8);
   let memoryCameraPos = memoryCameraBasePos.clone();
   
   let memoryControlsInitialized = false;
   let memoryObjectFloatEnabled = false;
   let doorOpenAmount = 0;
+
+  let isWalkingMode = false;
+
+  const movement = {
+    forward: false,
+    backward: false,
+    left: false,
+    right: false
+  };
+  
+  let playerVelocity = new THREE.Vector3();
+  const moveSpeed = 0.08;
 
   let memoryAtmospherePulse = 0;
   let memoryWarmBase = 0.90;
@@ -688,6 +701,13 @@
     saveMemories();
     updateMemoryPanel();
     applyMemoryTone();
+  }
+
+  function resetMovementFlags() {
+    movement.forward = false;
+    movement.backward = false;
+    movement.left = false;
+    movement.right = false;
   }
 
   function getArchiveStats() {
@@ -2625,7 +2645,7 @@
     controls.enabled = true;
     controls.enablePan = false;
     controls.enableZoom = true;
-    controls.enableRotate = true;
+    controls.enableRotate = false;
     controls.enableDamping = true;
     controls.rotateSpeed = 0.75;
     controls.zoomSpeed = 0.8;
@@ -2869,7 +2889,8 @@
     memoryWorldGroup.visible = false;
     previewFrameActive = !!selectedFrame;
     controls.enabled = true;
-  
+
+    resetMovementFlags();
     clearSpawnedMemoryObjects();
   
     controls.target.copy(hubTarget);
@@ -2893,7 +2914,8 @@
     memoryTransitionProgress = 0;
     memoryWorldGroup.visible = false;
     previewFrameActive = false;
-  
+    
+    resetMovementFlags();
     clearSpawnedMemoryObjects();
   
     setAppState("menu");
@@ -2903,6 +2925,13 @@
     const typingInInput =
       document.activeElement === memoryNameInput ||
       document.activeElement === objectTypeSelect;
+
+    if (appState === "memory" && !selectedMemoryObject) {
+      if (e.key === "w" || e.key === "W") movement.forward = true;
+      if (e.key === "s" || e.key === "S") movement.backward = true;
+      if (e.key === "a" || e.key === "A") movement.left = true;
+      if (e.key === "d" || e.key === "D") movement.right = true;
+    }
   
     if (!typingInInput && appState !== "memory" && (e.key === "r" || e.key === "R")) {
       saveSelectedMemoryName();
@@ -2961,11 +2990,13 @@
   
     if (e.key === "Escape") {
       if (appState === "memory" && selectedMemoryObject) {
+        resetMovementFlags();
         clearMemoryObjectSelection();
         return;
       }
     
       if (appState === "memory") {
+        resetMovementFlags();
         clearSpawnedMemoryObjects();
         memoryWorldGroup.visible = false;
         isMemoryTransitioning = false;
@@ -2975,6 +3006,13 @@
     
       setAppState("menu");
     }
+  });
+
+  window.addEventListener("keyup", (e) => {
+    if (e.key === "w" || e.key === "W") movement.forward = false;
+    if (e.key === "s" || e.key === "S") movement.backward = false;
+    if (e.key === "a" || e.key === "A") movement.left = false;
+    if (e.key === "d" || e.key === "D") movement.right = false;
   });
 
   function setAppState(nextState) {
@@ -3088,6 +3126,38 @@
       memories[selectedMemoryId].clarity = t;
       clarityText.textContent = t.toFixed(2);
       highlightFrames();
+
+      // ===== WASD MOVEMENT =====
+      if (!isMemoryTransitioning && !selectedMemoryObject) {
+        const direction = new THREE.Vector3();
+      
+        if (movement.forward) direction.z -= 1;
+        if (movement.backward) direction.z += 1;
+        if (movement.left) direction.x -= 1;
+        if (movement.right) direction.x += 1;
+      
+        if (direction.length() > 0) {
+          direction.normalize();
+      
+          const forward = new THREE.Vector3();
+          camera.getWorldDirection(forward);
+          forward.y = 0;
+          forward.normalize();
+      
+          const right = new THREE.Vector3();
+          right.crossVectors(forward, new THREE.Vector3(0, 1, 0)).normalize();
+      
+          const moveDir = new THREE.Vector3();
+          moveDir.addScaledVector(forward, -direction.z);
+          moveDir.addScaledVector(right, direction.x);
+      
+          camera.position.addScaledVector(moveDir, moveSpeed);
+          controls.target.addScaledVector(moveDir, moveSpeed);
+        }
+      
+        camera.position.y = PLAYER_HEIGHT;
+        controls.target.y = PLAYER_HEIGHT;
+      }
     }
 
     if (appState === "memory" && isMemoryTransitioning) {
