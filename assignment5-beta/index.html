@@ -604,21 +604,28 @@
   scene.add(museumSphere);
 
   const DEFAULT_MEMORY_COUNT = 6;
-  const savedNames = JSON.parse(localStorage.getItem("dreamscape_memory_names") || "null");
+  const savedMemories = JSON.parse(localStorage.getItem("dreamscape_memories") || "null");
   
-  const initialMemoryCount =
-    Array.isArray(savedNames) && savedNames.length > 0
-      ? savedNames.length
-      : DEFAULT_MEMORY_COUNT;
-  
-  const memories = Array.from({ length: initialMemoryCount }, (_, i) => ({
-    id: i,
-    name: savedNames?.[i] || `Memory ${String(i + 1).padStart(2, "0")}`,
-    clarity: 0.5,
-    tone: "neutral",
-    edited: false,
-    history: []
-  }));
+  const memories =
+    Array.isArray(savedMemories) && savedMemories.length > 0
+      ? savedMemories.map((m, i) => ({
+          id: i,
+          name: m.name || `Memory ${String(i + 1).padStart(2, "0")}`,
+          clarity: typeof m.clarity === "number" ? m.clarity : 0.5,
+          tone: m.tone || "neutral",
+          edited: !!m.edited,
+          history: Array.isArray(m.history) ? m.history : [],
+          objects: Array.isArray(m.objects) ? m.objects : []
+        }))
+      : Array.from({ length: DEFAULT_MEMORY_COUNT }, (_, i) => ({
+          id: i,
+          name: `Memory ${String(i + 1).padStart(2, "0")}`,
+          clarity: 0.5,
+          tone: "neutral",
+          edited: false,
+          history: [],
+          objects: []
+        }));
 
   let selectedMemoryId = 0;
   let selectedFrame = null;
@@ -653,8 +660,7 @@
   let doorOpenAmount = 0;
   
   function saveMemories() {
-    const names = memories.map(m => m.name);
-    localStorage.setItem("dreamscape_memory_names", JSON.stringify(names));
+    localStorage.setItem("dreamscape_memories", JSON.stringify(memories));
   }
 
   function getArchiveStats() {
@@ -1752,6 +1758,122 @@
   let selectedMemoryObject = null;
   const memorySelectableRoots = [];
   const spawnedMemoryObjects = [];
+
+  function createObjectRecord(type, root, label) {
+    return {
+      recordId: `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+      type,
+      label,
+      position: {
+        x: root.position.x,
+        y: root.position.y,
+        z: root.position.z
+      },
+      rotation: {
+        x: root.rotation.x,
+        y: root.rotation.y,
+        z: root.rotation.z
+      },
+      scale: {
+        x: root.scale.x,
+        y: root.scale.y,
+        z: root.scale.z
+      }
+    };
+  }
+  
+  function applyRecordToObject(root, record) {
+    root.position.set(
+      record.position?.x ?? root.position.x,
+      record.position?.y ?? root.position.y,
+      record.position?.z ?? root.position.z
+    );
+  
+    root.rotation.set(
+      record.rotation?.x ?? root.rotation.x,
+      record.rotation?.y ?? root.rotation.y,
+      record.rotation?.z ?? root.rotation.z
+    );
+  
+    root.scale.set(
+      record.scale?.x ?? 1,
+      record.scale?.y ?? 1,
+      record.scale?.z ?? 1
+    );
+  }
+  
+  function clearSpawnedMemoryObjects() {
+    while (spawnedMemoryObjects.length > 0) {
+      const spawned = spawnedMemoryObjects.pop();
+      memoryWorldGroup.remove(spawned);
+  
+      const selectableIndex = memorySelectableRoots.indexOf(spawned);
+      if (selectableIndex >= 0) {
+        memorySelectableRoots.splice(selectableIndex, 1);
+      }
+    }
+  
+    selectedMemoryObject = null;
+    selectedObjectText.textContent = "none";
+    updateHud();
+  }
+  
+  function loadSelectedMemoryObjects() {
+    clearSpawnedMemoryObjects();
+  
+    const memory = memories[selectedMemoryId];
+    if (!memory || !Array.isArray(memory.objects)) return;
+  
+    for (const record of memory.objects) {
+      const built = buildSpawnedObject(record.type || "cube");
+      const objectRoot = built.root;
+  
+      applyRecordToObject(objectRoot, record);
+  
+      objectRoot.userData.recordId = record.recordId;
+  
+      memoryWorldGroup.add(objectRoot);
+      registerMemorySelectable(
+        objectRoot,
+        record.label || built.label,
+        true
+      );
+      objectRoot.userData.memoryLabel = record.label || built.label;
+      spawnedMemoryObjects.push(objectRoot);
+    }
+  }
+  
+  function syncSelectedObjectToMemoryData() {
+    if (!selectedMemoryObject) return;
+  
+    const memory = memories[selectedMemoryId];
+    if (!memory || !Array.isArray(memory.objects)) return;
+  
+    const recordId = selectedMemoryObject.userData.recordId;
+    const record = memory.objects.find(obj => obj.recordId === recordId);
+  
+    if (!record) return;
+  
+    record.position = {
+      x: selectedMemoryObject.position.x,
+      y: selectedMemoryObject.position.y,
+      z: selectedMemoryObject.position.z
+    };
+  
+    record.rotation = {
+      x: selectedMemoryObject.rotation.x,
+      y: selectedMemoryObject.rotation.y,
+      z: selectedMemoryObject.rotation.z
+    };
+  
+    record.scale = {
+      x: selectedMemoryObject.scale.x,
+      y: selectedMemoryObject.scale.y,
+      z: selectedMemoryObject.scale.z
+    };
+  
+    saveMemories();
+  }
   
   function registerMemorySelectable(root, label, removable = false) {
     root.userData.isMemorySelectable = true;
@@ -1831,13 +1953,15 @@
     if (!selectedMemoryObject) return;
     selectedMemoryObject.position.x += dx;
     selectedMemoryObject.position.z += dz;
+    syncSelectedObjectToMemoryData();
   }
   
   function rotateSelectedMemoryObject(amount) {
     if (!selectedMemoryObject) return;
     selectedMemoryObject.rotation.y += amount;
+    syncSelectedObjectToMemoryData();
   }
-
+  
   function scaleSelectedMemoryObject(amount) {
     if (!selectedMemoryObject) return;
   
@@ -1846,6 +1970,7 @@
     const nextScaleZ = THREE.MathUtils.clamp(selectedMemoryObject.scale.z + amount, 0.4, 2.2);
   
     selectedMemoryObject.scale.set(nextScaleX, nextScaleY, nextScaleZ);
+    syncSelectedObjectToMemoryData();
   }
   
   function setCastReceiveShadowDeep(root) {
@@ -2108,13 +2233,21 @@
     objectRoot.position.x = 0;
     objectRoot.position.z = 1.2;
   
+    const record = createObjectRecord(chosenType, objectRoot, `${objectLabel} ${memories[selectedMemoryId].objects.length + 1}`);
+    objectRoot.userData.recordId = record.recordId;
+  
     memoryWorldGroup.add(objectRoot);
     registerMemorySelectable(
       objectRoot,
-      `${objectLabel} ${spawnedMemoryObjects.length + 1}`,
+      record.label,
       true
     );
+    objectRoot.userData.memoryLabel = record.label;
+  
     spawnedMemoryObjects.push(objectRoot);
+    memories[selectedMemoryId].objects.push(record);
+  
+    saveMemories();
     selectMemoryObject(objectRoot);
   }
   
@@ -2123,6 +2256,7 @@
     if (!selectedMemoryObject.userData.removable) return;
   
     const objectToRemove = selectedMemoryObject;
+    const recordId = objectToRemove.userData.recordId;
   
     applyMemoryObjectHighlight(objectToRemove, false);
     memoryWorldGroup.remove(objectToRemove);
@@ -2137,8 +2271,17 @@
       spawnedMemoryObjects.splice(spawnedIndex, 1);
     }
   
+    const memory = memories[selectedMemoryId];
+    if (memory && Array.isArray(memory.objects)) {
+      const recordIndex = memory.objects.findIndex(obj => obj.recordId === recordId);
+      if (recordIndex >= 0) {
+        memory.objects.splice(recordIndex, 1);
+      }
+    }
+  
     selectedMemoryObject = null;
     selectedObjectText.textContent = "none";
+    saveMemories();
     updateHud();
   }
 
@@ -2200,10 +2343,18 @@
     selectedFrame = frame;
     selectedMemoryId = frame.userData.memoryId;
     previewFrameActive = true;
+  
+    clearMemoryObjectSelection();
+  
     updatePreviewFrameTarget();
     updateMemoryFocusTarget();
     updateMemoryEntryTarget();
     updateMemoryPanel();
+  
+    if (appState === "memory") {
+      loadSelectedMemoryObjects();
+    }
+  
     highlightFrames();
     updateHud();
   }
@@ -2405,7 +2556,8 @@
       clarity: 0.5,
       tone: "neutral",
       edited: false,
-      history: []
+      history: [],
+      objects: []
     });
   
     saveMemories();
@@ -2450,21 +2602,10 @@
   }
 
   function resetArchive() {
-    localStorage.removeItem("dreamscape_memory_names");
-  
-    while (spawnedMemoryObjects.length > 0) {
-      const spawned = spawnedMemoryObjects.pop();
-      memoryWorldGroup.remove(spawned);
-  
-      const selectableIndex = memorySelectableRoots.indexOf(spawned);
-      if (selectableIndex >= 0) {
-        memorySelectableRoots.splice(selectableIndex, 1);
-      }
-    }
-  
-    selectedMemoryObject = null;
-    selectedObjectText.textContent = "none";
-  
+    localStorage.removeItem("dreamscape_memories");
+
+    clearSpawnedMemoryObjects();
+    
     memories.length = 0;
   
     for (let i = 0; i < DEFAULT_MEMORY_COUNT; i++) {
@@ -2474,7 +2615,8 @@
         clarity: 0.5,
         tone: "neutral",
         edited: false,
-        history: []
+        history: [],
+        objects: []
       });
     }
   
@@ -2493,6 +2635,11 @@
     highlightFrames();
     updateHud();
   }
+
+  togglePanelBtn.addEventListener("click", () => {
+    memoryPanel.classList.toggle("minimized");
+    togglePanelBtn.textContent = memoryPanel.classList.contains("minimized") ? "Expand" : "Minimize";
+  });
 
   toggleEditPanelBtn.addEventListener("click", () => {
     editPanel.classList.toggle("minimized");
@@ -2570,6 +2717,7 @@
   enterBtn.addEventListener("click", () => {
     if (!selectedFrame) return;
   
+    loadSelectedMemoryObjects();
     beginMemoryTransition();
     setAppState("memory");
   });
@@ -2580,10 +2728,12 @@
     memoryWorldGroup.visible = false;
     previewFrameActive = !!selectedFrame;
     controls.enabled = true;
-    
+  
+    clearSpawnedMemoryObjects();
+  
     controls.target.copy(hubTarget);
     controls.update();
-    
+  
     setAppState("hub");
   });
 
@@ -2602,7 +2752,9 @@
     memoryTransitionProgress = 0;
     memoryWorldGroup.visible = false;
     previewFrameActive = false;
-    
+  
+    clearSpawnedMemoryObjects();
+  
     setAppState("menu");
   });
 
@@ -2671,6 +2823,15 @@
         clearMemoryObjectSelection();
         return;
       }
+    
+      if (appState === "memory") {
+        clearSpawnedMemoryObjects();
+        memoryWorldGroup.visible = false;
+        isMemoryTransitioning = false;
+        memoryTransitionProgress = 0;
+        previewFrameActive = false;
+      }
+    
       setAppState("menu");
     }
   });
