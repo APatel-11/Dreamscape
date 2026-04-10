@@ -345,6 +345,10 @@
     </div>
 
     <div class="btnRow">
+      <button id="cycleToneBtn">Change Tone</button>
+    </div>
+
+    <div class="btnRow">
       <button id="enterBtn">Enter Memory</button>
       <button id="exitBtn" class="secondary">Exit Memory</button>
     </div>
@@ -670,6 +674,20 @@
   function getToneForMemoryIndex(index) {
     const tones = ["neutral", "warm", "cool", "dream", "echo"];
     return tones[index % tones.length];
+  }
+
+  function cycleSelectedMemoryTone() {
+    const tones = ["neutral", "warm", "cool", "dream", "echo"];
+    const memory = memories[selectedMemoryId];
+    if (!memory) return;
+  
+    const currentIndex = tones.indexOf(memory.tone);
+    const nextIndex = currentIndex >= 0 ? (currentIndex + 1) % tones.length : 0;
+  
+    memory.tone = tones[nextIndex];
+    saveMemories();
+    updateMemoryPanel();
+    applyMemoryTone();
   }
 
   function getArchiveStats() {
@@ -1783,6 +1801,9 @@
   const resetArchiveBtn = document.getElementById("resetArchiveBtn");
   const addObjectBtn = document.getElementById("addObjectBtn");
   const removeObjectBtn = document.getElementById("removeObjectBtn");
+
+  const cycleToneBtn = document.getElementById("cycleToneBtn");
+  
   const selectedObjectText = document.getElementById("selectedObjectText");
   const objectTypeSelect = document.getElementById("objectTypeSelect");
   
@@ -2828,6 +2849,8 @@
 
   saveBtn.addEventListener("click", saveSelectedMemoryName);
   undoBtn.addEventListener("click", undoMemoryName);
+
+  cycleToneBtn.addEventListener("click", cycleSelectedMemoryTone);
 
   enterBtn.addEventListener("click", () => {
     if (!selectedFrame) return;
