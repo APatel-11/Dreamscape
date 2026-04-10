@@ -2708,6 +2708,7 @@
       null;
   
     updateMemoryPanel();
+    applyMemoryTone();
     highlightFrames();
     updateHud();
     updateMemoryFocusTarget();
@@ -2834,6 +2835,9 @@
     loadSelectedMemoryObjects();
     beginMemoryTransition();
     setAppState("memory");
+
+    updateMemoryPanel();
+    applyMemoryTone();
   });
 
   exitBtn.addEventListener("click", () => {
