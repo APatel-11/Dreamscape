@@ -658,6 +658,10 @@
   let memoryControlsInitialized = false;
   let memoryObjectFloatEnabled = false;
   let doorOpenAmount = 0;
+
+  let memoryAtmospherePulse = 0;
+  let memoryWarmBase = 0.9;
+  let memoryCoolBase = 1.15;
   
   function saveMemories() {
     localStorage.setItem("dreamscape_memories", JSON.stringify(memories));
@@ -1410,6 +1414,8 @@
   keepsakeBox.castShadow = true;
   keepsakeBox.receiveShadow = true;
   memoryWorldGroup.add(keepsakeBox);
+
+  keepsakeBox.userData.baseY = keepsakeBox.position.y;
   
   const leftCabinetGroup = new THREE.Group();
 
@@ -1688,6 +1694,34 @@
     artFrame.position.set(-2.2 + i * 2.2, 3.1, -5.85);
     memoryWorldGroup.add(artFrame);
     memoryFramesInside.push(artFrame);
+  }
+
+  const memoryDustGroup = new THREE.Group();
+  memoryWorldGroup.add(memoryDustGroup);
+  
+  for (let i = 0; i < 55; i++) {
+    const mote = new THREE.Mesh(
+      new THREE.SphereGeometry(0.012 + Math.random() * 0.02, 8, 8),
+      new THREE.MeshBasicMaterial({
+        color: 0xf3e7d8,
+        transparent: true,
+        opacity: 0.10 + Math.random() * 0.14
+      })
+    );
+  
+    mote.position.set(
+      (Math.random() - 0.5) * 8.5,
+      0.8 + Math.random() * 3.6,
+      -4.8 + Math.random() * 6.8
+    );
+  
+    mote.userData.baseX = mote.position.x;
+    mote.userData.baseY = mote.position.y;
+    mote.userData.baseZ = mote.position.z;
+    mote.userData.offset = Math.random() * Math.PI * 2;
+    mote.userData.speed = 0.15 + Math.random() * 0.25;
+  
+    memoryDustGroup.add(mote);
   }
 
   const sideArtworkFrame = new THREE.Mesh(
@@ -3135,15 +3169,41 @@
     }
 
     if (memoryWorldGroup.visible) {
-      memoryWindow.material.emissiveIntensity = 0.16 + (Math.sin(time * 0.75) + 1) * 0.035;
+      memoryAtmospherePulse = 0.5 + 0.5 * Math.sin(time * 0.42);
+    
+      memoryWindow.material.emissiveIntensity =
+        0.12 + memoryAtmospherePulse * 0.06 + Math.sin(time * 0.9) * 0.01;
+    
+      memoryWindow.material.opacity =
+        0.70 + memoryAtmospherePulse * 0.05;
+    
+      windowInnerBacking.material.emissiveIntensity =
+        0.16 + memoryAtmospherePulse * 0.08;
     
       for (let i = 0; i < memoryFramesInside.length; i++) {
-        memoryFramesInside[i].rotation.z = Math.sin(time * 0.5 + i * 0.8) * 0.01;
+        memoryFramesInside[i].rotation.z = Math.sin(time * 0.35 + i * 0.8) * 0.006;
       }
     
-      memoryWarmLight.intensity = 0.78 + (Math.sin(time * 0.8) + 1) * 0.08;
-      memoryCoolLight.intensity = 0.95 + (Math.cos(time * 0.9) + 1) * 0.08;
-
+      memoryWarmLight.intensity =
+        memoryWarmBase + Math.sin(time * 0.55) * 0.05;
+    
+      memoryCoolLight.intensity =
+        memoryCoolBase + Math.cos(time * 0.60) * 0.05;
+    
+      doorwayGlow.intensity =
+        0.28 + memoryAtmospherePulse * 0.12;
+    
+      keepsakeBox.position.y =
+        keepsakeBox.userData.baseY + Math.sin(time * 0.9) * 0.025;
+    
+      for (const mote of memoryDustGroup.children) {
+        const driftTime = time * mote.userData.speed + mote.userData.offset;
+    
+        mote.position.x = mote.userData.baseX + Math.sin(driftTime) * 0.06;
+        mote.position.y = mote.userData.baseY + Math.cos(driftTime * 0.8) * 0.04;
+        mote.position.z = mote.userData.baseZ + Math.sin(driftTime * 0.6) * 0.05;
+      }
+    
       doorPivot.rotation.y = -doorOpenAmount * Math.PI * 0.5;
     }
 
