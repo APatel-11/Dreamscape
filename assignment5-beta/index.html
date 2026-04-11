@@ -1226,6 +1226,13 @@
   );
   baseboardRight.position.set(6.925, 0.08, 0);
   memoryWorldGroup.add(baseboardRight);
+
+  const baseboardFront = new THREE.Mesh(
+    new THREE.BoxGeometry(13.9, 0.15, 0.15),
+    baseboardMat
+  );
+  baseboardFront.position.set(0, 0.08, 5.925);
+  memoryWorldGroup.add(baseboardFront);
   
   const doorwayGroup = new THREE.Group();
   memoryWorldGroup.add(doorwayGroup);
@@ -2423,7 +2430,7 @@
   registerStaticCollider(leftCabinetGroup);
   registerStaticCollider(rightCabinetGroup);
   registerStaticCollider(chairGroup);
-  //registerStaticCollider(bench);
+  registerStaticCollider(bench);
   registerStaticCollider(tableBase);
   registerStaticCollider(photoFrameOuter);
   registerStaticCollider(keepsakeBox);
