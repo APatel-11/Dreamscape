@@ -1334,6 +1334,12 @@
   const doorwayGlow = new THREE.PointLight(0x8dafff, 0.45, 8);
   doorwayGlow.position.set(6.2, 1.8, 2.0);
   memoryWorldGroup.add(doorwayGlow);
+
+  const exteriorSunLight = new THREE.DirectionalLight(0xffffff, 0.9);
+  exteriorSunLight.position.set(-6, 10, -8);
+  exteriorSunLight.target.position.set(0, 0, -12);
+  scene.add(exteriorSunLight);
+  scene.add(exteriorSunLight.target);
   
   const windowOuterFrame = new THREE.Mesh(
     new THREE.BoxGeometry(9.1, 3.7, 0.18),
@@ -1347,29 +1353,29 @@
   const windowInnerBacking = new THREE.Mesh(
     new THREE.PlaneGeometry(8.15, 2.75),
     new THREE.MeshStandardMaterial({
-      color: 0x1f2740,
-      emissive: 0x273b72,
-      emissiveIntensity: 0.22,
-      roughness: 0.55,
-      metalness: 0.04
+      color: 0xeaf4ff,
+      emissive: 0xcfe6ff,
+      emissiveIntensity: 0.08,
+      roughness: 0.95,
+      metalness: 0.0
     })
   );
-  windowInnerBacking.position.set(0, 2.45, -5.84);
+  windowInnerBacking.position.set(0, 2.45, -5.86);
   memoryWorldGroup.add(windowInnerBacking);
   
   const memoryWindow = new THREE.Mesh(
     new THREE.PlaneGeometry(7.85, 2.45),
     new THREE.MeshStandardMaterial({
-      color: 0x9bc4ff,
-      emissive: 0x4e74c9,
-      emissiveIntensity: 0.20,
-      roughness: 0.18,
-      metalness: 0.08,
+      color: 0xffffff,
+      emissive: 0xaed4ff,
+      emissiveIntensity: 0.05,
+      roughness: 0.08,
+      metalness: 0.02,
       transparent: true,
-      opacity: 0.78
+      opacity: 0.18
     })
   );
-  memoryWindow.position.set(0, 2.45, -5.80);
+  memoryWindow.position.set(0, 2.45, -5.79);
   memoryWorldGroup.add(memoryWindow);
   
   const windowMullionV = new THREE.Mesh(
@@ -1399,148 +1405,158 @@
   memoryWorldGroup.add(exteriorWorldGroup);
   
   const outsideSky = new THREE.Mesh(
-    new THREE.PlaneGeometry(40, 18),
+    new THREE.PlaneGeometry(60, 26),
     new THREE.MeshBasicMaterial({
-      color: 0xbfdcff
+      color: 0xcfe7ff
     })
   );
-  outsideSky.position.set(0, 5.2, -18);
+  outsideSky.position.set(0, 7.5, -11.5);
   exteriorWorldGroup.add(outsideSky);
   
+  const distantSkyBand = new THREE.Mesh(
+    new THREE.PlaneGeometry(60, 8),
+    new THREE.MeshBasicMaterial({
+      color: 0xeaf4ff
+    })
+  );
+  distantSkyBand.position.set(0, 1.8, -11.4);
+  exteriorWorldGroup.add(distantSkyBand);
+  
   const outsideGround = new THREE.Mesh(
-    new THREE.PlaneGeometry(40, 20),
+    new THREE.PlaneGeometry(60, 30),
     new THREE.MeshStandardMaterial({
-      color: 0x7fa06d,
+      color: 0x86aa73,
       roughness: 1.0,
       metalness: 0.0
     })
   );
   outsideGround.rotation.x = -Math.PI / 2;
-  outsideGround.position.set(0, -0.02, -18);
+  outsideGround.position.set(0, -0.02, -12);
   outsideGround.receiveShadow = true;
   exteriorWorldGroup.add(outsideGround);
-
+  
   const street = new THREE.Mesh(
-    new THREE.BoxGeometry(40, 0.02, 4.5),
+    new THREE.BoxGeometry(60, 0.02, 3.8),
     new THREE.MeshStandardMaterial({
-      color: 0x4b4f57,
+      color: 0x4f535c,
       roughness: 0.95,
       metalness: 0.02
     })
   );
-  street.position.set(0, 0.01, -14.5);
+  street.position.set(0, 0.01, -9.3);
   street.receiveShadow = true;
   exteriorWorldGroup.add(street);
   
-  const streetLine = new THREE.Mesh(
-    new THREE.BoxGeometry(40, 0.03, 0.12),
-    new THREE.MeshStandardMaterial({
-      color: 0xf2e6a2,
-      roughness: 0.8,
-      metalness: 0.0
-    })
-  );
-  streetLine.position.set(0, 0.03, -14.5);
-  exteriorWorldGroup.add(streetLine);
-
-  function createOutsideHouse(x, z, bodyColor = 0xc9b7a6, roofColor = 0x6b4c43) {
+  for (let i = -24; i <= 24; i += 6) {
+    const dash = new THREE.Mesh(
+      new THREE.BoxGeometry(2.4, 0.03, 0.12),
+      new THREE.MeshStandardMaterial({
+        color: 0xf2e6a2,
+        roughness: 0.8,
+        metalness: 0.0
+      })
+    );
+    dash.position.set(i, 0.03, -9.3);
+    exteriorWorldGroup.add(dash);
+  }
+  
+  function createOutsideHouse(x, z, scale = 1, bodyColor = 0xc9b7a6, roofColor = 0x6b4c43) {
     const house = new THREE.Group();
   
     const body = new THREE.Mesh(
-      new THREE.BoxGeometry(2.8, 2.2, 2.4),
+      new THREE.BoxGeometry(3.2 * scale, 2.5 * scale, 2.6 * scale),
       new THREE.MeshStandardMaterial({
         color: bodyColor,
         roughness: 0.95,
         metalness: 0.02
       })
     );
-    body.position.y = 1.1;
+    body.position.y = 1.25 * scale;
     body.castShadow = true;
     body.receiveShadow = true;
     house.add(body);
   
     const roof = new THREE.Mesh(
-      new THREE.ConeGeometry(2.2, 1.2, 4),
+      new THREE.ConeGeometry(2.5 * scale, 1.35 * scale, 4),
       new THREE.MeshStandardMaterial({
         color: roofColor,
         roughness: 0.92,
         metalness: 0.02
       })
     );
-    roof.position.y = 2.8;
+    roof.position.y = 3.15 * scale;
     roof.rotation.y = Math.PI * 0.25;
     roof.castShadow = true;
     roof.receiveShadow = true;
     house.add(roof);
   
     const door = new THREE.Mesh(
-      new THREE.BoxGeometry(0.45, 0.95, 0.08),
+      new THREE.BoxGeometry(0.5 * scale, 1.05 * scale, 0.08),
       new THREE.MeshStandardMaterial({
         color: 0x5f4438,
         roughness: 0.88
       })
     );
-    door.position.set(0, 0.48, 1.24);
+    door.position.set(0, 0.52 * scale, 1.34 * scale);
     house.add(door);
   
     const windowLeft = new THREE.Mesh(
-      new THREE.BoxGeometry(0.45, 0.45, 0.06),
+      new THREE.BoxGeometry(0.5 * scale, 0.5 * scale, 0.06),
       new THREE.MeshStandardMaterial({
-        color: 0xbfd9ff,
-        emissive: 0x335588,
-        emissiveIntensity: 0.12,
+        color: 0xcfe4ff,
+        emissive: 0x446a99,
+        emissiveIntensity: 0.08,
         roughness: 0.3
       })
     );
-    windowLeft.position.set(-0.75, 1.3, 1.23);
+    windowLeft.position.set(-0.82 * scale, 1.45 * scale, 1.33 * scale);
     house.add(windowLeft);
   
     const windowRight = new THREE.Mesh(
-      new THREE.BoxGeometry(0.45, 0.45, 0.06),
+      new THREE.BoxGeometry(0.5 * scale, 0.5 * scale, 0.06),
       new THREE.MeshStandardMaterial({
-        color: 0xbfd9ff,
-        emissive: 0x335588,
-        emissiveIntensity: 0.12,
+        color: 0xcfe4ff,
+        emissive: 0x446a99,
+        emissiveIntensity: 0.08,
         roughness: 0.3
       })
     );
-    windowRight.position.set(0.75, 1.3, 1.23);
+    windowRight.position.set(0.82 * scale, 1.45 * scale, 1.33 * scale);
     house.add(windowRight);
   
     house.position.set(x, 0, z);
     exteriorWorldGroup.add(house);
   }
-
-  createOutsideHouse(-8.5, -19.5, 0xd8c3b4, 0x7a5a4e);
-  createOutsideHouse(-4.5, -18.2, 0xc7d6c2, 0x5d5a74);
-  createOutsideHouse(0.0, -19.2, 0xd8d0bb, 0x6f4f45);
-  createOutsideHouse(4.8, -18.4, 0xcbbfd8, 0x5e4f6b);
-  createOutsideHouse(9.0, -19.4, 0xd7c7b1, 0x6d5b4e);
-
+  
+  createOutsideHouse(-8.5, -13.7, 1.05, 0xd8c3b4, 0x7a5a4e);
+  createOutsideHouse(-3.8, -12.9, 1.0, 0xc7d6c2, 0x5d5a74);
+  createOutsideHouse(1.8, -13.4, 1.08, 0xd8d0bb, 0x6f4f45);
+  createOutsideHouse(7.2, -12.8, 1.0, 0xcbbfd8, 0x5e4f6b);
+  
   function createOutsideTree(x, z, scale = 1) {
     const tree = new THREE.Group();
   
     const trunk = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.16 * scale, 0.20 * scale, 1.4 * scale, 10),
+      new THREE.CylinderGeometry(0.16 * scale, 0.20 * scale, 1.5 * scale, 10),
       new THREE.MeshStandardMaterial({
         color: 0x6b4a35,
         roughness: 0.95
       })
     );
-    trunk.position.y = 0.7 * scale;
+    trunk.position.y = 0.75 * scale;
     trunk.castShadow = true;
     trunk.receiveShadow = true;
     tree.add(trunk);
   
     const leaves = new THREE.Mesh(
-      new THREE.SphereGeometry(0.75 * scale, 18, 18),
+      new THREE.SphereGeometry(0.82 * scale, 18, 18),
       new THREE.MeshStandardMaterial({
         color: 0x6f9a5f,
         roughness: 0.95,
         metalness: 0.0
       })
     );
-    leaves.position.y = 1.8 * scale;
+    leaves.position.y = 1.95 * scale;
     leaves.castShadow = true;
     leaves.receiveShadow = true;
     tree.add(leaves);
@@ -1548,19 +1564,18 @@
     tree.position.set(x, 0, z);
     exteriorWorldGroup.add(tree);
   }
-
-  createOutsideTree(-11, -15.8, 1.1);
-  createOutsideTree(-6.8, -16.9, 0.95);
-  createOutsideTree(-2.2, -15.9, 1.15);
-  createOutsideTree(2.9, -16.6, 1.0);
-  createOutsideTree(7.2, -15.7, 1.08);
-  createOutsideTree(11.2, -16.8, 0.92);
-
-  createOutsideTree(-13.5, -22.5, 1.25);
-  createOutsideTree(-7.5, -23.0, 1.1);
-  createOutsideTree(-1.5, -22.4, 1.2);
-  createOutsideTree(5.0, -23.2, 1.05);
-  createOutsideTree(12.8, -22.8, 1.15);
+  
+  createOutsideTree(-12.5, -10.8, 1.15);
+  createOutsideTree(-6.7, -11.2, 1.0);
+  createOutsideTree(-1.0, -10.9, 1.2);
+  createOutsideTree(4.8, -11.1, 1.05);
+  createOutsideTree(10.8, -10.7, 1.12);
+  
+  createOutsideTree(-15.0, -15.5, 1.3);
+  createOutsideTree(-8.7, -15.9, 1.15);
+  createOutsideTree(-2.0, -15.6, 1.25);
+  createOutsideTree(5.6, -15.8, 1.1);
+  createOutsideTree(13.8, -15.4, 1.2);
   
   const tableBase = new THREE.Mesh(
     new THREE.BoxGeometry(2.9, 0.16, 1.25),
@@ -3594,13 +3609,13 @@
       memoryAtmospherePulse = 0.5 + 0.5 * Math.sin(time * 0.42);
     
       memoryWindow.material.emissiveIntensity =
-        0.12 + memoryAtmospherePulse * 0.06 + Math.sin(time * 0.9) * 0.01;
-    
+        0.03 + memoryAtmospherePulse * 0.015 + Math.sin(time * 0.9) * 0.004;
+      
       memoryWindow.material.opacity =
-        0.70 + memoryAtmospherePulse * 0.05;
-    
+        0.14 + memoryAtmospherePulse * 0.03;
+      
       windowInnerBacking.material.emissiveIntensity =
-        0.16 + memoryAtmospherePulse * 0.08;
+        0.05 + memoryAtmospherePulse * 0.02;
     
       for (let i = 0; i < memoryFramesInside.length; i++) {
         memoryFramesInside[i].rotation.z = Math.sin(time * 0.35 + i * 0.8) * 0.006;
