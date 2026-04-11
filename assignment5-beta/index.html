@@ -2703,17 +2703,18 @@
   function configureMemoryControls() {
     controls.enabled = true;
     controls.enablePan = false;
-    controls.enableZoom = false;
+    controls.enableZoom = true;
     controls.enableRotate = true;
     controls.enableDamping = true;
     controls.rotateSpeed = 0.75;
+    controls.zoomSpeed = 0.9;
   
     const currentLookDir = new THREE.Vector3();
     camera.getWorldDirection(currentLookDir);
     controls.target.copy(camera.position).add(currentLookDir);
   
-    controls.minDistance = 0.001;
-    controls.maxDistance = 0.001;
+    controls.minDistance = 0.35;
+    controls.maxDistance = 3.0;
   
     controls.minPolarAngle = 0.35;
     controls.maxPolarAngle = Math.PI - 0.35;
