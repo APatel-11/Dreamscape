@@ -2423,7 +2423,7 @@
   registerStaticCollider(leftCabinetGroup);
   registerStaticCollider(rightCabinetGroup);
   registerStaticCollider(chairGroup);
-  registerStaticCollider(bench);
+  /registerStaticCollider(bench);
   registerStaticCollider(tableBase);
   registerStaticCollider(photoFrameOuter);
   registerStaticCollider(keepsakeBox);
@@ -3160,8 +3160,8 @@
     const t = Number(timeline.value) / 100;
     const time = performance.now() * 0.001;
 
-    const memoryZoomZ = THREE.MathUtils.lerp(5.2, 4.2, t);
-    memoryCameraPos.set(0, 1.72, memoryZoomZ);
+    const memoryZoomZ = THREE.MathUtils.lerp(2.2, 1.4, t);
+    memoryCameraPos.set(0, PLAYER_HEIGHT, memoryZoomZ);
 
     let desiredTarget = hubTarget;
     let targetDistance = 18.5 - t * 16.6;
