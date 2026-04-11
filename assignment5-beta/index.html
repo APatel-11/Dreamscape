@@ -544,7 +544,7 @@
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.outputEncoding = THREE.sRGBEncoding;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.0;
+  renderer.toneMappingExposure = 1.15;
   document.body.appendChild(renderer.domElement);
 
   const controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -1413,7 +1413,7 @@
   const outsideSky = new THREE.Mesh(
     new THREE.PlaneGeometry(70, 30),
     new THREE.MeshBasicMaterial({
-      color: 0xffb37a
+      color: 0xff8f4d
     })
   );
   outsideSky.position.set(0, 8.5, -12.5);
@@ -1423,7 +1423,7 @@
   const distantSkyBand = new THREE.Mesh(
     new THREE.PlaneGeometry(70, 12),
     new THREE.MeshBasicMaterial({
-      color: 0xffd9b8
+      color: 0xffc38a
     })
   );
   distantSkyBand.position.set(0, 2.2, -12.4);
@@ -2008,6 +2008,8 @@
   sideArtworkInner.position.set(-6.89, 2.63, -1.15);
   sideArtworkInner.rotation.y = Math.PI / 2;
   memoryWorldGroup.add(sideArtworkInner);
+
+  cacheTransparentMaterialState(memoryWorldGroup);
   
   const hud = document.getElementById("hud");
   const timeline = document.getElementById("timeline");
@@ -2813,6 +2815,23 @@
     memoryEntryCameraPos.copy(worldPos.clone().sub(inwardDir.multiplyScalar(2.1)));
   }
 
+  function cacheTransparentMaterialState(root) {
+    root.traverse((obj) => {
+      if (!obj.material) return;
+  
+      const materials = Array.isArray(obj.material) ? obj.material : [obj.material];
+  
+      for (const mat of materials) {
+        if ("opacity" in mat && mat.userData.baseOpacity === undefined) {
+          mat.userData.baseOpacity = mat.opacity;
+        }
+        if ("transparent" in mat && mat.userData.baseTransparent === undefined) {
+          mat.userData.baseTransparent = mat.transparent;
+        }
+      }
+    });
+  }
+
   function beginMemoryTransition() {
     if (!selectedFrame) return;
   
@@ -2863,9 +2882,15 @@
     transitionCurveP3.copy(memoryCameraPos);
   
     memoryWorldGroup.traverse((obj) => {
-      if (obj.material && "transparent" in obj.material) {
-        obj.material.transparent = true;
-        obj.material.opacity = 0;
+      if (!obj.material) return;
+    
+      const materials = Array.isArray(obj.material) ? obj.material : [obj.material];
+    
+      for (const mat of materials) {
+        if ("opacity" in mat) {
+          mat.transparent = true;
+          mat.opacity = 0;
+        }
       }
     });
   }
@@ -3152,10 +3177,11 @@
     memoryWorldGroup.visible = false;
     previewFrameActive = !!selectedFrame;
     controls.enabled = true;
-
+  
     resetMovementFlags();
     clearSpawnedMemoryObjects();
   
+    camera.position.set(0, 4.2, 11.8);
     controls.target.copy(hubTarget);
     controls.update();
   
@@ -3500,9 +3526,16 @@
     
         memoryWorldGroup.visible = true;
         memoryWorldGroup.traverse((obj) => {
-          if (obj.material && "opacity" in obj.material) {
-            obj.material.transparent = true;
-            obj.material.opacity = worldOpacity;
+          if (!obj.material) return;
+        
+          const materials = Array.isArray(obj.material) ? obj.material : [obj.material];
+        
+          for (const mat of materials) {
+            if ("opacity" in mat) {
+              const baseOpacity = mat.userData.baseOpacity ?? 1;
+              mat.transparent = true;
+              mat.opacity = baseOpacity * worldOpacity;
+            }
           }
         });
     
@@ -3529,9 +3562,15 @@
     
         memoryWorldGroup.visible = true;
         memoryWorldGroup.traverse((obj) => {
-          if (obj.material && "opacity" in obj.material) {
-            obj.material.transparent = true;
-            obj.material.opacity = 1;
+          if (!obj.material) return;
+        
+          const materials = Array.isArray(obj.material) ? obj.material : [obj.material];
+        
+          for (const mat of materials) {
+            if ("opacity" in mat) {
+              mat.transparent = mat.userData.baseTransparent ?? mat.transparent;
+              mat.opacity = mat.userData.baseOpacity ?? 1;
+            }
           }
         });
     
