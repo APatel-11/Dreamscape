@@ -1439,25 +1439,25 @@
       opacity: 0.16
     })
   );
-  windowInnerBacking.position.set(0, 3.3, -18.5);
+  windowInnerBacking.position.set(0, 3.15, -14.2);
   memoryWorldGroup.add(windowInnerBacking);
   
   const memoryWindow = new THREE.Mesh(
     new THREE.PlaneGeometry(7.85, 2.45),
     new THREE.MeshPhysicalMaterial({
-      color: 0xdfeaff,
-      emissive: 0x1f2f55,
-      emissiveIntensity: 0.025,
-      roughness: 0.08,
+      color: 0xf3f7ff,
+      emissive: 0x1b2742,
+      emissiveIntensity: 0.01,
+      roughness: 0.03,
       metalness: 0.0,
-      transmission: 0.82,
+      transmission: 0.94,
       transparent: true,
-      opacity: 1.0,
-      thickness: 0.08,
-      ior: 1.12,
-      reflectivity: 0.55,
+      opacity: 0.32,
+      thickness: 0.04,
+      ior: 1.08,
+      reflectivity: 0.32,
       clearcoat: 1.0,
-      clearcoatRoughness: 0.12,
+      clearcoatRoughness: 0.06,
       side: THREE.DoubleSide
     })
   );
@@ -1488,6 +1488,48 @@
   windowSill.castShadow = true;
   windowSill.receiveShadow = true;
   memoryWorldGroup.add(windowSill);
+
+  const windowRevealMat = new THREE.MeshStandardMaterial({
+    color: 0x3a313f,
+    roughness: 0.94,
+    metalness: 0.02
+  });
+  
+  const windowRevealTop = new THREE.Mesh(
+    new THREE.BoxGeometry(8.35, 0.22, 0.42),
+    windowRevealMat
+  );
+  windowRevealTop.position.set(0, 3.86, -5.76);
+  windowRevealTop.castShadow = true;
+  windowRevealTop.receiveShadow = true;
+  memoryWorldGroup.add(windowRevealTop);
+  
+  const windowRevealBottom = new THREE.Mesh(
+    new THREE.BoxGeometry(8.35, 0.18, 0.34),
+    windowRevealMat
+  );
+  windowRevealBottom.position.set(0, 1.03, -5.72);
+  windowRevealBottom.castShadow = true;
+  windowRevealBottom.receiveShadow = true;
+  memoryWorldGroup.add(windowRevealBottom);
+  
+  const windowRevealLeft = new THREE.Mesh(
+    new THREE.BoxGeometry(0.22, 2.88, 0.42),
+    windowRevealMat
+  );
+  windowRevealLeft.position.set(-4.07, 2.45, -5.76);
+  windowRevealLeft.castShadow = true;
+  windowRevealLeft.receiveShadow = true;
+  memoryWorldGroup.add(windowRevealLeft);
+  
+  const windowRevealRight = new THREE.Mesh(
+    new THREE.BoxGeometry(0.22, 2.88, 0.42),
+    windowRevealMat
+  );
+  windowRevealRight.position.set(4.07, 2.45, -5.76);
+  windowRevealRight.castShadow = true;
+  windowRevealRight.receiveShadow = true;
+  memoryWorldGroup.add(windowRevealRight);
   
   const outsideGroup = new THREE.Group();
   memoryWorldGroup.add(outsideGroup);
@@ -1500,7 +1542,7 @@
       opacity: 0.92
     })
   );
-  sunsetSky.position.set(0, 4.5, -20);
+  sunsetSky.position.set(0, 4.0, -14.8);
   outsideGroup.add(sunsetSky);
   
   const upperSky = new THREE.Mesh(
@@ -1511,7 +1553,7 @@
       opacity: 0.58
     })
   );
-  upperSky.position.set(0, 7.0, -20.1);
+  upperSky.position.set(0, 6.2, -14.9);
   outsideGroup.add(upperSky);
   
   const sunGlow = new THREE.Mesh(
@@ -1522,7 +1564,7 @@
       opacity: 0.72
     })
   );
-  sunGlow.position.set(3.6, 3.75, -19.8);
+  sunGlow.position.set(3.0, 3.5, -14.4);
   outsideGroup.add(sunGlow);
   
   const distantGround = new THREE.Mesh(
@@ -1531,7 +1573,7 @@
       color: 0x4f4a43
     })
   );
-  distantGround.position.set(0, 0.8, -19.5);
+  distantGround.position.set(0, 0.95, -14.0);
   outsideGroup.add(distantGround);
   
   const street = new THREE.Mesh(
@@ -2773,6 +2815,11 @@
       windowInnerBacking.material.color.set(0x4a2d1f);
       windowInnerBacking.material.emissive.set(0xa35a2e);
       windowInnerBacking.material.emissiveIntensity = 0.30;
+      sunsetSky.material.color.set(0xffa86b);
+      upperSky.material.color.set(0xffc3a0);
+      windowInnerBacking.material.color.set(0xffb27c);
+      memoryWindow.material.color.set(0xfff1e6);
+      memoryWindow.material.opacity = 0.28;
     } else if (tone === "cool") {
       scene.fog.color.set(0x16263a);
       museumSphere.material.color.set(0x0d1824);
@@ -2784,6 +2831,11 @@
       windowInnerBacking.material.color.set(0x1a304f);
       windowInnerBacking.material.emissive.set(0x2f6fb5);
       windowInnerBacking.material.emissiveIntensity = 0.28;
+      sunsetSky.material.color.set(0x6f8fdc);
+      upperSky.material.color.set(0xbfd5ff);
+      windowInnerBacking.material.color.set(0x85a8e8);
+      memoryWindow.material.color.set(0xe7f2ff);
+      memoryWindow.material.opacity = 0.34;
     } else if (tone === "dream") {
       scene.fog.color.set(0x34163a);
       museumSphere.material.color.set(0x1f0d24);
@@ -2795,6 +2847,11 @@
       windowInnerBacking.material.color.set(0x4b2354);
       windowInnerBacking.material.emissive.set(0x8d42b8);
       windowInnerBacking.material.emissiveIntensity = 0.30;
+      sunsetSky.material.color.set(0xc07cff);
+      upperSky.material.color.set(0xf0b4ff);
+      windowInnerBacking.material.color.set(0xd18cff);
+      memoryWindow.material.color.set(0xf8eaff);
+      memoryWindow.material.opacity = 0.36;
     } else if (tone === "echo") {
       scene.fog.color.set(0x2b2b31);
       museumSphere.material.color.set(0x151519);
@@ -2806,6 +2863,11 @@
       windowInnerBacking.material.color.set(0x30343d);
       windowInnerBacking.material.emissive.set(0x5f6878);
       windowInnerBacking.material.emissiveIntensity = 0.16;
+      sunsetSky.material.color.set(0x6e6875);
+      upperSky.material.color.set(0xa8acb8);
+      windowInnerBacking.material.color.set(0x8f95a1);
+      memoryWindow.material.color.set(0xf1f3f6);
+      memoryWindow.material.opacity = 0.26;
     } else {
       scene.fog.color.set(0x24182e);
       museumSphere.material.color.set(0x120f1a);
@@ -2817,6 +2879,11 @@
       windowInnerBacking.material.color.set(0x1f2740);
       windowInnerBacking.material.emissive.set(0x273b72);
       windowInnerBacking.material.emissiveIntensity = 0.22;
+      sunsetSky.material.color.set(0xffb27a);
+      upperSky.material.color.set(0x8fa8ff);
+      windowInnerBacking.material.color.set(0xffcaa0);
+      memoryWindow.material.color.set(0xf3f7ff);
+      memoryWindow.material.opacity = 0.32;
     }
   
     toneText.textContent = tone;
@@ -3241,16 +3308,28 @@
     isMemoryTransitioning = false;
     memoryTransitionProgress = 0;
     memoryWorldGroup.visible = false;
-    previewFrameActive = !!selectedFrame;
-    controls.enabled = true;
-
+  
     resetMovementFlags();
     clearSpawnedMemoryObjects();
   
+    previewFrameActive = !!selectedFrame;
+  
+    updatePreviewFrameTarget();
+    updateMemoryFocusTarget();
+    updateMemoryEntryTarget();
+  
+    framesGroup.visible = true;
+    platformGroup.visible = true;
+    consoleGroup.visible = true;
+    avatarGroup.visible = true;
+  
+    camera.position.set(0, 4.2, 11.8);
     controls.target.copy(hubTarget);
     controls.update();
   
     setAppState("hub");
+    highlightFrames();
+    updateHud();
   });
 
   addMemoryBtn.addEventListener("click", addMemory);
@@ -3718,16 +3797,16 @@
       memoryAtmospherePulse = 0.5 + 0.5 * Math.sin(time * 0.42);
     
       memoryWindow.material.emissiveIntensity =
-        0.018 + memoryAtmospherePulse * 0.01;
+        memoryWindow.material.emissiveIntensity * 0.92 + (0.008 + memoryAtmospherePulse * 0.004) * 0.08;
       
       memoryWindow.material.roughness =
-        0.07 + memoryAtmospherePulse * 0.02;
+        memoryWindow.material.roughness * 0.9 + (0.03 + memoryAtmospherePulse * 0.01) * 0.1;
       
       windowInnerBacking.material.emissiveIntensity =
-        0.06 + memoryAtmospherePulse * 0.03;
+        windowInnerBacking.material.emissiveIntensity * 0.9 + (0.05 + memoryAtmospherePulse * 0.02) * 0.1;
       
       windowInnerBacking.material.opacity =
-        0.12 + memoryAtmospherePulse * 0.03;
+        windowInnerBacking.material.opacity * 0.9 + (0.13 + memoryAtmospherePulse * 0.02) * 0.1;
     
       for (let i = 0; i < memoryFramesInside.length; i++) {
         memoryFramesInside[i].rotation.z = Math.sin(time * 0.35 + i * 0.8) * 0.006;
