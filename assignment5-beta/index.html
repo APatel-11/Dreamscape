@@ -544,7 +544,7 @@
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.outputEncoding = THREE.sRGBEncoding;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.15;
+  renderer.toneMappingExposure = 1.0;
   document.body.appendChild(renderer.domElement);
 
   const controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -3328,8 +3328,8 @@
       updateHud();
       
       configureHubControls();
-      scene.fog.color.set(0x111122);
-      museumSphere.material.color.set(0x0b0b14);
+      scene.fog.color.set(0x24182e);
+      museumSphere.material.color.set(0x120f1a);
       scene.fog.density = 0.02;
       framesGroup.visible = true;
       platformGroup.visible = true;
