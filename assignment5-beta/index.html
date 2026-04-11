@@ -2696,19 +2696,20 @@
   function configureMemoryControls() {
     controls.enabled = true;
     controls.enablePan = false;
-    controls.enableZoom = true;
-    controls.enableRotate = false;
+    controls.enableZoom = false;
+    controls.enableRotate = true;
     controls.enableDamping = true;
     controls.rotateSpeed = 0.75;
-    controls.zoomSpeed = 0.8;
   
-    controls.target.copy(memoryCameraTarget);
+    const currentLookDir = new THREE.Vector3();
+    camera.getWorldDirection(currentLookDir);
+    controls.target.copy(camera.position).add(currentLookDir);
   
-    controls.minDistance = 2.4;
-    controls.maxDistance = 5.0;
+    controls.minDistance = 0.001;
+    controls.maxDistance = 0.001;
   
-    controls.minPolarAngle = 1.0;
-    controls.maxPolarAngle = Math.PI / 2 + 0.18;
+    controls.minPolarAngle = 0.35;
+    controls.maxPolarAngle = Math.PI - 0.35;
   
     memoryControlsInitialized = true;
     controls.update();
@@ -3214,9 +3215,11 @@
           }
         }
       
+        const lookOffset = controls.target.clone().sub(camera.position);
+
         camera.position.y = PLAYER_HEIGHT;
-        controls.target.y = PLAYER_HEIGHT;
-      
+        controls.target.copy(camera.position).add(lookOffset);
+        
         clampPlayerInsideRoom();
       }
     }
