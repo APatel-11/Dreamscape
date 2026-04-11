@@ -542,9 +542,6 @@
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-  renderer.outputEncoding = THREE.sRGBEncoding;
-  renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.0;
   document.body.appendChild(renderer.domElement);
 
   const controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -658,9 +655,9 @@
   let transitionCurveP2 = new THREE.Vector3();
   let transitionCurveP3 = new THREE.Vector3();
   
-  const PLAYER_HEIGHT = 1.64;
-  let memoryCameraTarget = new THREE.Vector3(0, PLAYER_HEIGHT, -1.95);
-  let memoryCameraBasePos = new THREE.Vector3(0, PLAYER_HEIGHT + 0.1, 4.8);
+  let memoryCameraTarget = new THREE.Vector3(0, 1.62, -1.95);
+  const PLAYER_HEIGHT = 1.62;
+  let memoryCameraBasePos = new THREE.Vector3(0, 1.72, 4.8);
   let memoryCameraPos = memoryCameraBasePos.clone();
   
   let memoryControlsInitialized = false;
@@ -1337,12 +1334,6 @@
   const doorwayGlow = new THREE.PointLight(0x8dafff, 0.45, 8);
   doorwayGlow.position.set(6.2, 1.8, 2.0);
   memoryWorldGroup.add(doorwayGlow);
-
-  const exteriorSunLight = new THREE.DirectionalLight(0xffffff, 0.9);
-  exteriorSunLight.position.set(-6, 10, -8);
-  exteriorSunLight.target.position.set(0, 0, -12);
-  scene.add(exteriorSunLight);
-  scene.add(exteriorSunLight.target);
   
   const windowOuterFrame = new THREE.Mesh(
     new THREE.BoxGeometry(9.1, 3.7, 0.18),
@@ -1355,33 +1346,30 @@
   
   const windowInnerBacking = new THREE.Mesh(
     new THREE.PlaneGeometry(8.15, 2.75),
-    new THREE.MeshBasicMaterial({
-      color: 0xffd6b3,
-      transparent: true,
-      opacity: 0.10,
-      depthWrite: false
+    new THREE.MeshStandardMaterial({
+      color: 0x1f2740,
+      emissive: 0x273b72,
+      emissiveIntensity: 0.22,
+      roughness: 0.55,
+      metalness: 0.04
     })
   );
-  windowInnerBacking.position.set(0, 2.45, -5.86);
-  windowInnerBacking.renderOrder = 1;
+  windowInnerBacking.position.set(0, 2.45, -5.84);
   memoryWorldGroup.add(windowInnerBacking);
   
   const memoryWindow = new THREE.Mesh(
     new THREE.PlaneGeometry(7.85, 2.45),
-    new THREE.MeshPhysicalMaterial({
-      color: 0xffffff,
-      roughness: 0.04,
-      metalness: 0.0,
-      transmission: 0.92,
+    new THREE.MeshStandardMaterial({
+      color: 0x9bc4ff,
+      emissive: 0x4e74c9,
+      emissiveIntensity: 0.20,
+      roughness: 0.18,
+      metalness: 0.08,
       transparent: true,
-      opacity: 0.22,
-      clearcoat: 0.35,
-      clearcoatRoughness: 0.08,
-      depthWrite: false
+      opacity: 0.78
     })
   );
-  memoryWindow.position.set(0, 2.45, -5.79);
-  memoryWindow.renderOrder = 2;
+  memoryWindow.position.set(0, 2.45, -5.80);
   memoryWorldGroup.add(memoryWindow);
   
   const windowMullionV = new THREE.Mesh(
@@ -1406,184 +1394,6 @@
   windowSill.castShadow = true;
   windowSill.receiveShadow = true;
   memoryWorldGroup.add(windowSill);
-
-  const exteriorWorldGroup = new THREE.Group();
-  memoryWorldGroup.add(exteriorWorldGroup);
-  
-  const outsideSky = new THREE.Mesh(
-    new THREE.PlaneGeometry(70, 30),
-    new THREE.MeshBasicMaterial({
-      color: 0xff8f4d
-    })
-  );
-  outsideSky.position.set(0, 8.5, -12.5);
-  outsideSky.renderOrder = -2;
-  exteriorWorldGroup.add(outsideSky);
-  
-  const distantSkyBand = new THREE.Mesh(
-    new THREE.PlaneGeometry(70, 12),
-    new THREE.MeshBasicMaterial({
-      color: 0xffc38a
-    })
-  );
-  distantSkyBand.position.set(0, 2.2, -12.4);
-  distantSkyBand.renderOrder = -1;
-  exteriorWorldGroup.add(distantSkyBand);
-  
-  const outsideGround = new THREE.Mesh(
-    new THREE.PlaneGeometry(60, 30),
-    new THREE.MeshStandardMaterial({
-      color: 0x86aa73,
-      roughness: 1.0,
-      metalness: 0.0
-    })
-  );
-  outsideGround.rotation.x = -Math.PI / 2;
-  outsideGround.position.set(0, -0.02, -12);
-  outsideGround.receiveShadow = true;
-  exteriorWorldGroup.add(outsideGround);
-  
-  const street = new THREE.Mesh(
-    new THREE.BoxGeometry(60, 0.02, 3.8),
-    new THREE.MeshStandardMaterial({
-      color: 0x4f535c,
-      roughness: 0.95,
-      metalness: 0.02
-    })
-  );
-  street.position.set(0, 0.01, -9.3);
-  street.receiveShadow = true;
-  exteriorWorldGroup.add(street);
-  
-  for (let i = -24; i <= 24; i += 6) {
-    const dash = new THREE.Mesh(
-      new THREE.BoxGeometry(2.4, 0.03, 0.12),
-      new THREE.MeshStandardMaterial({
-        color: 0xf2e6a2,
-        roughness: 0.8,
-        metalness: 0.0
-      })
-    );
-    dash.position.set(i, 0.03, -9.3);
-    exteriorWorldGroup.add(dash);
-  }
-  
-  function createOutsideHouse(x, z, scale = 1, bodyColor = 0xc9b7a6, roofColor = 0x6b4c43) {
-    const house = new THREE.Group();
-  
-    const body = new THREE.Mesh(
-      new THREE.BoxGeometry(3.2 * scale, 2.5 * scale, 2.6 * scale),
-      new THREE.MeshStandardMaterial({
-        color: bodyColor,
-        roughness: 0.95,
-        metalness: 0.02
-      })
-    );
-    body.position.y = 1.25 * scale;
-    body.castShadow = true;
-    body.receiveShadow = true;
-    house.add(body);
-  
-    const roof = new THREE.Mesh(
-      new THREE.ConeGeometry(2.5 * scale, 1.35 * scale, 4),
-      new THREE.MeshStandardMaterial({
-        color: roofColor,
-        roughness: 0.92,
-        metalness: 0.02
-      })
-    );
-    roof.position.y = 3.15 * scale;
-    roof.rotation.y = Math.PI * 0.25;
-    roof.castShadow = true;
-    roof.receiveShadow = true;
-    house.add(roof);
-  
-    const door = new THREE.Mesh(
-      new THREE.BoxGeometry(0.5 * scale, 1.05 * scale, 0.08),
-      new THREE.MeshStandardMaterial({
-        color: 0x5f4438,
-        roughness: 0.88
-      })
-    );
-    door.position.set(0, 0.52 * scale, 1.34 * scale);
-    house.add(door);
-  
-    const windowLeft = new THREE.Mesh(
-      new THREE.BoxGeometry(0.5 * scale, 0.5 * scale, 0.06),
-      new THREE.MeshStandardMaterial({
-        color: 0xcfe4ff,
-        emissive: 0x446a99,
-        emissiveIntensity: 0.08,
-        roughness: 0.3
-      })
-    );
-    windowLeft.position.set(-0.82 * scale, 1.45 * scale, 1.33 * scale);
-    house.add(windowLeft);
-  
-    const windowRight = new THREE.Mesh(
-      new THREE.BoxGeometry(0.5 * scale, 0.5 * scale, 0.06),
-      new THREE.MeshStandardMaterial({
-        color: 0xcfe4ff,
-        emissive: 0x446a99,
-        emissiveIntensity: 0.08,
-        roughness: 0.3
-      })
-    );
-    windowRight.position.set(0.82 * scale, 1.45 * scale, 1.33 * scale);
-    house.add(windowRight);
-  
-    house.position.set(x, 0, z);
-    exteriorWorldGroup.add(house);
-  }
-  
-  createOutsideHouse(-8.5, -13.7, 1.05, 0xd8c3b4, 0x7a5a4e);
-  createOutsideHouse(-3.8, -12.9, 1.0, 0xc7d6c2, 0x5d5a74);
-  createOutsideHouse(1.8, -13.4, 1.08, 0xd8d0bb, 0x6f4f45);
-  createOutsideHouse(7.2, -12.8, 1.0, 0xcbbfd8, 0x5e4f6b);
-  
-  function createOutsideTree(x, z, scale = 1) {
-    const tree = new THREE.Group();
-  
-    const trunk = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.16 * scale, 0.20 * scale, 1.5 * scale, 10),
-      new THREE.MeshStandardMaterial({
-        color: 0x6b4a35,
-        roughness: 0.95
-      })
-    );
-    trunk.position.y = 0.75 * scale;
-    trunk.castShadow = true;
-    trunk.receiveShadow = true;
-    tree.add(trunk);
-  
-    const leaves = new THREE.Mesh(
-      new THREE.SphereGeometry(0.82 * scale, 18, 18),
-      new THREE.MeshStandardMaterial({
-        color: 0x6f9a5f,
-        roughness: 0.95,
-        metalness: 0.0
-      })
-    );
-    leaves.position.y = 1.95 * scale;
-    leaves.castShadow = true;
-    leaves.receiveShadow = true;
-    tree.add(leaves);
-  
-    tree.position.set(x, 0, z);
-    exteriorWorldGroup.add(tree);
-  }
-  
-  createOutsideTree(-12.5, -10.8, 1.15);
-  createOutsideTree(-6.7, -11.2, 1.0);
-  createOutsideTree(-1.0, -10.9, 1.2);
-  createOutsideTree(4.8, -11.1, 1.05);
-  createOutsideTree(10.8, -10.7, 1.12);
-  
-  createOutsideTree(-15.0, -15.5, 1.3);
-  createOutsideTree(-8.7, -15.9, 1.15);
-  createOutsideTree(-2.0, -15.6, 1.25);
-  createOutsideTree(5.6, -15.8, 1.1);
-  createOutsideTree(13.8, -15.4, 1.2);
   
   const tableBase = new THREE.Mesh(
     new THREE.BoxGeometry(2.9, 0.16, 1.25),
@@ -2008,8 +1818,6 @@
   sideArtworkInner.position.set(-6.89, 2.63, -1.15);
   sideArtworkInner.rotation.y = Math.PI / 2;
   memoryWorldGroup.add(sideArtworkInner);
-
-  cacheTransparentMaterialState(memoryWorldGroup);
   
   const hud = document.getElementById("hud");
   const timeline = document.getElementById("timeline");
@@ -2668,66 +2476,56 @@
       museumSphere.material.color.set(0x24130e);
       memoryWarmBase = 1.35;
       memoryCoolBase = 0.70;
-  
       memoryWindow.material.color.set(0xffc08a);
-      if ("emissive" in memoryWindow.material) {
-        memoryWindow.material.emissive.set(0xff8a4a);
-        memoryWindow.material.emissiveIntensity = 0.12;
-      }
-  
-      windowInnerBacking.material.color.set(0xffc9a3);
+      memoryWindow.material.emissive.set(0xff8a4a);
+      memoryWindow.material.emissiveIntensity = 0.38;
+      windowInnerBacking.material.color.set(0x4a2d1f);
+      windowInnerBacking.material.emissive.set(0xa35a2e);
+      windowInnerBacking.material.emissiveIntensity = 0.30;
     } else if (tone === "cool") {
       scene.fog.color.set(0x16263a);
       museumSphere.material.color.set(0x0d1824);
       memoryWarmBase = 0.55;
       memoryCoolBase = 1.45;
-  
       memoryWindow.material.color.set(0x8fc8ff);
-      if ("emissive" in memoryWindow.material) {
-        memoryWindow.material.emissive.set(0x4a90ff);
-        memoryWindow.material.emissiveIntensity = 0.10;
-      }
-  
-      windowInnerBacking.material.color.set(0xbfdcff);
+      memoryWindow.material.emissive.set(0x4a90ff);
+      memoryWindow.material.emissiveIntensity = 0.34;
+      windowInnerBacking.material.color.set(0x1a304f);
+      windowInnerBacking.material.emissive.set(0x2f6fb5);
+      windowInnerBacking.material.emissiveIntensity = 0.28;
     } else if (tone === "dream") {
       scene.fog.color.set(0x34163a);
       museumSphere.material.color.set(0x1f0d24);
       memoryWarmBase = 1.00;
       memoryCoolBase = 1.05;
-  
       memoryWindow.material.color.set(0xf0a8ff);
-      if ("emissive" in memoryWindow.material) {
-        memoryWindow.material.emissive.set(0xc85cff);
-        memoryWindow.material.emissiveIntensity = 0.10;
-      }
-  
-      windowInnerBacking.material.color.set(0xf3c1ff);
+      memoryWindow.material.emissive.set(0xc85cff);
+      memoryWindow.material.emissiveIntensity = 0.36;
+      windowInnerBacking.material.color.set(0x4b2354);
+      windowInnerBacking.material.emissive.set(0x8d42b8);
+      windowInnerBacking.material.emissiveIntensity = 0.30;
     } else if (tone === "echo") {
       scene.fog.color.set(0x2b2b31);
       museumSphere.material.color.set(0x151519);
       memoryWarmBase = 0.45;
       memoryCoolBase = 0.55;
-  
       memoryWindow.material.color.set(0xd6dbe2);
-      if ("emissive" in memoryWindow.material) {
-        memoryWindow.material.emissive.set(0x8d97a8);
-        memoryWindow.material.emissiveIntensity = 0.05;
-      }
-  
-      windowInnerBacking.material.color.set(0xd7d2cc);
+      memoryWindow.material.emissive.set(0x8d97a8);
+      memoryWindow.material.emissiveIntensity = 0.18;
+      windowInnerBacking.material.color.set(0x30343d);
+      windowInnerBacking.material.emissive.set(0x5f6878);
+      windowInnerBacking.material.emissiveIntensity = 0.16;
     } else {
       scene.fog.color.set(0x24182e);
       museumSphere.material.color.set(0x120f1a);
       memoryWarmBase = 0.90;
       memoryCoolBase = 1.15;
-  
       memoryWindow.material.color.set(0x9bc4ff);
-      if ("emissive" in memoryWindow.material) {
-        memoryWindow.material.emissive.set(0x4e74c9);
-        memoryWindow.material.emissiveIntensity = 0.06;
-      }
-  
-      windowInnerBacking.material.color.set(0xffd6b3);
+      memoryWindow.material.emissive.set(0x4e74c9);
+      memoryWindow.material.emissiveIntensity = 0.20;
+      windowInnerBacking.material.color.set(0x1f2740);
+      windowInnerBacking.material.emissive.set(0x273b72);
+      windowInnerBacking.material.emissiveIntensity = 0.22;
     }
   
     toneText.textContent = tone;
@@ -2815,23 +2613,6 @@
     memoryEntryCameraPos.copy(worldPos.clone().sub(inwardDir.multiplyScalar(2.1)));
   }
 
-  function cacheTransparentMaterialState(root) {
-    root.traverse((obj) => {
-      if (!obj.material) return;
-  
-      const materials = Array.isArray(obj.material) ? obj.material : [obj.material];
-  
-      for (const mat of materials) {
-        if ("opacity" in mat && mat.userData.baseOpacity === undefined) {
-          mat.userData.baseOpacity = mat.opacity;
-        }
-        if ("transparent" in mat && mat.userData.baseTransparent === undefined) {
-          mat.userData.baseTransparent = mat.transparent;
-        }
-      }
-    });
-  }
-
   function beginMemoryTransition() {
     if (!selectedFrame) return;
   
@@ -2882,15 +2663,9 @@
     transitionCurveP3.copy(memoryCameraPos);
   
     memoryWorldGroup.traverse((obj) => {
-      if (!obj.material) return;
-    
-      const materials = Array.isArray(obj.material) ? obj.material : [obj.material];
-    
-      for (const mat of materials) {
-        if ("opacity" in mat) {
-          mat.transparent = true;
-          mat.opacity = 0;
-        }
+      if (obj.material && "transparent" in obj.material) {
+        obj.material.transparent = true;
+        obj.material.opacity = 0;
       }
     });
   }
@@ -3177,11 +2952,10 @@
     memoryWorldGroup.visible = false;
     previewFrameActive = !!selectedFrame;
     controls.enabled = true;
-  
+
     resetMovementFlags();
     clearSpawnedMemoryObjects();
   
-    camera.position.set(0, 4.2, 11.8);
     controls.target.copy(hubTarget);
     controls.update();
   
@@ -3328,8 +3102,8 @@
       updateHud();
       
       configureHubControls();
-      scene.fog.color.set(0x24182e);
-      museumSphere.material.color.set(0x120f1a);
+      scene.fog.color.set(0x111122);
+      museumSphere.material.color.set(0x0b0b14);
       scene.fog.density = 0.02;
       framesGroup.visible = true;
       platformGroup.visible = true;
@@ -3526,16 +3300,9 @@
     
         memoryWorldGroup.visible = true;
         memoryWorldGroup.traverse((obj) => {
-          if (!obj.material) return;
-        
-          const materials = Array.isArray(obj.material) ? obj.material : [obj.material];
-        
-          for (const mat of materials) {
-            if ("opacity" in mat) {
-              const baseOpacity = mat.userData.baseOpacity ?? 1;
-              mat.transparent = true;
-              mat.opacity = baseOpacity * worldOpacity;
-            }
+          if (obj.material && "opacity" in obj.material) {
+            obj.material.transparent = true;
+            obj.material.opacity = worldOpacity;
           }
         });
     
@@ -3562,15 +3329,9 @@
     
         memoryWorldGroup.visible = true;
         memoryWorldGroup.traverse((obj) => {
-          if (!obj.material) return;
-        
-          const materials = Array.isArray(obj.material) ? obj.material : [obj.material];
-        
-          for (const mat of materials) {
-            if ("opacity" in mat) {
-              mat.transparent = mat.userData.baseTransparent ?? mat.transparent;
-              mat.opacity = mat.userData.baseOpacity ?? 1;
-            }
+          if (obj.material && "opacity" in obj.material) {
+            obj.material.transparent = true;
+            obj.material.opacity = 1;
           }
         });
     
@@ -3665,16 +3426,14 @@
     if (memoryWorldGroup.visible) {
       memoryAtmospherePulse = 0.5 + 0.5 * Math.sin(time * 0.42);
     
-      if ("emissiveIntensity" in memoryWindow.material) {
-        memoryWindow.material.emissiveIntensity =
-          0.01 + memoryAtmospherePulse * 0.008;
-      }
-      
+      memoryWindow.material.emissiveIntensity =
+        0.12 + memoryAtmospherePulse * 0.06 + Math.sin(time * 0.9) * 0.01;
+    
       memoryWindow.material.opacity =
-        0.18 + memoryAtmospherePulse * 0.015;
-      
-      windowInnerBacking.material.opacity =
-        0.08 + memoryAtmospherePulse * 0.03;
+        0.70 + memoryAtmospherePulse * 0.05;
+    
+      windowInnerBacking.material.emissiveIntensity =
+        0.16 + memoryAtmospherePulse * 0.08;
     
       for (let i = 0; i < memoryFramesInside.length; i++) {
         memoryFramesInside[i].rotation.z = Math.sin(time * 0.35 + i * 0.8) * 0.006;
