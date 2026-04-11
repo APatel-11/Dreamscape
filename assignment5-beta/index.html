@@ -676,6 +676,9 @@
   let playerVelocity = new THREE.Vector3();
   const moveSpeed = 0.08;
 
+  const staticCollisionObjects = [];
+  const playerRadius = 0.32;
+
   const ROOM_MIN_X = -6.2;
   const ROOM_MAX_X = 6.2;
   const ROOM_MIN_Z = -5.2;
@@ -2079,6 +2082,33 @@
       }
     });
   }
+
+  function registerStaticCollider(root) {
+    staticCollisionObjects.push(root);
+  }
+  
+  function canMoveTo(nextX, nextZ) {
+    const playerMinX = nextX - playerRadius;
+    const playerMaxX = nextX + playerRadius;
+    const playerMinZ = nextZ - playerRadius;
+    const playerMaxZ = nextZ + playerRadius;
+  
+    for (const obj of staticCollisionObjects) {
+      const box = new THREE.Box3().setFromObject(obj);
+  
+      const hit =
+        playerMaxX > box.min.x &&
+        playerMinX < box.max.x &&
+        playerMaxZ > box.min.z &&
+        playerMinZ < box.max.z;
+  
+      if (hit) {
+        return false;
+      }
+    }
+  
+    return true;
+  }
   
   function buildSpawnedObject(type) {
     let root;
@@ -2389,6 +2419,14 @@
   registerMemorySelectable(chairGroup, "chair");
   registerMemorySelectable(bench, "bench");
   registerMemorySelectable(keepsakeBox, "keepsake box");
+
+  registerStaticCollider(leftCabinetGroup);
+  registerStaticCollider(rightCabinetGroup);
+  registerStaticCollider(chairGroup);
+  registerStaticCollider(bench);
+  registerStaticCollider(tableBase);
+  registerStaticCollider(photoFrameOuter);
+  registerStaticCollider(keepsakeBox);
 
   function updateHud() {
     if (appState === "menu") {
@@ -3143,34 +3181,42 @@
     
       if (!isMemoryTransitioning && !selectedMemoryObject) {
         const direction = new THREE.Vector3();
-    
+      
         if (movement.forward) direction.z -= 1;
         if (movement.backward) direction.z += 1;
         if (movement.left) direction.x -= 1;
         if (movement.right) direction.x += 1;
-    
+      
         if (direction.length() > 0) {
           direction.normalize();
-    
+      
           const forward = new THREE.Vector3();
           camera.getWorldDirection(forward);
           forward.y = 0;
           forward.normalize();
-    
+      
           const right = new THREE.Vector3();
           right.crossVectors(forward, new THREE.Vector3(0, 1, 0)).normalize();
-    
+      
           const moveDir = new THREE.Vector3();
           moveDir.addScaledVector(forward, -direction.z);
           moveDir.addScaledVector(right, direction.x);
-    
-          camera.position.addScaledVector(moveDir, moveSpeed);
-          controls.target.addScaledVector(moveDir, moveSpeed);
+          moveDir.normalize();
+      
+          const proposedX = camera.position.x + moveDir.x * moveSpeed;
+          const proposedZ = camera.position.z + moveDir.z * moveSpeed;
+      
+          if (canMoveTo(proposedX, proposedZ)) {
+            camera.position.x = proposedX;
+            camera.position.z = proposedZ;
+            controls.target.x += moveDir.x * moveSpeed;
+            controls.target.z += moveDir.z * moveSpeed;
+          }
         }
-    
+      
         camera.position.y = PLAYER_HEIGHT;
         controls.target.y = PLAYER_HEIGHT;
-    
+      
         clampPlayerInsideRoom();
       }
     }
