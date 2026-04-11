@@ -542,6 +542,10 @@
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.0;
+  renderer.physicallyCorrectLights = true;
   document.body.appendChild(renderer.domElement);
 
   const controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -1189,19 +1193,98 @@
   areaRug.receiveShadow = true;
   memoryWorldGroup.add(areaRug);
   
-  const room = new THREE.Mesh(
-    new THREE.BoxGeometry(14, 6, 12),
-    new THREE.MeshStandardMaterial({
-      color: 0x2a2330,
-      roughness: 0.95,
-      metalness: 0.03,
-      side: THREE.BackSide
-    })
-  );
+  const roomShell = new THREE.Group();
+  memoryWorldGroup.add(roomShell);
   
-  room.position.set(0, 3, 0);
-  room.receiveShadow = true;
-  memoryWorldGroup.add(room);
+  const roomSurfaceMat = new THREE.MeshStandardMaterial({
+    color: 0x2a2330,
+    roughness: 0.95,
+    metalness: 0.03,
+    side: THREE.DoubleSide
+  });
+  
+  const backWallMat = new THREE.MeshStandardMaterial({
+    color: 0x2a2330,
+    roughness: 0.95,
+    metalness: 0.03,
+    side: THREE.DoubleSide
+  });
+  
+  const ceiling = new THREE.Mesh(
+    new THREE.PlaneGeometry(14, 12),
+    roomSurfaceMat
+  );
+  ceiling.rotation.x = Math.PI / 2;
+  ceiling.position.set(0, 6, 0);
+  ceiling.receiveShadow = true;
+  roomShell.add(ceiling);
+  
+  const leftWall = new THREE.Mesh(
+    new THREE.PlaneGeometry(12, 6),
+    roomSurfaceMat
+  );
+  leftWall.rotation.y = Math.PI / 2;
+  leftWall.position.set(-7, 3, 0);
+  leftWall.receiveShadow = true;
+  roomShell.add(leftWall);
+  
+  const rightWall = new THREE.Mesh(
+    new THREE.PlaneGeometry(12, 6),
+    roomSurfaceMat
+  );
+  rightWall.rotation.y = -Math.PI / 2;
+  rightWall.position.set(7, 3, 0);
+  rightWall.receiveShadow = true;
+  roomShell.add(rightWall);
+  
+  const frontWall = new THREE.Mesh(
+    new THREE.PlaneGeometry(14, 6),
+    roomSurfaceMat
+  );
+  frontWall.position.set(0, 3, 6);
+  frontWall.rotation.y = Math.PI;
+  frontWall.receiveShadow = true;
+  roomShell.add(frontWall);
+  
+  /*
+    Back wall built in pieces so the window area is a real opening.
+    Window opening target:
+    centerY = 2.45
+    width = 8.25
+    height = 2.85
+  */
+  
+  const backWallTop = new THREE.Mesh(
+    new THREE.PlaneGeometry(14, 1.90),
+    backWallMat
+  );
+  backWallTop.position.set(0, 5.05, -5.98);
+  backWallTop.receiveShadow = true;
+  roomShell.add(backWallTop);
+  
+  const backWallBottom = new THREE.Mesh(
+    new THREE.PlaneGeometry(14, 1.15),
+    backWallMat
+  );
+  backWallBottom.position.set(0, 0.575, -5.98);
+  backWallBottom.receiveShadow = true;
+  roomShell.add(backWallBottom);
+  
+  const backWallLeft = new THREE.Mesh(
+    new THREE.PlaneGeometry(2.875, 2.85),
+    backWallMat
+  );
+  backWallLeft.position.set(-5.5625, 2.45, -5.98);
+  backWallLeft.receiveShadow = true;
+  roomShell.add(backWallLeft);
+  
+  const backWallRight = new THREE.Mesh(
+    new THREE.PlaneGeometry(2.875, 2.85),
+    backWallMat
+  );
+  backWallRight.position.set(5.5625, 2.45, -5.98);
+  backWallRight.receiveShadow = true;
+  roomShell.add(backWallRight);
 
   const baseboardMat = new THREE.MeshStandardMaterial({
     color: 0x4a3f4d,
@@ -1345,31 +1428,42 @@
   memoryWorldGroup.add(windowOuterFrame);
   
   const windowInnerBacking = new THREE.Mesh(
-    new THREE.PlaneGeometry(8.15, 2.75),
+    new THREE.PlaneGeometry(10.8, 4.8),
     new THREE.MeshStandardMaterial({
-      color: 0x1f2740,
-      emissive: 0x273b72,
-      emissiveIntensity: 0.22,
-      roughness: 0.55,
-      metalness: 0.04
+      color: 0xffcaa0,
+      emissive: 0xffa866,
+      emissiveIntensity: 0.08,
+      roughness: 0.95,
+      metalness: 0.0,
+      transparent: true,
+      opacity: 0.16
     })
   );
-  windowInnerBacking.position.set(0, 2.45, -5.84);
+  windowInnerBacking.position.set(0, 3.3, -18.5);
   memoryWorldGroup.add(windowInnerBacking);
   
   const memoryWindow = new THREE.Mesh(
     new THREE.PlaneGeometry(7.85, 2.45),
-    new THREE.MeshStandardMaterial({
-      color: 0x9bc4ff,
-      emissive: 0x4e74c9,
-      emissiveIntensity: 0.20,
-      roughness: 0.18,
-      metalness: 0.08,
+    new THREE.MeshPhysicalMaterial({
+      color: 0xdfeaff,
+      emissive: 0x1f2f55,
+      emissiveIntensity: 0.025,
+      roughness: 0.08,
+      metalness: 0.0,
+      transmission: 0.82,
       transparent: true,
-      opacity: 0.78
+      opacity: 1.0,
+      thickness: 0.08,
+      ior: 1.12,
+      reflectivity: 0.55,
+      clearcoat: 1.0,
+      clearcoatRoughness: 0.12,
+      side: THREE.DoubleSide
     })
   );
-  memoryWindow.position.set(0, 2.45, -5.80);
+  memoryWindow.position.set(0, 2.45, -5.79);
+  memoryWindow.renderOrder = 2;
+  memoryWindow.material.depthWrite = false;
   memoryWorldGroup.add(memoryWindow);
   
   const windowMullionV = new THREE.Mesh(
@@ -1394,6 +1488,203 @@
   windowSill.castShadow = true;
   windowSill.receiveShadow = true;
   memoryWorldGroup.add(windowSill);
+  
+  const outsideGroup = new THREE.Group();
+  memoryWorldGroup.add(outsideGroup);
+  
+  const sunsetSky = new THREE.Mesh(
+    new THREE.PlaneGeometry(28, 12),
+    new THREE.MeshBasicMaterial({
+      color: 0xffb27a,
+      transparent: true,
+      opacity: 0.92
+    })
+  );
+  sunsetSky.position.set(0, 4.5, -20);
+  outsideGroup.add(sunsetSky);
+  
+  const upperSky = new THREE.Mesh(
+    new THREE.PlaneGeometry(28, 8),
+    new THREE.MeshBasicMaterial({
+      color: 0x8fa8ff,
+      transparent: true,
+      opacity: 0.58
+    })
+  );
+  upperSky.position.set(0, 7.0, -20.1);
+  outsideGroup.add(upperSky);
+  
+  const sunGlow = new THREE.Mesh(
+    new THREE.CircleGeometry(1.15, 40),
+    new THREE.MeshBasicMaterial({
+      color: 0xffd7a3,
+      transparent: true,
+      opacity: 0.72
+    })
+  );
+  sunGlow.position.set(3.6, 3.75, -19.8);
+  outsideGroup.add(sunGlow);
+  
+  const distantGround = new THREE.Mesh(
+    new THREE.PlaneGeometry(28, 5.5),
+    new THREE.MeshBasicMaterial({
+      color: 0x4f4a43
+    })
+  );
+  distantGround.position.set(0, 0.8, -19.5);
+  outsideGroup.add(distantGround);
+  
+  const street = new THREE.Mesh(
+    new THREE.PlaneGeometry(18, 4.2),
+    new THREE.MeshStandardMaterial({
+      color: 0x3a3a40,
+      roughness: 0.98,
+      metalness: 0.02
+    })
+  );
+  street.rotation.x = -Math.PI / 2;
+  street.position.set(0, 0.02, -10.4);
+  street.receiveShadow = true;
+  outsideGroup.add(street);
+  
+  const sidewalkLeft = new THREE.Mesh(
+    new THREE.BoxGeometry(18, 0.08, 0.7),
+    new THREE.MeshStandardMaterial({
+      color: 0x8d8179,
+      roughness: 0.95
+    })
+  );
+  sidewalkLeft.position.set(0, 0.04, -8.1);
+  outsideGroup.add(sidewalkLeft);
+  
+  const sidewalkRight = new THREE.Mesh(
+    new THREE.BoxGeometry(18, 0.08, 0.7),
+    new THREE.MeshStandardMaterial({
+      color: 0x8d8179,
+      roughness: 0.95
+    })
+  );
+  sidewalkRight.position.set(0, 0.04, -12.7);
+  outsideGroup.add(sidewalkRight);
+  
+  const boundaryWall = new THREE.Mesh(
+    new THREE.BoxGeometry(18, 1.2, 0.22),
+    new THREE.MeshStandardMaterial({
+      color: 0xb7a392,
+      roughness: 0.96
+    })
+  );
+  boundaryWall.position.set(0, 0.6, -8.7);
+  outsideGroup.add(boundaryWall);
+  
+  const outsideSunLight = new THREE.DirectionalLight(0xffb56b, 1.65);
+  outsideSunLight.position.set(5, 7, -8);
+  outsideSunLight.target.position.set(0, 1, -13);
+  outsideSunLight.castShadow = true;
+  outsideSunLight.shadow.mapSize.width = 1024;
+  outsideSunLight.shadow.mapSize.height = 1024;
+  outsideGroup.add(outsideSunLight);
+  outsideGroup.add(outsideSunLight.target);
+  
+  const neighborhoodLight = new THREE.AmbientLight(0xffcaa2, 0.42);
+  outsideGroup.add(neighborhoodLight);
+  
+  function createHouse(x, z, bodyColor, roofColor, scale = 1) {
+    const house = new THREE.Group();
+  
+    const body = new THREE.Mesh(
+      new THREE.BoxGeometry(1.8 * scale, 1.5 * scale, 1.5 * scale),
+      new THREE.MeshStandardMaterial({
+        color: bodyColor,
+        roughness: 0.92,
+        metalness: 0.02
+      })
+    );
+    body.position.y = 0.75 * scale;
+    body.castShadow = true;
+    body.receiveShadow = true;
+    house.add(body);
+  
+    const roof = new THREE.Mesh(
+      new THREE.ConeGeometry(1.45 * scale, 0.85 * scale, 4),
+      new THREE.MeshStandardMaterial({
+        color: roofColor,
+        roughness: 0.88,
+        metalness: 0.03
+      })
+    );
+    roof.rotation.y = Math.PI * 0.25;
+    roof.position.y = 1.88 * scale;
+    roof.castShadow = true;
+    roof.receiveShadow = true;
+    house.add(roof);
+  
+    const windowA = new THREE.Mesh(
+      new THREE.PlaneGeometry(0.30 * scale, 0.30 * scale),
+      new THREE.MeshBasicMaterial({
+        color: 0xffd8b2,
+        transparent: true,
+        opacity: 0.85
+      })
+    );
+    windowA.position.set(-0.42 * scale, 0.92 * scale, 0.76 * scale);
+    house.add(windowA);
+  
+    const windowB = new THREE.Mesh(
+      new THREE.PlaneGeometry(0.30 * scale, 0.30 * scale),
+      new THREE.MeshBasicMaterial({
+        color: 0xffd8b2,
+        transparent: true,
+        opacity: 0.85
+      })
+    );
+    windowB.position.set(0.42 * scale, 0.92 * scale, 0.76 * scale);
+    house.add(windowB);
+  
+    house.position.set(x, 0, z);
+    return house;
+  }
+  
+  outsideGroup.add(createHouse(-5.0, -14.1, 0xd8c2b4, 0x7e5a4d, 1.05));
+  outsideGroup.add(createHouse(-1.8, -13.4, 0xe2d4c4, 0x6b4f4a, 0.92));
+  outsideGroup.add(createHouse(1.9, -14.6, 0xcab7aa, 0x7d6758, 1.12));
+  outsideGroup.add(createHouse(5.2, -13.7, 0xe0cfc4, 0x70504b, 0.98));
+  
+  function createTree(x, z, scale = 1) {
+    const tree = new THREE.Group();
+  
+    const trunk = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.10 * scale, 0.12 * scale, 1.0 * scale, 12),
+      new THREE.MeshStandardMaterial({
+        color: 0x6b4a36,
+        roughness: 0.95
+      })
+    );
+    trunk.position.y = 0.5 * scale;
+    trunk.castShadow = true;
+    trunk.receiveShadow = true;
+    tree.add(trunk);
+  
+    const leaves = new THREE.Mesh(
+      new THREE.SphereGeometry(0.55 * scale, 18, 18),
+      new THREE.MeshStandardMaterial({
+        color: 0x4b5f43,
+        roughness: 0.98
+      })
+    );
+    leaves.position.y = 1.38 * scale;
+    leaves.castShadow = true;
+    leaves.receiveShadow = true;
+    tree.add(leaves);
+  
+    tree.position.set(x, 0, z);
+    return tree;
+  }
+  
+  outsideGroup.add(createTree(-6.8, -10.6, 1.2));
+  outsideGroup.add(createTree(-3.9, -9.7, 0.95));
+  outsideGroup.add(createTree(3.1, -10.0, 1.05));
+  outsideGroup.add(createTree(6.6, -10.9, 1.25));
   
   const tableBase = new THREE.Mesh(
     new THREE.BoxGeometry(2.9, 0.16, 1.25),
@@ -2478,7 +2769,7 @@
       memoryCoolBase = 0.70;
       memoryWindow.material.color.set(0xffc08a);
       memoryWindow.material.emissive.set(0xff8a4a);
-      memoryWindow.material.emissiveIntensity = 0.38;
+      memoryWindow.material.emissiveIntensity = 0.35;
       windowInnerBacking.material.color.set(0x4a2d1f);
       windowInnerBacking.material.emissive.set(0xa35a2e);
       windowInnerBacking.material.emissiveIntensity = 0.30;
@@ -2489,7 +2780,7 @@
       memoryCoolBase = 1.45;
       memoryWindow.material.color.set(0x8fc8ff);
       memoryWindow.material.emissive.set(0x4a90ff);
-      memoryWindow.material.emissiveIntensity = 0.34;
+      memoryWindow.material.emissiveIntensity = 0.03;
       windowInnerBacking.material.color.set(0x1a304f);
       windowInnerBacking.material.emissive.set(0x2f6fb5);
       windowInnerBacking.material.emissiveIntensity = 0.28;
@@ -2500,7 +2791,7 @@
       memoryCoolBase = 1.05;
       memoryWindow.material.color.set(0xf0a8ff);
       memoryWindow.material.emissive.set(0xc85cff);
-      memoryWindow.material.emissiveIntensity = 0.36;
+      memoryWindow.material.emissiveIntensity = 0.04;
       windowInnerBacking.material.color.set(0x4b2354);
       windowInnerBacking.material.emissive.set(0x8d42b8);
       windowInnerBacking.material.emissiveIntensity = 0.30;
@@ -2511,7 +2802,7 @@
       memoryCoolBase = 0.55;
       memoryWindow.material.color.set(0xd6dbe2);
       memoryWindow.material.emissive.set(0x8d97a8);
-      memoryWindow.material.emissiveIntensity = 0.18;
+      memoryWindow.material.emissiveIntensity = 0.015;
       windowInnerBacking.material.color.set(0x30343d);
       windowInnerBacking.material.emissive.set(0x5f6878);
       windowInnerBacking.material.emissiveIntensity = 0.16;
@@ -2522,7 +2813,7 @@
       memoryCoolBase = 1.15;
       memoryWindow.material.color.set(0x9bc4ff);
       memoryWindow.material.emissive.set(0x4e74c9);
-      memoryWindow.material.emissiveIntensity = 0.20;
+      memoryWindow.material.emissiveIntensity = 0.025;
       windowInnerBacking.material.color.set(0x1f2740);
       windowInnerBacking.material.emissive.set(0x273b72);
       windowInnerBacking.material.emissiveIntensity = 0.22;
@@ -3427,13 +3718,16 @@
       memoryAtmospherePulse = 0.5 + 0.5 * Math.sin(time * 0.42);
     
       memoryWindow.material.emissiveIntensity =
-        0.12 + memoryAtmospherePulse * 0.06 + Math.sin(time * 0.9) * 0.01;
-    
-      memoryWindow.material.opacity =
-        0.70 + memoryAtmospherePulse * 0.05;
-    
+        0.018 + memoryAtmospherePulse * 0.01;
+      
+      memoryWindow.material.roughness =
+        0.07 + memoryAtmospherePulse * 0.02;
+      
       windowInnerBacking.material.emissiveIntensity =
-        0.16 + memoryAtmospherePulse * 0.08;
+        0.06 + memoryAtmospherePulse * 0.03;
+      
+      windowInnerBacking.material.opacity =
+        0.12 + memoryAtmospherePulse * 0.03;
     
       for (let i = 0; i < memoryFramesInside.length; i++) {
         memoryFramesInside[i].rotation.z = Math.sin(time * 0.35 + i * 0.8) * 0.006;
