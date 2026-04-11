@@ -687,6 +687,8 @@
   let memoryAtmospherePulse = 0;
   let memoryWarmBase = 0.90;
   let memoryCoolBase = 1.15;
+
+  let walkBobTime = 0;
   
   function saveMemories() {
     localStorage.setItem("dreamscape_memories", JSON.stringify(memories));
@@ -3190,44 +3192,55 @@
     
       if (!isMemoryTransitioning && !selectedMemoryObject) {
         const direction = new THREE.Vector3();
-      
+    
         if (movement.forward) direction.z -= 1;
         if (movement.backward) direction.z += 1;
         if (movement.left) direction.x -= 1;
         if (movement.right) direction.x += 1;
-      
+    
+        let isMoving = false;
+    
         if (direction.length() > 0) {
           direction.normalize();
-      
+    
           const forward = new THREE.Vector3();
           camera.getWorldDirection(forward);
           forward.y = 0;
           forward.normalize();
-      
+    
           const right = new THREE.Vector3();
           right.crossVectors(forward, new THREE.Vector3(0, 1, 0)).normalize();
-      
+    
           const moveDir = new THREE.Vector3();
           moveDir.addScaledVector(forward, -direction.z);
           moveDir.addScaledVector(right, direction.x);
           moveDir.normalize();
-      
+    
           const proposedX = camera.position.x + moveDir.x * moveSpeed;
           const proposedZ = camera.position.z + moveDir.z * moveSpeed;
-      
+    
           if (canMoveTo(proposedX, proposedZ)) {
             camera.position.x = proposedX;
             camera.position.z = proposedZ;
             controls.target.x += moveDir.x * moveSpeed;
             controls.target.z += moveDir.z * moveSpeed;
+            isMoving = true;
           }
         }
-      
+    
+        if (isMoving) {
+          walkBobTime += 0.14;
+        } else {
+          walkBobTime *= 0.9;
+        }
+    
+        const bobAmount = isMoving ? Math.sin(walkBobTime) * 0.035 : 0;
+    
         const lookOffset = controls.target.clone().sub(camera.position);
-
-        camera.position.y = PLAYER_HEIGHT;
+    
+        camera.position.y = PLAYER_HEIGHT + bobAmount;
         controls.target.copy(camera.position).add(lookOffset);
-        
+    
         clampPlayerInsideRoom();
       }
     }
@@ -3446,7 +3459,18 @@
         mote.position.z = mote.userData.baseZ + Math.sin(driftTime * 0.6) * 0.05;
       }
     
+      const doorCenter = new THREE.Vector3(6.88, PLAYER_HEIGHT, 2.0);
+      const playerPos2D = new THREE.Vector3(camera.position.x, PLAYER_HEIGHT, camera.position.z);
+      const distanceToDoor = playerPos2D.distanceTo(doorCenter);
+      
+      const targetDoorOpen =
+        distanceToDoor < 2.2 ? THREE.MathUtils.clamp((2.2 - distanceToDoor) / 2.2, 0, 1) : 0;
+      
+      doorOpenAmount = THREE.MathUtils.lerp(doorOpenAmount, targetDoorOpen, 0.08);
       doorPivot.rotation.y = -doorOpenAmount * Math.PI * 0.5;
+      
+      doorwayGlow.intensity =
+        0.28 + memoryAtmospherePulse * 0.12 + doorOpenAmount * 0.35;
     }
 
     consoleGroup.position.y = consoleBaseY + Math.sin(time * 1.15) * 0.022;
