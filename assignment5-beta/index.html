@@ -542,6 +542,9 @@
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.0;
   document.body.appendChild(renderer.domElement);
 
   const controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -1352,30 +1355,33 @@
   
   const windowInnerBacking = new THREE.Mesh(
     new THREE.PlaneGeometry(8.15, 2.75),
-    new THREE.MeshStandardMaterial({
-      color: 0xeaf4ff,
-      emissive: 0xcfe6ff,
-      emissiveIntensity: 0.08,
-      roughness: 0.95,
-      metalness: 0.0
+    new THREE.MeshBasicMaterial({
+      color: 0xffd6b3,
+      transparent: true,
+      opacity: 0.10,
+      depthWrite: false
     })
   );
   windowInnerBacking.position.set(0, 2.45, -5.86);
+  windowInnerBacking.renderOrder = 1;
   memoryWorldGroup.add(windowInnerBacking);
   
   const memoryWindow = new THREE.Mesh(
     new THREE.PlaneGeometry(7.85, 2.45),
-    new THREE.MeshStandardMaterial({
+    new THREE.MeshPhysicalMaterial({
       color: 0xffffff,
-      emissive: 0xaed4ff,
-      emissiveIntensity: 0.05,
-      roughness: 0.08,
-      metalness: 0.02,
+      roughness: 0.04,
+      metalness: 0.0,
+      transmission: 0.92,
       transparent: true,
-      opacity: 0.18
+      opacity: 0.22,
+      clearcoat: 0.35,
+      clearcoatRoughness: 0.08,
+      depthWrite: false
     })
   );
   memoryWindow.position.set(0, 2.45, -5.79);
+  memoryWindow.renderOrder = 2;
   memoryWorldGroup.add(memoryWindow);
   
   const windowMullionV = new THREE.Mesh(
@@ -1405,21 +1411,23 @@
   memoryWorldGroup.add(exteriorWorldGroup);
   
   const outsideSky = new THREE.Mesh(
-    new THREE.PlaneGeometry(60, 26),
+    new THREE.PlaneGeometry(70, 30),
     new THREE.MeshBasicMaterial({
-      color: 0xcfe7ff
+      color: 0xffb37a
     })
   );
-  outsideSky.position.set(0, 7.5, -11.5);
+  outsideSky.position.set(0, 8.5, -12.5);
+  outsideSky.renderOrder = -2;
   exteriorWorldGroup.add(outsideSky);
   
   const distantSkyBand = new THREE.Mesh(
-    new THREE.PlaneGeometry(60, 8),
+    new THREE.PlaneGeometry(70, 12),
     new THREE.MeshBasicMaterial({
-      color: 0xeaf4ff
+      color: 0xffd9b8
     })
   );
-  distantSkyBand.position.set(0, 1.8, -11.4);
+  distantSkyBand.position.set(0, 2.2, -12.4);
+  distantSkyBand.renderOrder = -1;
   exteriorWorldGroup.add(distantSkyBand);
   
   const outsideGround = new THREE.Mesh(
@@ -2658,56 +2666,66 @@
       museumSphere.material.color.set(0x24130e);
       memoryWarmBase = 1.35;
       memoryCoolBase = 0.70;
+  
       memoryWindow.material.color.set(0xffc08a);
-      memoryWindow.material.emissive.set(0xff8a4a);
-      memoryWindow.material.emissiveIntensity = 0.38;
-      windowInnerBacking.material.color.set(0x4a2d1f);
-      windowInnerBacking.material.emissive.set(0xa35a2e);
-      windowInnerBacking.material.emissiveIntensity = 0.30;
+      if ("emissive" in memoryWindow.material) {
+        memoryWindow.material.emissive.set(0xff8a4a);
+        memoryWindow.material.emissiveIntensity = 0.12;
+      }
+  
+      windowInnerBacking.material.color.set(0xffc9a3);
     } else if (tone === "cool") {
       scene.fog.color.set(0x16263a);
       museumSphere.material.color.set(0x0d1824);
       memoryWarmBase = 0.55;
       memoryCoolBase = 1.45;
+  
       memoryWindow.material.color.set(0x8fc8ff);
-      memoryWindow.material.emissive.set(0x4a90ff);
-      memoryWindow.material.emissiveIntensity = 0.34;
-      windowInnerBacking.material.color.set(0x1a304f);
-      windowInnerBacking.material.emissive.set(0x2f6fb5);
-      windowInnerBacking.material.emissiveIntensity = 0.28;
+      if ("emissive" in memoryWindow.material) {
+        memoryWindow.material.emissive.set(0x4a90ff);
+        memoryWindow.material.emissiveIntensity = 0.10;
+      }
+  
+      windowInnerBacking.material.color.set(0xbfdcff);
     } else if (tone === "dream") {
       scene.fog.color.set(0x34163a);
       museumSphere.material.color.set(0x1f0d24);
       memoryWarmBase = 1.00;
       memoryCoolBase = 1.05;
+  
       memoryWindow.material.color.set(0xf0a8ff);
-      memoryWindow.material.emissive.set(0xc85cff);
-      memoryWindow.material.emissiveIntensity = 0.36;
-      windowInnerBacking.material.color.set(0x4b2354);
-      windowInnerBacking.material.emissive.set(0x8d42b8);
-      windowInnerBacking.material.emissiveIntensity = 0.30;
+      if ("emissive" in memoryWindow.material) {
+        memoryWindow.material.emissive.set(0xc85cff);
+        memoryWindow.material.emissiveIntensity = 0.10;
+      }
+  
+      windowInnerBacking.material.color.set(0xf3c1ff);
     } else if (tone === "echo") {
       scene.fog.color.set(0x2b2b31);
       museumSphere.material.color.set(0x151519);
       memoryWarmBase = 0.45;
       memoryCoolBase = 0.55;
+  
       memoryWindow.material.color.set(0xd6dbe2);
-      memoryWindow.material.emissive.set(0x8d97a8);
-      memoryWindow.material.emissiveIntensity = 0.18;
-      windowInnerBacking.material.color.set(0x30343d);
-      windowInnerBacking.material.emissive.set(0x5f6878);
-      windowInnerBacking.material.emissiveIntensity = 0.16;
+      if ("emissive" in memoryWindow.material) {
+        memoryWindow.material.emissive.set(0x8d97a8);
+        memoryWindow.material.emissiveIntensity = 0.05;
+      }
+  
+      windowInnerBacking.material.color.set(0xd7d2cc);
     } else {
       scene.fog.color.set(0x24182e);
       museumSphere.material.color.set(0x120f1a);
       memoryWarmBase = 0.90;
       memoryCoolBase = 1.15;
+  
       memoryWindow.material.color.set(0x9bc4ff);
-      memoryWindow.material.emissive.set(0x4e74c9);
-      memoryWindow.material.emissiveIntensity = 0.20;
-      windowInnerBacking.material.color.set(0x1f2740);
-      windowInnerBacking.material.emissive.set(0x273b72);
-      windowInnerBacking.material.emissiveIntensity = 0.22;
+      if ("emissive" in memoryWindow.material) {
+        memoryWindow.material.emissive.set(0x4e74c9);
+        memoryWindow.material.emissiveIntensity = 0.06;
+      }
+  
+      windowInnerBacking.material.color.set(0xffd6b3);
     }
   
     toneText.textContent = tone;
@@ -3608,14 +3626,16 @@
     if (memoryWorldGroup.visible) {
       memoryAtmospherePulse = 0.5 + 0.5 * Math.sin(time * 0.42);
     
-      memoryWindow.material.emissiveIntensity =
-        0.03 + memoryAtmospherePulse * 0.015 + Math.sin(time * 0.9) * 0.004;
+      if ("emissiveIntensity" in memoryWindow.material) {
+        memoryWindow.material.emissiveIntensity =
+          0.01 + memoryAtmospherePulse * 0.008;
+      }
       
       memoryWindow.material.opacity =
-        0.14 + memoryAtmospherePulse * 0.03;
+        0.18 + memoryAtmospherePulse * 0.015;
       
-      windowInnerBacking.material.emissiveIntensity =
-        0.05 + memoryAtmospherePulse * 0.02;
+      windowInnerBacking.material.opacity =
+        0.08 + memoryAtmospherePulse * 0.03;
     
       for (let i = 0; i < memoryFramesInside.length; i++) {
         memoryFramesInside[i].rotation.z = Math.sin(time * 0.35 + i * 0.8) * 0.006;
