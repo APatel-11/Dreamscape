@@ -657,7 +657,7 @@
   
   let memoryCameraTarget = new THREE.Vector3(0, 1.62, -1.95);
   const PLAYER_HEIGHT = 1.62;
-  let memoryCameraBasePos = new THREE.Vector3(0, 1.72, 3.8);
+  let memoryCameraBasePos = new THREE.Vector3(0, 1.72, 4.8);
   let memoryCameraPos = memoryCameraBasePos.clone();
   
   let memoryControlsInitialized = false;
@@ -3159,7 +3159,7 @@
     const t = Number(timeline.value) / 100;
     const time = performance.now() * 0.001;
 
-    const memoryZoomZ = THREE.MathUtils.lerp(4.4, 3.0, t);
+    const memoryZoomZ = THREE.MathUtils.lerp(5.2, 4.2, t);
     memoryCameraPos.set(0, 1.72, memoryZoomZ);
 
     let desiredTarget = hubTarget;
