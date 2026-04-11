@@ -676,6 +676,11 @@
   let playerVelocity = new THREE.Vector3();
   const moveSpeed = 0.08;
 
+  const ROOM_MIN_X = -6.2;
+  const ROOM_MAX_X = 6.2;
+  const ROOM_MIN_Z = -5.2;
+  const ROOM_MAX_Z = 5.2;
+
   let memoryAtmospherePulse = 0;
   let memoryWarmBase = 0.90;
   let memoryCoolBase = 1.15;
@@ -708,6 +713,15 @@
     movement.backward = false;
     movement.left = false;
     movement.right = false;
+  }
+
+  function clampPlayerInsideRoom() {
+    const offset = controls.target.clone().sub(camera.position);
+  
+    camera.position.x = THREE.MathUtils.clamp(camera.position.x, ROOM_MIN_X, ROOM_MAX_X);
+    camera.position.z = THREE.MathUtils.clamp(camera.position.z, ROOM_MIN_Z, ROOM_MAX_Z);
+  
+    controls.target.copy(camera.position).add(offset);
   }
 
   function getArchiveStats() {
@@ -3126,40 +3140,41 @@
       memories[selectedMemoryId].clarity = t;
       clarityText.textContent = t.toFixed(2);
       highlightFrames();
-
-      // ===== WASD MOVEMENT =====
+    
       if (!isMemoryTransitioning && !selectedMemoryObject) {
         const direction = new THREE.Vector3();
-      
+    
         if (movement.forward) direction.z -= 1;
         if (movement.backward) direction.z += 1;
         if (movement.left) direction.x -= 1;
         if (movement.right) direction.x += 1;
-      
+    
         if (direction.length() > 0) {
           direction.normalize();
-      
+    
           const forward = new THREE.Vector3();
           camera.getWorldDirection(forward);
           forward.y = 0;
           forward.normalize();
-      
+    
           const right = new THREE.Vector3();
           right.crossVectors(forward, new THREE.Vector3(0, 1, 0)).normalize();
-      
+    
           const moveDir = new THREE.Vector3();
           moveDir.addScaledVector(forward, -direction.z);
           moveDir.addScaledVector(right, direction.x);
-      
+    
           camera.position.addScaledVector(moveDir, moveSpeed);
           controls.target.addScaledVector(moveDir, moveSpeed);
         }
-      
+    
         camera.position.y = PLAYER_HEIGHT;
         controls.target.y = PLAYER_HEIGHT;
+    
+        clampPlayerInsideRoom();
       }
     }
-
+    
     if (appState === "memory" && isMemoryTransitioning) {
       memoryTransitionProgress = Math.min(1, memoryTransitionProgress + 0.018);
     
