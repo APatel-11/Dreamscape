@@ -1405,6 +1405,7 @@
   memoryBackWallLeft.castShadow = true;
   memoryBackWallLeft.receiveShadow = true;
   memoryBackWallGroup.add(memoryBackWallLeft);
+  memoryBackWallLeft.material.color.set(0xff0000);
   
   const memoryBackWallRight = new THREE.Mesh(
     new THREE.BoxGeometry(sideWidth, wallHeight, 0.16),
@@ -1507,23 +1508,18 @@
   
   const memoryWindow = new THREE.Mesh(
     new THREE.PlaneGeometry(7.75, 2.30),
-    new THREE.MeshPhysicalMaterial({
-      color: 0xf3f7ff,
-      roughness: 0.04,
-      metalness: 0.0,
-      transmission: 0.98,
+    
+    const memoryWindowMat = new THREE.MeshStandardMaterial({
+      color: 0xcfd6e6,
       transparent: true,
-      opacity: 0.22,
-      ior: 1.08,
-      reflectivity: 0.22,
-      clearcoat: 1.0,
-      clearcoatRoughness: 0.04,
+      opacity: 0.08,
+      roughness: 0.6,
+      metalness: 0.0,
       side: THREE.DoubleSide
     })
   );
   memoryWindow.position.set(0, openingCenterY, -5.67);
   memoryWindow.renderOrder = 10;
-  memoryWindow.material.depthWrite = false;
   memoryWindow.userData.preserveMaterial = true;
   memoryWorldGroup.add(memoryWindow);
   
@@ -1557,6 +1553,7 @@
   const outsideGroup = new THREE.Group();
   outsideGroup.userData.preserveMaterial = true;
   memoryWorldGroup.add(outsideGroup);
+  outsideGroup.position.z = -2;
   
   const sunsetSky = new THREE.Mesh(
     new THREE.PlaneGeometry(24, 9),
