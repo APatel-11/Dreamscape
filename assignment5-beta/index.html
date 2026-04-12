@@ -1444,7 +1444,7 @@
   const topHeight = wallHeight - (openingCenterY + openingHeight / 2);
   const bottomHeight = openingCenterY - openingHeight / 2;
   
-  const backWallLeft = new THREE.Mesh(
+  const memoryBackWallLeft = new THREE.Mesh(
     new THREE.BoxGeometry(sideWidth, wallHeight, 0.16),
     memoryBackWallMat
   );
@@ -1453,7 +1453,7 @@
   backWallLeft.receiveShadow = true;
   backWallGroup.add(backWallLeft);
   
-  const backWallRight = new THREE.Mesh(
+  const memoryBackWallRight = new THREE.Mesh(
     new THREE.BoxGeometry(sideWidth, wallHeight, 0.16),
     memoryBackWallMat
   );
@@ -1462,7 +1462,7 @@
   backWallRight.receiveShadow = true;
   backWallGroup.add(backWallRight);
   
-  const backWallTop = new THREE.Mesh(
+  const memoryBackWallTop = new THREE.Mesh(
     new THREE.BoxGeometry(openingWidth, topHeight, 0.16),
     memoryBackWallMat
   );
@@ -1471,7 +1471,7 @@
   backWallTop.receiveShadow = true;
   backWallGroup.add(backWallTop);
   
-  const backWallBottom = new THREE.Mesh(
+  const memoryBackWallBottom = new THREE.Mesh(
     new THREE.BoxGeometry(openingWidth, bottomHeight, 0.16),
     memoryBackWallMat
   );
