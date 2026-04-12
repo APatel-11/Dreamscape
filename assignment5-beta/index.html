@@ -1433,14 +1433,41 @@
   memoryBackWallBottom.receiveShadow = true;
   memoryBackWallGroup.add(memoryBackWallBottom);
   
-  const windowOuterFrame = new THREE.Mesh(
-    new THREE.BoxGeometry(8.55, 3.05, 0.20),
+  const windowFrameTop = new THREE.Mesh(
+    new THREE.BoxGeometry(8.55, 0.18, 0.20),
     windowFrameMat
   );
-  windowOuterFrame.position.set(0, openingCenterY, -5.86);
-  windowOuterFrame.castShadow = true;
-  windowOuterFrame.receiveShadow = true;
-  memoryWorldGroup.add(windowOuterFrame);
+  windowFrameTop.position.set(0, openingCenterY + 1.43, -5.86);
+  windowFrameTop.castShadow = true;
+  windowFrameTop.receiveShadow = true;
+  memoryWorldGroup.add(windowFrameTop);
+  
+  const windowFrameBottom = new THREE.Mesh(
+    new THREE.BoxGeometry(8.55, 0.18, 0.20),
+    windowFrameMat
+  );
+  windowFrameBottom.position.set(0, openingCenterY - 1.43, -5.86);
+  windowFrameBottom.castShadow = true;
+  windowFrameBottom.receiveShadow = true;
+  memoryWorldGroup.add(windowFrameBottom);
+  
+  const windowFrameLeft = new THREE.Mesh(
+    new THREE.BoxGeometry(0.18, 3.05, 0.20),
+    windowFrameMat
+  );
+  windowFrameLeft.position.set(-4.185, openingCenterY, -5.86);
+  windowFrameLeft.castShadow = true;
+  windowFrameLeft.receiveShadow = true;
+  memoryWorldGroup.add(windowFrameLeft);
+  
+  const windowFrameRight = new THREE.Mesh(
+    new THREE.BoxGeometry(0.18, 3.05, 0.20),
+    windowFrameMat
+  );
+  windowFrameRight.position.set(4.185, openingCenterY, -5.86);
+  windowFrameRight.castShadow = true;
+  windowFrameRight.receiveShadow = true;
+  memoryWorldGroup.add(windowFrameRight);
   
   const windowRecessTop = new THREE.Mesh(
     new THREE.BoxGeometry(8.10, 0.16, 0.38),
