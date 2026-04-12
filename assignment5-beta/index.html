@@ -1448,37 +1448,37 @@
     new THREE.BoxGeometry(sideWidth, wallHeight, 0.16),
     memoryBackWallMat
   );
-  backWallLeft.position.set(-(openingWidth / 2 + sideWidth / 2), 3, wallZ);
-  backWallLeft.castShadow = true;
-  backWallLeft.receiveShadow = true;
-  backWallGroup.add(backWallLeft);
+  memoryBackWallLeft.position.set(-(openingWidth / 2 + sideWidth / 2), 3, wallZ);
+  memoryBackWallLeft.castShadow = true;
+  memoryBackWallLeft.receiveShadow = true;
+  memoryBackWallGroup.add(memoryBackWallLeft);
   
   const memoryBackWallRight = new THREE.Mesh(
     new THREE.BoxGeometry(sideWidth, wallHeight, 0.16),
     memoryBackWallMat
   );
-  backWallRight.position.set((openingWidth / 2 + sideWidth / 2), 3, wallZ);
-  backWallRight.castShadow = true;
-  backWallRight.receiveShadow = true;
-  backWallGroup.add(backWallRight);
+  memoryBackWallRight.position.set((openingWidth / 2 + sideWidth / 2), 3, wallZ);
+  memoryBackWallRight.castShadow = true;
+  memoryBackWallRight.receiveShadow = true;
+  memoryBackWallGroup.add(memoryBackWallRight);
   
   const memoryBackWallTop = new THREE.Mesh(
     new THREE.BoxGeometry(openingWidth, topHeight, 0.16),
     memoryBackWallMat
   );
-  backWallTop.position.set(0, openingCenterY + openingHeight / 2 + topHeight / 2, wallZ);
-  backWallTop.castShadow = true;
-  backWallTop.receiveShadow = true;
-  backWallGroup.add(backWallTop);
+  memoryBackWallTop.position.set(0, openingCenterY + openingHeight / 2 + topHeight / 2, wallZ);
+  memoryBackWallTop.castShadow = true;
+  memoryBackWallTop.receiveShadow = true;
+  memoryBackWallGroup.add(memoryBackWallTop);
   
   const memoryBackWallBottom = new THREE.Mesh(
     new THREE.BoxGeometry(openingWidth, bottomHeight, 0.16),
     memoryBackWallMat
   );
-  backWallBottom.position.set(0, bottomHeight / 2, wallZ);
-  backWallBottom.castShadow = true;
-  backWallBottom.receiveShadow = true;
-  backWallGroup.add(backWallBottom);
+  memoryBackWallBottom.position.set(0, bottomHeight / 2, wallZ);
+  memoryBackWallBottom.castShadow = true;
+  memoryBackWallBottom.receiveShadow = true;
+  memoryBackWallGroup.add(memoryBackWallBottom);
   
   const windowOuterFrame = new THREE.Mesh(
     new THREE.BoxGeometry(8.55, 3.05, 0.20),
