@@ -557,7 +557,6 @@
   renderer.physicallyCorrectLights = true;
   document.body.appendChild(renderer.domElement);
 
-  // --- Environment Map ---
   const pmremGenerator = new THREE.PMREMGenerator(renderer);
   pmremGenerator.compileEquirectangularShader();
   new THREE.RGBELoader().load('../assets/hdri/studio_small_09_1k.hdr', function(hdrTexture) {
@@ -567,10 +566,8 @@
     pmremGenerator.dispose();
   });
 
-  // --- RectAreaLight init ---
   THREE.RectAreaLightUniformsLib.init();
 
-  // --- Post-Processing ---
   const composer = new THREE.EffectComposer(renderer);
   const renderPass = new THREE.RenderPass(scene, camera);
   composer.addPass(renderPass);
@@ -633,7 +630,6 @@
   scene.add(memoryBackGlow);
   scene.add(memoryBackGlow.target);
 
-  // Recessed ceiling lights
   const recessedPositions = [
     { x: -3, z: -3 }, { x: 3, z: -3 },
     { x: -3, z: 2 },  { x: 3, z: 2 },
@@ -707,10 +703,10 @@
   let transitionCurveP1 = new THREE.Vector3();
   let transitionCurveP2 = new THREE.Vector3();
   let transitionCurveP3 = new THREE.Vector3();
-  
-  let memoryCameraTarget = new THREE.Vector3(0, 1.62, -1.95);
-  const PLAYER_HEIGHT = 1.62;
-  let memoryCameraBasePos = new THREE.Vector3(0, 1.72, 4.8);
+
+  const PLAYER_HEIGHT = 1.64;
+  let memoryCameraTarget = new THREE.Vector3(0, 1.64, -1.95);
+  let memoryCameraBasePos = new THREE.Vector3(0, 1.74, 4.8);
   let memoryCameraPos = memoryCameraBasePos.clone();
   
   let memoryControlsInitialized = false;
@@ -1191,7 +1187,6 @@
     dustGroup.add(dot);
   }
 
-  // --- PBR Texture Helper ---
   const texLoader = new THREE.TextureLoader();
   const texBase = '../assets/textures/';
   function loadPBR(name, repeatX, repeatY) {
@@ -1240,7 +1235,6 @@
     });
   }
 
-  // Load all models
   Promise.all([
     loadModel('desk'),
     loadModel('desktop_computer'),
@@ -1257,7 +1251,6 @@
   ]).then(function() {
     console.log('All models loaded');
 
-    // Populate houses with varied Kenney models
     const houseModelNames = ['house_kenney_a', 'house_kenney_b', 'house_kenney_c', 'house_kenney_d', 'house_kenney_e'];
     for (let i = 0; i < housePlaceholders.length; i++) {
       const hp = housePlaceholders[i];
@@ -1267,7 +1260,6 @@
       hp.group.add(h);
     }
 
-    // Populate tree placeholders
     for (let i = 0; i < treePlaceholders.length; i++) {
       const tp = treePlaceholders[i];
       const t = loadedModels.realistic_tree.clone();
@@ -1275,10 +1267,8 @@
       tp.group.add(t);
     }
 
-    // Populate desk (native: 5.6w x 8.5h x 11.3d, scale to 1.23 tall)
     const deskClone = loadedModels.desk.clone();
     deskClone.scale.set(0.35, 0.175, 0.35);
-    // Hide the hutch/upper shelf parts
     deskClone.traverse(function(child) {
       if (child.name && (child.name.indexOf('Upper') !== -1 || child.name.indexOf('BoardAbove') !== -1)) {
         child.visible = false;
@@ -1286,34 +1276,25 @@
     });
     deskModel.add(deskClone);
 
-    // Populate PC on desk (native ~940 tall in mm, target ~0.5 tall on desk surface)
     const pcClone = loadedModels.desktop_computer.clone();
     const pcScale = 0.001;
     pcClone.scale.setScalar(pcScale);
-    // Desk surface at ~3.8 native * 0.175 y-scale = 0.665. PC bottom at native y=-640.
     pcClone.position.set(0, 3.8 * 0.175 + 640 * pcScale, 0);
     monitorModel.add(pcClone);
 
-    // Populate left cabinet (bookshelf, native ~1.15 tall, origin offset at x~8.9)
     const bookshelfClone = loadedModels.bookshelf.clone();
     bookshelfClone.scale.set(2.17, 2.8, 2.17);
     bookshelfClone.position.set(-8.9 * 2.17, 0, -0.18 * 2.17);
     leftCabinetGroup.add(bookshelfClone);
 
-    // Populate corner bookshelf (perpendicular, against window wall)
-    // Corner bookshelf - rotation=0 so local=world. Model origin at native x=8.93.
-    // Place so left edge aligns with left wall bookshelf.
-    // Corner bookshelf: same offset pattern as left wall bookshelf
     const cornerShelfClone = loadedModels.bookshelf.clone();
     cornerShelfClone.scale.setScalar(2.17);
     cornerShelfClone.position.set(-8.9 * 2.17, 0, -0.18 * 2.17);
     cornerBookshelf.add(cornerShelfClone);
 
-    // Populate right cabinet (credenza, native ~1.8 tall, origin offset at x~100 z~21)
     const credenzaClone = loadedModels.credenza.clone();
     credenzaClone.scale.setScalar(0.56);
     credenzaClone.position.set(-100 * 0.56, -0.57 * 0.56, -21 * 0.56);
-    // Apply warm wood tone to credenza
     credenzaClone.traverse(function(c) {
       if (c.isMesh) {
         c.material = new THREE.MeshStandardMaterial({
@@ -1328,19 +1309,15 @@
     });
     rightCabinetGroup.add(credenzaClone);
 
-    // Populate sofa/chaise (native: 0.6w x 1.0h x 2.0d, origin at center)
     const sofaClone = loadedModels.sofa.clone();
     sofaClone.scale.set(2.5, 1.5, 1.8);
     sofaClone.position.set(0, 0.5 * 1.5, 0);
     bench.add(sofaClone);
 
-    // Populate chair (native ~0.95 tall in meters, target 1.3)
     const chairClone = loadedModels.armchair.clone();
     chairClone.scale.setScalar(1.37);
     chairGroup.add(chairClone);
 
-    // Procedural potted plants and floor lamp (GLTF models don't render in this group)
-    // will be added below as procedural geometry
 
     document.getElementById('startBtn').disabled = false;
   });
@@ -1465,14 +1442,12 @@
   frontWall.receiveShadow = true;
   roomShell.add(frontWall);
   
-  // Back wall built in 4 pieces around the window opening.
-  // Wall: 14 wide, y 0..6. Opening: 8.25 wide, 2.85 tall, centered at y=2.45.
-  // Opening edges: left=-4.125, right=4.125, bottom=1.025, top=3.875
+  
   const winOpenW = 8.25, winOpenH = 2.85, winCenterY = 2.45;
-  const winTop = winCenterY + winOpenH / 2;   // 3.875
-  const winBot = winCenterY - winOpenH / 2;   // 1.025
-  const winLeft = -winOpenW / 2;              // -4.125
-  const winRight = winOpenW / 2;              //  4.125
+  const winTop = winCenterY + winOpenH / 2;   
+  const winBot = winCenterY - winOpenH / 2;   
+  const winLeft = -winOpenW / 2;              
+  const winRight = winOpenW / 2;              
   const bwZ = -5.98;
 
   const backWallTop = new THREE.Mesh(
@@ -1491,7 +1466,7 @@
   backWallBottom.receiveShadow = true;
   roomShell.add(backWallBottom);
 
-  const sideW = (14 - winOpenW) / 2; // 2.875
+  const sideW = (14 - winOpenW) / 2; 
   const backWallLeft = new THREE.Mesh(
     new THREE.PlaneGeometry(sideW, winOpenH),
     backWallMat
@@ -1741,7 +1716,6 @@
   windowSill.receiveShadow = true;
   memoryWorldGroup.add(windowSill);
 
-  // Window RectAreaLight — casts warm directional light into room
   const windowRectLight = new THREE.RectAreaLight(0xffd4a8, 2.0, 7.8, 2.3);
   windowRectLight.position.set(0, 2.45, -5.7);
   windowRectLight.lookAt(0, 0, 0);
@@ -1792,7 +1766,6 @@
   distantGround.position.set(0, 0.5, -27);
   outsideGroup.add(distantGround);
 
-  // Grass yard between wall and street
   const yard = new THREE.Mesh(
     new THREE.PlaneGeometry(18, 4),
     new THREE.MeshStandardMaterial({
@@ -1852,31 +1825,29 @@
   const neighborhoodLight = new THREE.AmbientLight(0xffcaa2, 0.8);
   outsideGroup.add(neighborhoodLight);
 
-  // Birds flying outside the window
   function createBird(color, breastColor) {
     const bird = new THREE.Group();
-    // Body
     const body = new THREE.Mesh(
       new THREE.SphereGeometry(0.08, 8, 8),
       new THREE.MeshStandardMaterial({ color: color, roughness: 0.8 })
     );
     body.scale.set(1, 0.7, 1.6);
     bird.add(body);
-    // Head
+    
     const head = new THREE.Mesh(
       new THREE.SphereGeometry(0.055, 8, 8),
       new THREE.MeshStandardMaterial({ color: color, roughness: 0.8 })
     );
     head.position.set(0, 0.04, 0.12);
     bird.add(head);
-    // Breast
+    
     const breast = new THREE.Mesh(
       new THREE.SphereGeometry(0.05, 8, 8),
       new THREE.MeshStandardMaterial({ color: breastColor, roughness: 0.8 })
     );
     breast.position.set(0, -0.02, 0.05);
     bird.add(breast);
-    // Beak
+    
     const beak = new THREE.Mesh(
       new THREE.ConeGeometry(0.012, 0.04, 6),
       new THREE.MeshStandardMaterial({ color: 0x3a3020, roughness: 0.5 })
@@ -1884,7 +1855,7 @@
     beak.rotation.x = -Math.PI / 2;
     beak.position.set(0, 0.04, 0.18);
     bird.add(beak);
-    // Wings
+    
     for (let side = -1; side <= 1; side += 2) {
       const wing = new THREE.Mesh(
         new THREE.PlaneGeometry(0.12, 0.06),
@@ -1911,15 +1882,12 @@
   }
 
   const birds = [
-    // 3 Robins (brown body, red breast)
     addBird(0x5a3a2a, 0xcc3322, 1.5, 3.5, -8, 0.8, 2.5),
     addBird(0x5a3a2a, 0xcc3322, -2.5, 4.2, -9, 0.65, 3.0),
     addBird(0x5a3a2a, 0xcc3322, 3.0, 3.0, -10, 0.9, 2.0),
-    // 3 Blue jays (blue body, white breast)
     addBird(0x2255aa, 0xdddddd, -1.0, 4.0, -9, 1.1, 3.0),
     addBird(0x2255aa, 0xdddddd, 2.0, 3.8, -8.5, 0.75, 2.8),
     addBird(0x2255aa, 0xdddddd, -3.0, 4.5, -10, 0.95, 3.5),
-    // 1 Cardinal (red body, red breast with black face)
     addBird(0xcc2222, 0xbb1111, 0.0, 4.8, -8, 0.7, 2.2)
   ];
 
@@ -1979,9 +1947,7 @@
     return house;
   }
   
-  // House and tree GLTF placeholders (populated after models load)
   const housePlaceholders = [];
-  // Kenney houses: native ~1.3 wide x ~1 tall. Scale up for neighborhood.
   const housePositions = [
     { x: -3.5, z: -13, s: 3.0, ry: 0 },
     { x: -1.0, z: -14, s: 2.8, ry: 0.2 },
@@ -1991,6 +1957,7 @@
     { x: 0.5, z: -18, s: 2.2, ry: -0.2 },
     { x: 3.0, z: -17.5, s: 2.5, ry: 0.15 }
   ];
+  
   for (let i = 0; i < housePositions.length; i++) {
     const placeholder = new THREE.Group();
     placeholder.position.set(housePositions[i].x, 0, housePositions[i].z);
@@ -2031,8 +1998,6 @@
   }
   
   const treePlaceholders = [];
-  // Trees: smaller and more frequent for a dense neighborhood feel
-  // Trees: native ~16 tall. Keep behind wall (z < -6) but close enough to be visible.
   const treePositions = [
     { x: -3.5, z: -8, s: 0.20 },
     { x: -1.5, z: -9, s: 0.18 },
@@ -2044,6 +2009,7 @@
     { x: -4.5, z: -10, s: 0.18 },
     { x: 4.5, z: -10.5, s: 0.16 }
   ];
+  
   for (let i = 0; i < treePositions.length; i++) {
     const placeholder = new THREE.Group();
     placeholder.position.set(treePositions[i].x, 0, treePositions[i].z);
@@ -2051,13 +2017,11 @@
     treePlaceholders.push({ group: placeholder, s: treePositions[i].s });
   }
   
-  // Desk (GLTF model placeholder — populated after models load)
   const deskModel = new THREE.Group();
   deskModel.position.set(0, 0, -3.0);
   deskModel.rotation.y = -Math.PI / 2;
   memoryWorldGroup.add(deskModel);
 
-  // PC setup on desk (monitor + keyboard + tower — populated after models load)
   const monitorModel = new THREE.Group();
   monitorModel.position.set(0, 0, -3.0);
   monitorModel.rotation.y = 0;
@@ -2079,35 +2043,27 @@
 
   keepsakeBox.userData.baseY = keepsakeBox.position.y;
   
-  // Left cabinet (GLTF placeholder)
   const leftCabinetGroup = new THREE.Group();
   leftCabinetGroup.position.set(-6.2, 0, -5.0);
   leftCabinetGroup.rotation.y = Math.PI / 2;
   memoryWorldGroup.add(leftCabinetGroup);
 
-  // Corner bookshelf - perpendicular to first, against window wall
-  // Corner bookshelf against window wall, perpendicular to left wall bookshelf
-  // Model origin at native x=8.93. At scale 2.17 and rotation 0, clone offsets by -19.37 on x.
-  // So group.x = desired_x + 19.37 to compensate.
+  
   const cornerBookshelf = new THREE.Group();
-  // Group x compensates for model origin offset: -4.5 + 8.9*2.17 = 14.83
   cornerBookshelf.position.set(14.83, 0, -4.8);
   cornerBookshelf.rotation.y = 0;
   memoryWorldGroup.add(cornerBookshelf);
 
-  // Right cabinet (GLTF placeholder)
   const rightCabinetGroup = new THREE.Group();
   rightCabinetGroup.position.set(6.0, 0, -2.0);
   rightCabinetGroup.rotation.y = -Math.PI / 2;
   memoryWorldGroup.add(rightCabinetGroup);
   
-  // Bench (GLTF placeholder)
   const bench = new THREE.Group();
   bench.position.set(-4.5, 0, 4.0);
   bench.rotation.y = Math.PI / 4;
   memoryWorldGroup.add(bench);
 
-  // Chair (GLTF placeholder)
   const chairGroup = new THREE.Group();
   chairGroup.position.set(0, 0, 0.5);
   chairGroup.rotation.y = Math.PI;
@@ -2119,6 +2075,7 @@
     ['#5a2d4e', '#8b4a6e', '#3d1a32', '#b86d8a'],
     ['#4e5a2d', '#6e8b4a', '#323d1a', '#8ab86d']
   ];
+  
   for (let i = 0; i < 3; i++) {
     const artFrame = new THREE.Mesh(
       new THREE.BoxGeometry(0.08, 1.2, 1.6),
@@ -2128,21 +2085,26 @@
     memoryWorldGroup.add(artFrame);
     memoryFramesInside.push(artFrame);
 
-    // Abstract art canvas for this frame
     const artCanvas = document.createElement('canvas');
     artCanvas.width = 256;
     artCanvas.height = 192;
+    
     const actx = artCanvas.getContext('2d');
+    
     const agrd = actx.createLinearGradient(0, 0, 256, 192);
     agrd.addColorStop(0, '#0f0f1a');
     agrd.addColorStop(1, '#1a1a2e');
     actx.fillStyle = agrd;
     actx.fillRect(0, 0, 256, 192);
+    
     const fc = frameColors[i];
+    
     for (let p = 0; p < 8; p++) {
       actx.beginPath();
+      
       const cx = Math.random() * 256, cy = Math.random() * 192;
       const pts = 3 + Math.floor(Math.random() * 3);
+      
       for (let j = 0; j < pts; j++) {
         const angle = (j / pts) * Math.PI * 2 + Math.random() * 0.4;
         const r = 15 + Math.random() * 50;
@@ -2155,8 +2117,10 @@
       actx.fill();
     }
     actx.globalAlpha = 1;
+    
     const artTex = new THREE.CanvasTexture(artCanvas);
     artTex.encoding = THREE.sRGBEncoding;
+    
     const artInner = new THREE.Mesh(
       new THREE.PlaneGeometry(1.4, 1.0),
       new THREE.MeshStandardMaterial({ map: artTex, roughness: 0.7 })
@@ -2166,28 +2130,30 @@
     memoryWorldGroup.add(artInner);
   }
 
-  // Large monstera - right of window, between credenza and window wall
   const plant1Group = new THREE.Group();
   plant1Group.position.set(5.8, 0, -4.2);
   memoryWorldGroup.add(plant1Group);
+  
   const pot1 = new THREE.Mesh(
     new THREE.CylinderGeometry(0.28, 0.22, 0.55, 16),
     new THREE.MeshStandardMaterial({ color: 0x6b4530, roughness: 0.9 })
   );
   pot1.position.y = 0.275;
   plant1Group.add(pot1);
+  
   const soil1 = new THREE.Mesh(
     new THREE.CylinderGeometry(0.26, 0.26, 0.05, 16),
     new THREE.MeshStandardMaterial({ color: 0x2a1e12, roughness: 1.0 })
   );
   soil1.position.y = 0.57;
   plant1Group.add(soil1);
-  // Tall dark monstera leaves
+  
   for (let li = 0; li < 11; li++) {
     const leaf = new THREE.Mesh(
       new THREE.PlaneGeometry(0.4, 0.65),
       new THREE.MeshStandardMaterial({ color: 0x041a0a, roughness: 0.95, metalness: 0.0, envMapIntensity: 0.05, side: THREE.DoubleSide })
     );
+    
     const angle = (li / 11) * Math.PI * 2;
     const tilt = 0.25 + Math.random() * 0.4;
     leaf.position.set(Math.cos(angle) * 0.25, 0.8 + Math.random() * 0.8, Math.sin(angle) * 0.25);
@@ -2195,10 +2161,10 @@
     plant1Group.add(leaf);
   }
 
-  // Floor lamp - back corner by the door
   const floorLampGroup = new THREE.Group();
   floorLampGroup.position.set(6.3, 0, 5.2);
   memoryWorldGroup.add(floorLampGroup);
+  
   const lampBaseMat = new THREE.MeshStandardMaterial({ color: 0x8b6914, roughness: 0.35, metalness: 0.7 });
   const lampBase = new THREE.Mesh(
     new THREE.CylinderGeometry(0.22, 0.25, 0.08, 20),
@@ -2206,42 +2172,44 @@
   );
   lampBase.position.y = 0.04;
   floorLampGroup.add(lampBase);
+  
   const lampStem = new THREE.Mesh(
     new THREE.CylinderGeometry(0.022, 0.028, 2.4, 12),
     lampBaseMat
   );
   lampStem.position.y = 1.24;
   floorLampGroup.add(lampStem);
+  
   const lampShade = new THREE.Mesh(
     new THREE.CylinderGeometry(0.14, 0.3, 0.4, 20, 1, true),
     new THREE.MeshStandardMaterial({ color: 0xe8d5b0, roughness: 0.85, side: THREE.DoubleSide })
   );
   lampShade.position.y = 2.5;
   floorLampGroup.add(lampShade);
+  
   const lampGlow = new THREE.PointLight(0xffd6a0, 0.8, 6);
   lampGlow.position.y = 2.45;
   floorLampGroup.add(lampGlow);
 
-  // Side table next to lamp with small plant on top
   const sideTableGroup = new THREE.Group();
   sideTableGroup.position.set(5.8, 0, 4.8);
   memoryWorldGroup.add(sideTableGroup);
+  
   const stBrownMat = new THREE.MeshStandardMaterial({ color: 0x4a3222, roughness: 0.8, metalness: 0.05 });
-  // Table top
   const stTop = new THREE.Mesh(
     new THREE.CylinderGeometry(0.55, 0.55, 0.06, 20),
     new THREE.MeshStandardMaterial({ color: 0x7a5c3e, roughness: 0.8, map: woodTrimTex.map, normalMap: woodTrimTex.normalMap })
   );
   stTop.position.y = 0.58;
   sideTableGroup.add(stTop);
-  // Central stem
+  
   const stStem = new THREE.Mesh(
     new THREE.CylinderGeometry(0.04, 0.045, 0.38, 10),
     stBrownMat
   );
   stStem.position.y = 0.38;
   sideTableGroup.add(stStem);
-  // Three-pronged angled legs
+  
   for (let li = 0; li < 3; li++) {
     const legAngle = (li / 3) * Math.PI * 2;
     const leg = new THREE.Mesh(
@@ -2251,7 +2219,7 @@
     leg.position.set(Math.cos(legAngle) * 0.16, 0.15, Math.sin(legAngle) * 0.16);
     leg.rotation.set(Math.sin(legAngle) * 0.35, 0, -Math.cos(legAngle) * 0.35);
     sideTableGroup.add(leg);
-    // Foot
+    
     const foot = new THREE.Mesh(
       new THREE.SphereGeometry(0.02, 8, 8),
       stBrownMat
@@ -2259,45 +2227,48 @@
     foot.position.set(Math.cos(legAngle) * 0.28, 0.01, Math.sin(legAngle) * 0.28);
     sideTableGroup.add(foot);
   }
-  // Small plant on table
+  
   const smallPot = new THREE.Mesh(
     new THREE.CylinderGeometry(0.1, 0.08, 0.14, 12),
     new THREE.MeshStandardMaterial({ color: 0xd4c4a8, roughness: 0.85 })
   );
   smallPot.position.y = 0.67;
   sideTableGroup.add(smallPot);
+  
   const smallSoil = new THREE.Mesh(
     new THREE.CylinderGeometry(0.09, 0.09, 0.03, 12),
     new THREE.MeshStandardMaterial({ color: 0x2a1e12, roughness: 1.0 })
   );
   smallSoil.position.y = 0.75;
   sideTableGroup.add(smallSoil);
+  
   for (let li = 0; li < 5; li++) {
     const leaf = new THREE.Mesh(
       new THREE.PlaneGeometry(0.12, 0.18),
       new THREE.MeshStandardMaterial({ color: 0x0e3820, roughness: 0.75, side: THREE.DoubleSide })
     );
+    
     const angle = (li / 5) * Math.PI * 2;
     const tilt = 0.3 + Math.random() * 0.35;
+    
     leaf.position.set(Math.cos(angle) * 0.06, 0.82 + Math.random() * 0.12, Math.sin(angle) * 0.06);
     leaf.rotation.set(-tilt, angle, Math.random() * 0.2 - 0.1);
     sideTableGroup.add(leaf);
   }
 
-  // Small dark brown armchair next to the table
   const cornerChairGroup = new THREE.Group();
   cornerChairGroup.position.set(4.5, 0, 4.8);
   cornerChairGroup.rotation.y = -Math.PI / 2.5 - Math.PI / 2;
   memoryWorldGroup.add(cornerChairGroup);
+  
   const chairBrownMat = new THREE.MeshStandardMaterial({ color: 0x1a0e08, roughness: 0.95, metalness: 0.0, envMapIntensity: 0.1 });
-  // Seat
   const cSeat = new THREE.Mesh(
     new THREE.BoxGeometry(0.9, 0.14, 0.85),
     chairBrownMat
   );
   cSeat.position.y = 0.45;
   cornerChairGroup.add(cSeat);
-  // Back
+  
   const cBack = new THREE.Mesh(
     new THREE.BoxGeometry(0.9, 0.75, 0.12),
     chairBrownMat
@@ -2305,7 +2276,7 @@
   cBack.position.set(0, 0.78, -0.38);
   cBack.rotation.x = -0.08;
   cornerChairGroup.add(cBack);
-  // Arms
+  
   for (let side = -1; side <= 1; side += 2) {
     const arm = new THREE.Mesh(
       new THREE.BoxGeometry(0.1, 0.25, 0.7),
@@ -2314,7 +2285,6 @@
     arm.position.set(side * 0.45, 0.58, -0.02);
     cornerChairGroup.add(arm);
   }
-  // Legs
   const chairLegMat = new THREE.MeshStandardMaterial({ color: 0x4a3222, roughness: 0.7, metalness: 0.1 });
   const legPositions = [[-0.36, -0.34], [0.36, -0.34], [-0.36, 0.34], [0.36, 0.34]];
   for (let lp of legPositions) {
@@ -2366,24 +2336,25 @@
   sideArtworkFrame.rotation.y = -Math.PI / 2;
   memoryWorldGroup.add(sideArtworkFrame);
   
-  // Generate abstract polygon art for painting
   const paintingCanvas = document.createElement('canvas');
   paintingCanvas.width = 512;
   paintingCanvas.height = 320;
+  
   const pctx = paintingCanvas.getContext('2d');
-  // Dark blue gradient background
   const grad = pctx.createLinearGradient(0, 0, 512, 320);
   grad.addColorStop(0, '#0a1628');
   grad.addColorStop(0.5, '#1a2d4d');
   grad.addColorStop(1, '#0d1f3a');
   pctx.fillStyle = grad;
   pctx.fillRect(0, 0, 512, 320);
-  // Abstract polygons
+  
   const colors = ['#c4956a', '#8b5e3c', '#d4a574', '#e8c99b', '#6d4c3d', '#2a4a6b', '#3d6b8e', '#1a3355'];
   for (let p = 0; p < 12; p++) {
     pctx.beginPath();
+    
     const cx = Math.random() * 512, cy = Math.random() * 320;
     const pts = 3 + Math.floor(Math.random() * 4);
+    
     for (let j = 0; j < pts; j++) {
       const angle = (j / pts) * Math.PI * 2 + Math.random() * 0.5;
       const r = 30 + Math.random() * 80;
@@ -2398,6 +2369,7 @@
     pctx.fill();
   }
   pctx.globalAlpha = 1;
+  
   const paintingTexture = new THREE.CanvasTexture(paintingCanvas);
   paintingTexture.encoding = THREE.sRGBEncoding;
 
@@ -4106,7 +4078,6 @@
         mote.position.z = mote.userData.baseZ + Math.sin(driftTime * 0.6) * 0.05;
       }
 
-      // Animate birds
       for (let bi = 0; bi < birds.length; bi++) {
         const bird = birds[bi];
         const bt = time * bird.userData.speed + bi * 3.0;
@@ -4114,9 +4085,7 @@
         bird.position.x = bird.userData.baseX + Math.sin(bt) * r;
         bird.position.y = bird.userData.baseY + Math.sin(bt * 1.3) * 0.5;
         bird.position.z = bird.userData.baseZ + Math.cos(bt) * r * 0.5;
-        // Face direction of travel
         bird.rotation.y = Math.atan2(Math.cos(bt) * r, -Math.sin(bt) * r * 0.5);
-        // Wing flap
         bird.traverse(function(child) {
           if (child.userData.wingSide) {
             child.rotation.z = child.userData.wingSide * (0.3 + Math.sin(time * 12 + bi * 2) * 0.5);
