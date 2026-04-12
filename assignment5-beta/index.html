@@ -1506,17 +1506,17 @@
   windowRecessRight.receiveShadow = true;
   memoryWorldGroup.add(windowRecessRight);
   
-  const memoryWindow = new THREE.Mesh(
-    new THREE.PlaneGeometry(7.75, 2.30),
-    
-    const memoryWindowMat = new THREE.MeshStandardMaterial({
+  const memoryWindowMat = new THREE.MeshStandardMaterial({
       color: 0xcfd6e6,
       transparent: true,
       opacity: 0.08,
       roughness: 0.6,
       metalness: 0.0,
       side: THREE.DoubleSide
-    })
+  })
+  
+  const memoryWindow = new THREE.Mesh(
+    new THREE.PlaneGeometry(7.75, 2.30),
   );
   memoryWindow.position.set(0, openingCenterY, -5.67);
   memoryWindow.renderOrder = 10;
