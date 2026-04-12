@@ -8,6 +8,14 @@ This project is being developed as part of a **Computer Graphics course project 
 
 ---
 
+## Acknowledgments
+
+I received debugging assistance from my tutor while working through issues with Three.js rendering, lighting, and scene composition (including the memory window and performance optimizations).
+
+The overall system design, interaction model, and final integrated build are my own work.
+
+---
+
 # Live Builds
 
 ## Assignment 5 — Beta Build
