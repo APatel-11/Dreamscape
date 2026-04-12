@@ -1418,237 +1418,258 @@
   doorwayGlow.position.set(6.2, 1.8, 2.0);
   memoryWorldGroup.add(doorwayGlow);
   
-  const windowOuterFrame = new THREE.Mesh(
-    new THREE.BoxGeometry(9.1, 3.7, 0.18),
-    memoryTrimMat
+  const backWallGroup = new THREE.Group();
+  memoryWorldGroup.add(backWallGroup);
+  
+  const backWallMat = new THREE.MeshStandardMaterial({
+    color: 0x2a2330,
+    roughness: 0.95,
+    metalness: 0.03
+  });
+  
+  const windowFrameMat = new THREE.MeshStandardMaterial({
+    color: 0x4a404f,
+    roughness: 0.88,
+    metalness: 0.04
+  });
+  
+  const wallZ = -5.92;
+  const openingWidth = 8.05;
+  const openingHeight = 2.55;
+  const openingCenterY = 2.45;
+  const wallWidth = 14;
+  const wallHeight = 6;
+  
+  const sideWidth = (wallWidth - openingWidth) / 2;
+  const topHeight = wallHeight - (openingCenterY + openingHeight / 2);
+  const bottomHeight = openingCenterY - openingHeight / 2;
+  
+  const backWallLeft = new THREE.Mesh(
+    new THREE.BoxGeometry(sideWidth, wallHeight, 0.16),
+    backWallMat
   );
-  windowOuterFrame.position.set(0, 2.45, -5.93);
+  backWallLeft.position.set(-(openingWidth / 2 + sideWidth / 2), 3, wallZ);
+  backWallLeft.castShadow = true;
+  backWallLeft.receiveShadow = true;
+  backWallGroup.add(backWallLeft);
+  
+  const backWallRight = new THREE.Mesh(
+    new THREE.BoxGeometry(sideWidth, wallHeight, 0.16),
+    backWallMat
+  );
+  backWallRight.position.set((openingWidth / 2 + sideWidth / 2), 3, wallZ);
+  backWallRight.castShadow = true;
+  backWallRight.receiveShadow = true;
+  backWallGroup.add(backWallRight);
+  
+  const backWallTop = new THREE.Mesh(
+    new THREE.BoxGeometry(openingWidth, topHeight, 0.16),
+    backWallMat
+  );
+  backWallTop.position.set(0, openingCenterY + openingHeight / 2 + topHeight / 2, wallZ);
+  backWallTop.castShadow = true;
+  backWallTop.receiveShadow = true;
+  backWallGroup.add(backWallTop);
+  
+  const backWallBottom = new THREE.Mesh(
+    new THREE.BoxGeometry(openingWidth, bottomHeight, 0.16),
+    backWallMat
+  );
+  backWallBottom.position.set(0, bottomHeight / 2, wallZ);
+  backWallBottom.castShadow = true;
+  backWallBottom.receiveShadow = true;
+  backWallGroup.add(backWallBottom);
+  
+  const windowOuterFrame = new THREE.Mesh(
+    new THREE.BoxGeometry(8.55, 3.05, 0.20),
+    windowFrameMat
+  );
+  windowOuterFrame.position.set(0, openingCenterY, -5.86);
   windowOuterFrame.castShadow = true;
   windowOuterFrame.receiveShadow = true;
   memoryWorldGroup.add(windowOuterFrame);
   
-  const windowInnerBacking = new THREE.Mesh(
-    new THREE.PlaneGeometry(10.8, 4.8),
-    new THREE.MeshStandardMaterial({
-      color: 0xffcaa0,
-      emissive: 0xffa866,
-      emissiveIntensity: 0.08,
-      roughness: 0.95,
-      metalness: 0.0,
-      transparent: true,
-      opacity: 0.16
-    })
+  const windowRecessTop = new THREE.Mesh(
+    new THREE.BoxGeometry(8.10, 0.16, 0.38),
+    windowFrameMat
   );
-  windowInnerBacking.position.set(0, 3.15, -14.2);
-  memoryWorldGroup.add(windowInnerBacking);
+  windowRecessTop.position.set(0, 3.76, -5.73);
+  windowRecessTop.castShadow = true;
+  windowRecessTop.receiveShadow = true;
+  memoryWorldGroup.add(windowRecessTop);
+  
+  const windowRecessBottom = new THREE.Mesh(
+    new THREE.BoxGeometry(8.10, 0.16, 0.30),
+    windowFrameMat
+  );
+  windowRecessBottom.position.set(0, 1.14, -5.69);
+  windowRecessBottom.castShadow = true;
+  windowRecessBottom.receiveShadow = true;
+  memoryWorldGroup.add(windowRecessBottom);
+  
+  const windowRecessLeft = new THREE.Mesh(
+    new THREE.BoxGeometry(0.16, 2.45, 0.38),
+    windowFrameMat
+  );
+  windowRecessLeft.position.set(-3.97, openingCenterY, -5.73);
+  windowRecessLeft.castShadow = true;
+  windowRecessLeft.receiveShadow = true;
+  memoryWorldGroup.add(windowRecessLeft);
+  
+  const windowRecessRight = new THREE.Mesh(
+    new THREE.BoxGeometry(0.16, 2.45, 0.38),
+    windowFrameMat
+  );
+  windowRecessRight.position.set(3.97, openingCenterY, -5.73);
+  windowRecessRight.castShadow = true;
+  windowRecessRight.receiveShadow = true;
+  memoryWorldGroup.add(windowRecessRight);
   
   const memoryWindow = new THREE.Mesh(
-    new THREE.PlaneGeometry(7.85, 2.45),
+    new THREE.PlaneGeometry(7.75, 2.30),
     new THREE.MeshPhysicalMaterial({
       color: 0xf3f7ff,
-      emissive: 0x1b2742,
-      emissiveIntensity: 0.01,
-      roughness: 0.03,
+      roughness: 0.04,
       metalness: 0.0,
-      transmission: 0.94,
+      transmission: 0.98,
       transparent: true,
-      opacity: 0.32,
-      thickness: 0.04,
+      opacity: 0.22,
+      thickness: 0.03,
       ior: 1.08,
-      reflectivity: 0.32,
+      reflectivity: 0.22,
       clearcoat: 1.0,
-      clearcoatRoughness: 0.06,
+      clearcoatRoughness: 0.04,
       side: THREE.DoubleSide
     })
   );
-  memoryWindow.position.set(0, 2.45, -5.79);
-  memoryWindow.renderOrder = 2;
+  memoryWindow.position.set(0, openingCenterY, -5.67);
+  memoryWindow.renderOrder = 10;
   memoryWindow.material.depthWrite = false;
+  memoryWindow.userData.preserveMaterial = true;
   memoryWorldGroup.add(memoryWindow);
   
   const windowMullionV = new THREE.Mesh(
-    new THREE.BoxGeometry(0.12, 2.55, 0.08),
-    memoryTrimMat
+    new THREE.BoxGeometry(0.10, 2.35, 0.08),
+    windowFrameMat
   );
-  windowMullionV.position.set(0, 2.45, -5.77);
+  windowMullionV.position.set(0, openingCenterY, -5.63);
+  windowMullionV.castShadow = true;
+  windowMullionV.receiveShadow = true;
   memoryWorldGroup.add(windowMullionV);
   
   const windowMullionH = new THREE.Mesh(
-    new THREE.BoxGeometry(7.95, 0.12, 0.08),
-    memoryTrimMat
+    new THREE.BoxGeometry(7.85, 0.10, 0.08),
+    windowFrameMat
   );
-  windowMullionH.position.set(0, 2.45, -5.77);
+  windowMullionH.position.set(0, openingCenterY, -5.63);
+  windowMullionH.castShadow = true;
+  windowMullionH.receiveShadow = true;
   memoryWorldGroup.add(windowMullionH);
   
   const windowSill = new THREE.Mesh(
-    new THREE.BoxGeometry(8.3, 0.14, 0.35),
-    memoryTrimMat
+    new THREE.BoxGeometry(8.35, 0.14, 0.34),
+    windowFrameMat
   );
-  windowSill.position.set(0, 1.15, -5.60);
+  windowSill.position.set(0, 1.12, -5.56);
   windowSill.castShadow = true;
   windowSill.receiveShadow = true;
   memoryWorldGroup.add(windowSill);
-
-  const windowRevealMat = new THREE.MeshStandardMaterial({
-    color: 0x3a313f,
-    roughness: 0.94,
-    metalness: 0.02
-  });
-  
-  const windowRevealTop = new THREE.Mesh(
-    new THREE.BoxGeometry(8.35, 0.22, 0.42),
-    windowRevealMat
-  );
-  windowRevealTop.position.set(0, 3.86, -5.76);
-  windowRevealTop.castShadow = true;
-  windowRevealTop.receiveShadow = true;
-  memoryWorldGroup.add(windowRevealTop);
-  
-  const windowRevealBottom = new THREE.Mesh(
-    new THREE.BoxGeometry(8.35, 0.18, 0.34),
-    windowRevealMat
-  );
-  windowRevealBottom.position.set(0, 1.03, -5.72);
-  windowRevealBottom.castShadow = true;
-  windowRevealBottom.receiveShadow = true;
-  memoryWorldGroup.add(windowRevealBottom);
-  
-  const windowRevealLeft = new THREE.Mesh(
-    new THREE.BoxGeometry(0.22, 2.88, 0.42),
-    windowRevealMat
-  );
-  windowRevealLeft.position.set(-4.07, 2.45, -5.76);
-  windowRevealLeft.castShadow = true;
-  windowRevealLeft.receiveShadow = true;
-  memoryWorldGroup.add(windowRevealLeft);
-  
-  const windowRevealRight = new THREE.Mesh(
-    new THREE.BoxGeometry(0.22, 2.88, 0.42),
-    windowRevealMat
-  );
-  windowRevealRight.position.set(4.07, 2.45, -5.76);
-  windowRevealRight.castShadow = true;
-  windowRevealRight.receiveShadow = true;
-  memoryWorldGroup.add(windowRevealRight);
   
   const outsideGroup = new THREE.Group();
+  outsideGroup.userData.preserveMaterial = true;
   memoryWorldGroup.add(outsideGroup);
   
   const sunsetSky = new THREE.Mesh(
-    new THREE.PlaneGeometry(28, 12),
+    new THREE.PlaneGeometry(24, 9),
     new THREE.MeshBasicMaterial({
-      color: 0xffb27a,
-      transparent: true,
-      opacity: 0.92
+      color: 0xffb27a
     })
   );
-  sunsetSky.position.set(0, 4.0, -14.8);
+  sunsetSky.position.set(0, 4.2, -13.8);
   outsideGroup.add(sunsetSky);
   
   const upperSky = new THREE.Mesh(
-    new THREE.PlaneGeometry(28, 8),
+    new THREE.PlaneGeometry(24, 6),
     new THREE.MeshBasicMaterial({
       color: 0x8fa8ff,
-      transparent: true,
-      opacity: 0.58
-    })
-  );
-  upperSky.position.set(0, 6.2, -14.9);
-  outsideGroup.add(upperSky);
-  
-  const sunGlow = new THREE.Mesh(
-    new THREE.CircleGeometry(1.15, 40),
-    new THREE.MeshBasicMaterial({
-      color: 0xffd7a3,
       transparent: true,
       opacity: 0.72
     })
   );
-  sunGlow.position.set(3.0, 3.5, -14.4);
+  upperSky.position.set(0, 6.8, -13.9);
+  outsideGroup.add(upperSky);
+  
+  const sunGlow = new THREE.Mesh(
+    new THREE.CircleGeometry(0.9, 32),
+    new THREE.MeshBasicMaterial({
+      color: 0xffddb3,
+      transparent: true,
+      opacity: 0.78
+    })
+  );
+  sunGlow.position.set(2.7, 3.6, -13.4);
   outsideGroup.add(sunGlow);
   
   const distantGround = new THREE.Mesh(
-    new THREE.PlaneGeometry(28, 5.5),
+    new THREE.PlaneGeometry(24, 4.5),
     new THREE.MeshBasicMaterial({
-      color: 0x4f4a43
+      color: 0x63584d
     })
   );
-  distantGround.position.set(0, 0.95, -14.0);
+  distantGround.position.set(0, 0.9, -13.1);
   outsideGroup.add(distantGround);
   
   const street = new THREE.Mesh(
-    new THREE.PlaneGeometry(18, 4.2),
+    new THREE.PlaneGeometry(18, 3.8),
     new THREE.MeshStandardMaterial({
-      color: 0x3a3a40,
+      color: 0x3b3b42,
       roughness: 0.98,
       metalness: 0.02
     })
   );
   street.rotation.x = -Math.PI / 2;
-  street.position.set(0, 0.02, -10.4);
+  street.position.set(0, 0.02, -10.2);
   street.receiveShadow = true;
   outsideGroup.add(street);
   
   const sidewalkLeft = new THREE.Mesh(
-    new THREE.BoxGeometry(18, 0.08, 0.7),
+    new THREE.BoxGeometry(18, 0.08, 0.55),
     new THREE.MeshStandardMaterial({
-      color: 0x8d8179,
+      color: 0x9a8f85,
       roughness: 0.95
     })
   );
-  sidewalkLeft.position.set(0, 0.04, -8.1);
+  sidewalkLeft.position.set(0, 0.04, -8.0);
   outsideGroup.add(sidewalkLeft);
   
   const sidewalkRight = new THREE.Mesh(
-    new THREE.BoxGeometry(18, 0.08, 0.7),
+    new THREE.BoxGeometry(18, 0.08, 0.55),
     new THREE.MeshStandardMaterial({
-      color: 0x8d8179,
+      color: 0x9a8f85,
       roughness: 0.95
     })
   );
-  sidewalkRight.position.set(0, 0.04, -12.7);
+  sidewalkRight.position.set(0, 0.04, -12.4);
   outsideGroup.add(sidewalkRight);
-  
-  const boundaryWall = new THREE.Mesh(
-    new THREE.BoxGeometry(18, 1.2, 0.22),
-    new THREE.MeshStandardMaterial({
-      color: 0xb7a392,
-      roughness: 0.96
-    })
-  );
-  boundaryWall.position.set(0, 0.6, -8.7);
-  outsideGroup.add(boundaryWall);
-  
-  const outsideSunLight = new THREE.DirectionalLight(0xffb56b, 1.65);
-  outsideSunLight.position.set(5, 7, -8);
-  outsideSunLight.target.position.set(0, 1, -13);
-  outsideSunLight.castShadow = true;
-  outsideSunLight.shadow.mapSize.width = 1024;
-  outsideSunLight.shadow.mapSize.height = 1024;
-  outsideGroup.add(outsideSunLight);
-  outsideGroup.add(outsideSunLight.target);
-  
-  const neighborhoodLight = new THREE.AmbientLight(0xffcaa2, 0.42);
-  outsideGroup.add(neighborhoodLight);
   
   function createHouse(x, z, bodyColor, roofColor, scale = 1) {
     const house = new THREE.Group();
   
     const body = new THREE.Mesh(
-      new THREE.BoxGeometry(1.8 * scale, 1.5 * scale, 1.5 * scale),
+      new THREE.BoxGeometry(1.7 * scale, 1.45 * scale, 1.35 * scale),
       new THREE.MeshStandardMaterial({
         color: bodyColor,
         roughness: 0.92,
         metalness: 0.02
       })
     );
-    body.position.y = 0.75 * scale;
+    body.position.y = 0.725 * scale;
     body.castShadow = true;
     body.receiveShadow = true;
     house.add(body);
   
     const roof = new THREE.Mesh(
-      new THREE.ConeGeometry(1.45 * scale, 0.85 * scale, 4),
+      new THREE.ConeGeometry(1.35 * scale, 0.78 * scale, 4),
       new THREE.MeshStandardMaterial({
         color: roofColor,
         roughness: 0.88,
@@ -1656,65 +1677,65 @@
       })
     );
     roof.rotation.y = Math.PI * 0.25;
-    roof.position.y = 1.88 * scale;
+    roof.position.y = 1.75 * scale;
     roof.castShadow = true;
     roof.receiveShadow = true;
     house.add(roof);
   
-    const windowA = new THREE.Mesh(
-      new THREE.PlaneGeometry(0.30 * scale, 0.30 * scale),
+    const glowA = new THREE.Mesh(
+      new THREE.PlaneGeometry(0.24 * scale, 0.24 * scale),
       new THREE.MeshBasicMaterial({
-        color: 0xffd8b2,
+        color: 0xffd7b0,
         transparent: true,
-        opacity: 0.85
+        opacity: 0.88
       })
     );
-    windowA.position.set(-0.42 * scale, 0.92 * scale, 0.76 * scale);
-    house.add(windowA);
+    glowA.position.set(-0.34 * scale, 0.92 * scale, 0.69 * scale);
+    house.add(glowA);
   
-    const windowB = new THREE.Mesh(
-      new THREE.PlaneGeometry(0.30 * scale, 0.30 * scale),
+    const glowB = new THREE.Mesh(
+      new THREE.PlaneGeometry(0.24 * scale, 0.24 * scale),
       new THREE.MeshBasicMaterial({
-        color: 0xffd8b2,
+        color: 0xffd7b0,
         transparent: true,
-        opacity: 0.85
+        opacity: 0.88
       })
     );
-    windowB.position.set(0.42 * scale, 0.92 * scale, 0.76 * scale);
-    house.add(windowB);
+    glowB.position.set(0.34 * scale, 0.92 * scale, 0.69 * scale);
+    house.add(glowB);
   
     house.position.set(x, 0, z);
     return house;
   }
   
-  outsideGroup.add(createHouse(-5.0, -14.1, 0xd8c2b4, 0x7e5a4d, 1.05));
-  outsideGroup.add(createHouse(-1.8, -13.4, 0xe2d4c4, 0x6b4f4a, 0.92));
-  outsideGroup.add(createHouse(1.9, -14.6, 0xcab7aa, 0x7d6758, 1.12));
-  outsideGroup.add(createHouse(5.2, -13.7, 0xe0cfc4, 0x70504b, 0.98));
+  outsideGroup.add(createHouse(-4.8, -13.1, 0xdccbbe, 0x76554a, 1.0));
+  outsideGroup.add(createHouse(-1.5, -12.6, 0xe6d6c8, 0x6f524b, 0.9));
+  outsideGroup.add(createHouse(2.0, -13.4, 0xd1c0b3, 0x7d6558, 1.08));
+  outsideGroup.add(createHouse(5.1, -12.8, 0xe2d2c5, 0x6f504a, 0.95));
   
   function createTree(x, z, scale = 1) {
     const tree = new THREE.Group();
   
     const trunk = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.10 * scale, 0.12 * scale, 1.0 * scale, 12),
+      new THREE.CylinderGeometry(0.08 * scale, 0.1 * scale, 0.95 * scale, 10),
       new THREE.MeshStandardMaterial({
-        color: 0x6b4a36,
+        color: 0x6b4b38,
         roughness: 0.95
       })
     );
-    trunk.position.y = 0.5 * scale;
+    trunk.position.y = 0.475 * scale;
     trunk.castShadow = true;
     trunk.receiveShadow = true;
     tree.add(trunk);
   
     const leaves = new THREE.Mesh(
-      new THREE.SphereGeometry(0.55 * scale, 18, 18),
+      new THREE.SphereGeometry(0.46 * scale, 16, 16),
       new THREE.MeshStandardMaterial({
-        color: 0x4b5f43,
+        color: 0x55684d,
         roughness: 0.98
       })
     );
-    leaves.position.y = 1.38 * scale;
+    leaves.position.y = 1.2 * scale;
     leaves.castShadow = true;
     leaves.receiveShadow = true;
     tree.add(leaves);
@@ -1723,10 +1744,19 @@
     return tree;
   }
   
-  outsideGroup.add(createTree(-6.8, -10.6, 1.2));
-  outsideGroup.add(createTree(-3.9, -9.7, 0.95));
-  outsideGroup.add(createTree(3.1, -10.0, 1.05));
-  outsideGroup.add(createTree(6.6, -10.9, 1.25));
+  outsideGroup.add(createTree(-6.2, -9.9, 1.15));
+  outsideGroup.add(createTree(-3.6, -9.4, 0.95));
+  outsideGroup.add(createTree(3.2, -9.6, 1.0));
+  outsideGroup.add(createTree(6.3, -10.0, 1.18));
+  
+  const outsideSunLight = new THREE.DirectionalLight(0xffb46a, 1.35);
+  outsideSunLight.position.set(4.5, 6.5, -8.5);
+  outsideSunLight.target.position.set(0, 1, -12);
+  outsideGroup.add(outsideSunLight);
+  outsideGroup.add(outsideSunLight.target);
+  
+  const outsideAmbient = new THREE.AmbientLight(0xffc9aa, 0.38);
+  outsideGroup.add(outsideAmbient);
   
   const tableBase = new THREE.Mesh(
     new THREE.BoxGeometry(2.9, 0.16, 1.25),
@@ -2807,83 +2837,73 @@
     if (tone === "warm") {
       scene.fog.color.set(0x3a2016);
       museumSphere.material.color.set(0x24130e);
-      memoryWarmBase = 1.35;
-      memoryCoolBase = 0.70;
-      memoryWindow.material.color.set(0xffc08a);
-      memoryWindow.material.emissive.set(0xff8a4a);
-      memoryWindow.material.emissiveIntensity = 0.35;
-      windowInnerBacking.material.color.set(0x4a2d1f);
-      windowInnerBacking.material.emissive.set(0xa35a2e);
-      windowInnerBacking.material.emissiveIntensity = 0.30;
-      sunsetSky.material.color.set(0xffa86b);
-      upperSky.material.color.set(0xffc3a0);
-      windowInnerBacking.material.color.set(0xffb27c);
-      memoryWindow.material.color.set(0xfff1e6);
-      memoryWindow.material.opacity = 0.28;
+      memoryWarmBase = 1.3;
+      memoryCoolBase = 0.65;
+  
+      sunsetSky.material.color.set(0xff9e68);
+      upperSky.material.color.set(0xffc7a8);
+      upperSky.material.opacity = 0.45;
+      distantGround.material.color.set(0x6a5648);
+  
+      memoryWindow.material.color.set(0xfff2e8);
+      memoryWindow.material.opacity = 0.18;
+      memoryWindow.material.roughness = 0.035;
     } else if (tone === "cool") {
       scene.fog.color.set(0x16263a);
       museumSphere.material.color.set(0x0d1824);
       memoryWarmBase = 0.55;
       memoryCoolBase = 1.45;
-      memoryWindow.material.color.set(0x8fc8ff);
-      memoryWindow.material.emissive.set(0x4a90ff);
-      memoryWindow.material.emissiveIntensity = 0.03;
-      windowInnerBacking.material.color.set(0x1a304f);
-      windowInnerBacking.material.emissive.set(0x2f6fb5);
-      windowInnerBacking.material.emissiveIntensity = 0.28;
-      sunsetSky.material.color.set(0x6f8fdc);
-      upperSky.material.color.set(0xbfd5ff);
-      windowInnerBacking.material.color.set(0x85a8e8);
-      memoryWindow.material.color.set(0xe7f2ff);
-      memoryWindow.material.opacity = 0.34;
+  
+      sunsetSky.material.color.set(0x7293d8);
+      upperSky.material.color.set(0xc7dcff);
+      upperSky.material.opacity = 0.68;
+      distantGround.material.color.set(0x57606b);
+  
+      memoryWindow.material.color.set(0xeaf4ff);
+      memoryWindow.material.opacity = 0.24;
+      memoryWindow.material.roughness = 0.055;
     } else if (tone === "dream") {
       scene.fog.color.set(0x34163a);
       museumSphere.material.color.set(0x1f0d24);
-      memoryWarmBase = 1.00;
+      memoryWarmBase = 1.0;
       memoryCoolBase = 1.05;
-      memoryWindow.material.color.set(0xf0a8ff);
-      memoryWindow.material.emissive.set(0xc85cff);
-      memoryWindow.material.emissiveIntensity = 0.04;
-      windowInnerBacking.material.color.set(0x4b2354);
-      windowInnerBacking.material.emissive.set(0x8d42b8);
-      windowInnerBacking.material.emissiveIntensity = 0.30;
-      sunsetSky.material.color.set(0xc07cff);
-      upperSky.material.color.set(0xf0b4ff);
-      windowInnerBacking.material.color.set(0xd18cff);
-      memoryWindow.material.color.set(0xf8eaff);
-      memoryWindow.material.opacity = 0.36;
+  
+      sunsetSky.material.color.set(0xc47dff);
+      upperSky.material.color.set(0xf0b8ff);
+      upperSky.material.opacity = 0.58;
+      distantGround.material.color.set(0x66506e);
+  
+      memoryWindow.material.color.set(0xf9ecff);
+      memoryWindow.material.opacity = 0.28;
+      memoryWindow.material.roughness = 0.06;
     } else if (tone === "echo") {
       scene.fog.color.set(0x2b2b31);
       museumSphere.material.color.set(0x151519);
-      memoryWarmBase = 0.45;
-      memoryCoolBase = 0.55;
-      memoryWindow.material.color.set(0xd6dbe2);
-      memoryWindow.material.emissive.set(0x8d97a8);
-      memoryWindow.material.emissiveIntensity = 0.015;
-      windowInnerBacking.material.color.set(0x30343d);
-      windowInnerBacking.material.emissive.set(0x5f6878);
-      windowInnerBacking.material.emissiveIntensity = 0.16;
-      sunsetSky.material.color.set(0x6e6875);
-      upperSky.material.color.set(0xa8acb8);
-      windowInnerBacking.material.color.set(0x8f95a1);
-      memoryWindow.material.color.set(0xf1f3f6);
-      memoryWindow.material.opacity = 0.26;
+      memoryWarmBase = 0.42;
+      memoryCoolBase = 0.52;
+  
+      sunsetSky.material.color.set(0x746d76);
+      upperSky.material.color.set(0xb0b4be);
+      upperSky.material.opacity = 0.42;
+      distantGround.material.color.set(0x5a595c);
+  
+      memoryWindow.material.color.set(0xf3f4f6);
+      memoryWindow.material.opacity = 0.16;
+      memoryWindow.material.roughness = 0.03;
     } else {
       scene.fog.color.set(0x24182e);
       museumSphere.material.color.set(0x120f1a);
       memoryWarmBase = 0.90;
       memoryCoolBase = 1.15;
-      memoryWindow.material.color.set(0x9bc4ff);
-      memoryWindow.material.emissive.set(0x4e74c9);
-      memoryWindow.material.emissiveIntensity = 0.025;
-      windowInnerBacking.material.color.set(0x1f2740);
-      windowInnerBacking.material.emissive.set(0x273b72);
-      windowInnerBacking.material.emissiveIntensity = 0.22;
+  
       sunsetSky.material.color.set(0xffb27a);
       upperSky.material.color.set(0x8fa8ff);
-      windowInnerBacking.material.color.set(0xffcaa0);
+      upperSky.material.opacity = 0.72;
+      distantGround.material.color.set(0x63584d);
+  
       memoryWindow.material.color.set(0xf3f7ff);
-      memoryWindow.material.opacity = 0.32;
+      memoryWindow.material.opacity = 0.22;
+      memoryWindow.material.roughness = 0.04;
     }
   
     toneText.textContent = tone;
@@ -3021,8 +3041,10 @@
     transitionCurveP3.copy(memoryCameraPos);
   
     memoryWorldGroup.traverse((obj) => {
-      if (obj.material && "transparent" in obj.material) {
+      if (obj.userData.preserveMaterial) return;
+      if (obj.material && "opacity" in obj.material) {
         obj.material.transparent = true;
+        obj.userData.originalOpacity = obj.material.opacity;
         obj.material.opacity = 0;
       }
     });
@@ -3313,10 +3335,6 @@
     clearSpawnedMemoryObjects();
   
     previewFrameActive = !!selectedFrame;
-  
-    updatePreviewFrameTarget();
-    updateMemoryFocusTarget();
-    updateMemoryEntryTarget();
   
     framesGroup.visible = true;
     platformGroup.visible = true;
@@ -3670,9 +3688,12 @@
     
         memoryWorldGroup.visible = true;
         memoryWorldGroup.traverse((obj) => {
+          if (obj.userData.preserveMaterial) return;
           if (obj.material && "opacity" in obj.material) {
             obj.material.transparent = true;
-            obj.material.opacity = worldOpacity;
+            const baseOpacity =
+              typeof obj.userData.originalOpacity === "number" ? obj.userData.originalOpacity : 1;
+            obj.material.opacity = baseOpacity * worldOpacity;
           }
         });
     
@@ -3699,9 +3720,11 @@
     
         memoryWorldGroup.visible = true;
         memoryWorldGroup.traverse((obj) => {
+          if (obj.userData.preserveMaterial) return;
           if (obj.material && "opacity" in obj.material) {
             obj.material.transparent = true;
-            obj.material.opacity = 1;
+            obj.material.opacity =
+              typeof obj.userData.originalOpacity === "number" ? obj.userData.originalOpacity : 1;
           }
         });
     
@@ -3795,18 +3818,6 @@
 
     if (memoryWorldGroup.visible) {
       memoryAtmospherePulse = 0.5 + 0.5 * Math.sin(time * 0.42);
-    
-      memoryWindow.material.emissiveIntensity =
-        memoryWindow.material.emissiveIntensity * 0.92 + (0.008 + memoryAtmospherePulse * 0.004) * 0.08;
-      
-      memoryWindow.material.roughness =
-        memoryWindow.material.roughness * 0.9 + (0.03 + memoryAtmospherePulse * 0.01) * 0.1;
-      
-      windowInnerBacking.material.emissiveIntensity =
-        windowInnerBacking.material.emissiveIntensity * 0.9 + (0.05 + memoryAtmospherePulse * 0.02) * 0.1;
-      
-      windowInnerBacking.material.opacity =
-        windowInnerBacking.material.opacity * 0.9 + (0.13 + memoryAtmospherePulse * 0.02) * 0.1;
     
       for (let i = 0; i < memoryFramesInside.length; i++) {
         memoryFramesInside[i].rotation.z = Math.sin(time * 0.35 + i * 0.8) * 0.006;
