@@ -1272,7 +1272,7 @@
   backWallBottom.receiveShadow = true;
   roomShell.add(backWallBottom);
 
-  const sideW = -winLeft - (-7); // 7 - 4.125 = 2.875
+  const sideW = (14 - winOpenW) / 2; // 2.875
   const backWallLeft = new THREE.Mesh(
     new THREE.PlaneGeometry(sideW, winOpenH),
     backWallMat
