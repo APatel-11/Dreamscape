@@ -1203,13 +1203,6 @@
     side: THREE.DoubleSide
   });
   
-  const backWallMat = new THREE.MeshStandardMaterial({
-    color: 0x2a2330,
-    roughness: 0.95,
-    metalness: 0.03,
-    side: THREE.DoubleSide
-  });
-  
   const ceiling = new THREE.Mesh(
     new THREE.PlaneGeometry(14, 12),
     roomSurfaceMat
@@ -1245,46 +1238,6 @@
   frontWall.rotation.y = Math.PI;
   frontWall.receiveShadow = true;
   roomShell.add(frontWall);
-  
-  /*
-    Back wall built in pieces so the window area is a real opening.
-    Window opening target:
-    centerY = 2.45
-    width = 8.25
-    height = 2.85
-  */
-  
-  const backWallTop = new THREE.Mesh(
-    new THREE.PlaneGeometry(14, 1.90),
-    backWallMat
-  );
-  backWallTop.position.set(0, 5.05, -5.98);
-  backWallTop.receiveShadow = true;
-  roomShell.add(backWallTop);
-  
-  const backWallBottom = new THREE.Mesh(
-    new THREE.PlaneGeometry(14, 1.15),
-    backWallMat
-  );
-  backWallBottom.position.set(0, 0.575, -5.98);
-  backWallBottom.receiveShadow = true;
-  roomShell.add(backWallBottom);
-  
-  const backWallLeft = new THREE.Mesh(
-    new THREE.PlaneGeometry(2.875, 2.85),
-    backWallMat
-  );
-  backWallLeft.position.set(-5.5625, 2.45, -5.98);
-  backWallLeft.receiveShadow = true;
-  roomShell.add(backWallLeft);
-  
-  const backWallRight = new THREE.Mesh(
-    new THREE.PlaneGeometry(2.875, 2.85),
-    backWallMat
-  );
-  backWallRight.position.set(5.5625, 2.45, -5.98);
-  backWallRight.receiveShadow = true;
-  roomShell.add(backWallRight);
 
   const baseboardMat = new THREE.MeshStandardMaterial({
     color: 0x4a3f4d,
@@ -1534,7 +1487,6 @@
       transmission: 0.98,
       transparent: true,
       opacity: 0.22,
-      thickness: 0.03,
       ior: 1.08,
       reflectivity: 0.22,
       clearcoat: 1.0,
