@@ -1421,7 +1421,7 @@
   const backWallGroup = new THREE.Group();
   memoryWorldGroup.add(backWallGroup);
   
-  const backWallMat = new THREE.MeshStandardMaterial({
+  const memoryBackWallMat = new THREE.MeshStandardMaterial({
     color: 0x2a2330,
     roughness: 0.95,
     metalness: 0.03
@@ -1446,7 +1446,7 @@
   
   const backWallLeft = new THREE.Mesh(
     new THREE.BoxGeometry(sideWidth, wallHeight, 0.16),
-    backWallMat
+    memoryBackWallMat
   );
   backWallLeft.position.set(-(openingWidth / 2 + sideWidth / 2), 3, wallZ);
   backWallLeft.castShadow = true;
@@ -1455,7 +1455,7 @@
   
   const backWallRight = new THREE.Mesh(
     new THREE.BoxGeometry(sideWidth, wallHeight, 0.16),
-    backWallMat
+    memoryBackWallMat
   );
   backWallRight.position.set((openingWidth / 2 + sideWidth / 2), 3, wallZ);
   backWallRight.castShadow = true;
@@ -1464,7 +1464,7 @@
   
   const backWallTop = new THREE.Mesh(
     new THREE.BoxGeometry(openingWidth, topHeight, 0.16),
-    backWallMat
+    memoryBackWallMat
   );
   backWallTop.position.set(0, openingCenterY + openingHeight / 2 + topHeight / 2, wallZ);
   backWallTop.castShadow = true;
@@ -1473,7 +1473,7 @@
   
   const backWallBottom = new THREE.Mesh(
     new THREE.BoxGeometry(openingWidth, bottomHeight, 0.16),
-    backWallMat
+    memoryBackWallMat
   );
   backWallBottom.position.set(0, bottomHeight / 2, wallZ);
   backWallBottom.castShadow = true;
