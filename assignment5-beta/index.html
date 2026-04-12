@@ -1200,14 +1200,14 @@
     color: 0x2a2330,
     roughness: 0.95,
     metalness: 0.03,
-    side: THREE.DoubleSide
+    side: THREE.BackSide
   });
   
   const ceiling = new THREE.Mesh(
     new THREE.PlaneGeometry(14, 12),
     roomSurfaceMat
   );
-  ceiling.rotation.x = Math.PI / 2;
+  ceiling.rotation.x = -Math.PI / 2;
   ceiling.position.set(0, 6, 0);
   ceiling.receiveShadow = true;
   roomShell.add(ceiling);
