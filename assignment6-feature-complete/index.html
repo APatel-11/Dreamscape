@@ -1,0 +1,4154 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<title>Dreamscape Beta Build</title>
+<style>
+  body {
+    margin: 0;
+    overflow: hidden;
+    background: black;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  }
+
+  #timeline {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60%;
+    z-index: 10;
+  }
+
+  #hud {
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    color: white;
+    font-family: monospace;
+    z-index: 10;
+  }
+
+  #timelineLabel {
+    position: fixed;
+    top: 40px;
+    left: 12px;
+    color: #aaa;
+    font-family: monospace;
+    font-size: 12px;
+    z-index: 10;
+  }
+
+  #fps {
+    position: fixed;
+    top: 72px;
+    left: 12px;
+    color: white;
+    font-family: monospace;
+    z-index: 10;
+  }
+
+  #memoryPanel {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    width: 300px;
+    background: rgba(5, 8, 20, 0.74);
+    border: 1px solid rgba(122, 188, 255, 0.25);
+    border-radius: 14px;
+    padding: 14px;
+    color: white;
+    z-index: 20;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 0 24px rgba(60, 100, 255, 0.12);
+    transition: width 0.22s ease, padding 0.22s ease;
+    overflow: hidden;
+  }
+
+  #editPanel {
+    position: fixed;
+    left: 16px;
+    top: 95px;
+    width: 280px;
+    background: rgba(5, 8, 20, 0.55);
+    border: 1px solid rgba(122, 188, 255, 0.15);
+    border-radius: 14px;
+    padding: 14px;
+    color: white;
+    z-index: 20;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 0 24px rgba(60, 100, 255, 0.12);
+    transition: width 0.22s ease, padding 0.22s ease;
+    overflow: hidden;
+    display: none;
+  }
+
+  #editPanel.minimized {
+    width: 168px;
+    padding: 12px;
+  }
+
+  #editPanelTop {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  #editPanel h3 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 700;
+    color: #dff4ff;
+  }
+
+  #toggleEditPanelBtn {
+    border: 1px solid rgba(160, 210, 255, 0.18);
+    background: rgba(20, 26, 46, 0.8);
+    color: white;
+    border-radius: 10px;
+    padding: 7px 10px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+
+  #editPanelBody {
+    display: block;
+  }
+
+  #editPanel.minimized #editPanelBody {
+    display: none;
+  }
+
+  #editPanel .label {
+    font-size: 12px;
+    color: #9db6d8;
+    margin-top: 8px;
+    margin-bottom: 4px;
+  }
+
+  #editControlsHint {
+    margin-top: 10px;
+    font-size: 11px;
+    color: #9fb8d8;
+    line-height: 1.45;
+  }
+
+  #memoryPanel.minimized {
+    width: 168px;
+    padding: 12px;
+  }
+
+  #memoryPanelTop {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  #memoryPanel h3 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 700;
+    color: #dff4ff;
+  }
+
+  #togglePanelBtn {
+    border: 1px solid rgba(160, 210, 255, 0.18);
+    background: rgba(20, 26, 46, 0.8);
+    color: white;
+    border-radius: 10px;
+    padding: 7px 10px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+
+  #memoryPanelBody {
+    display: block;
+  }
+
+  #memoryPanel.minimized #memoryPanelBody {
+    display: none;
+  }
+
+  #memoryPanel .label {
+    font-size: 12px;
+    color: #9db6d8;
+    margin-top: 8px;
+    margin-bottom: 4px;
+  }
+
+  #memoryName {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 9px 10px;
+    border-radius: 10px;
+    border: 1px solid rgba(160, 210, 255, 0.18);
+    background: rgba(20, 26, 46, 0.8);
+    color: white;
+    outline: none;
+  }
+
+  #objectTypeSelect {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 9px 10px;
+    border-radius: 10px;
+    border: 1px solid rgba(160, 210, 255, 0.18);
+    background: rgba(20, 26, 46, 0.8);
+    color: white;
+    outline: none;
+    margin-top: 2px;
+  }
+
+  #memoryMeta {
+    margin-top: 10px;
+    font-size: 13px;
+    color: #d2e9ff;
+    line-height: 1.5;
+  }
+
+  .btnRow {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .btnRow button {
+    flex: 1;
+    padding: 10px 12px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    color: white;
+    background: linear-gradient(135deg, rgba(84, 113, 255, 0.95), rgba(71, 171, 255, 0.95));
+  }
+
+  .btnRow button.secondary {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.12);
+  }
+
+  #controlsHint {
+    margin-top: 10px;
+    font-size: 11px;
+    color: #9fb8d8;
+    line-height: 1.45;
+  }
+
+  #startOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background:
+      radial-gradient(circle at center, rgba(36,46,92,0.35), rgba(4,6,16,0.92)),
+      rgba(0,0,0,0.86);
+  }
+
+  #startCard {
+    width: min(540px, 88vw);
+    padding: 28px;
+    border-radius: 18px;
+    background: rgba(10, 14, 28, 0.82);
+    border: 1px solid rgba(145, 198, 255, 0.18);
+    box-shadow: 0 0 40px rgba(78, 123, 255, 0.14);
+    color: white;
+    backdrop-filter: blur(12px);
+  }
+
+  #startCard h1 {
+    margin: 0 0 10px 0;
+    font-size: 28px;
+    color: #e7f5ff;
+  }
+
+  #startCard p {
+    margin: 0 0 18px 0;
+    color: #bed4ec;
+    line-height: 1.55;
+    font-size: 14px;
+  }
+
+  #startCard .menuRow {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+  }
+
+  #startCard button {
+    flex: 1;
+    padding: 12px 14px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 700;
+    color: white;
+    background: linear-gradient(135deg, rgba(80,110,255,0.96), rgba(77,182,255,0.96));
+  }
+
+  #startCard button.secondary {
+    background: rgba(255,255,255,0.09);
+    border: 1px solid rgba(255,255,255,0.12);
+  }
+</style>
+</head>
+
+<body>
+
+<div id="startOverlay">
+  <div id="startCard">
+    <h1>Dreamscape</h1>
+    <p>
+      Enter a memory archive where individual memories are organized as interactive frames.
+      Select a memory, rename it, adjust its clarity, and enter a focused memory state.
+    </p>
+    <div class="menuRow">
+      <button id="startBtn" disabled>Start Dreamscape</button>
+      <button id="backToMenuBtn" class="secondary">Return to Menu</button>
+    </div>
+  </div>
+</div>
+
+<input id="timeline" type="range" min="0" max="100" value="18" />
+
+<div id="hud">memory archive: initializing</div>
+<div id="timelineLabel">timeline = point of view + memory clarity</div>
+<div id="fps">fps: --</div>
+
+<div id="memoryPanel">
+  <div id="memoryPanelTop">
+    <h3>Dreamscape Memory Console</h3>
+    <button id="togglePanelBtn">Minimize</button>
+  </div>
+
+  <div id="memoryPanelBody">
+    <div class="label">Selected Memory</div>
+    <input id="memoryName" type="text" value="Memory 01" />
+
+    <div id="memoryMeta">
+      <div><strong>ID:</strong> <span id="memoryIdText">0</span></div>
+      <div><strong>Clarity:</strong> <span id="clarityText">0.50</span></div>
+      <div><strong>Tone:</strong> <span id="toneText">neutral</span></div>
+      <div><strong>State:</strong> <span id="stateText">hub</span></div>
+      <div><strong>Object:</strong> <span id="selectedObjectText">none</span></div>
+    </div>
+
+    <div class="btnRow">
+      <button id="saveBtn">Save Name</button>
+      <button id="undoBtn" class="secondary">Undo</button>
+    </div>
+
+    <div class="btnRow">
+      <button id="cycleToneBtn">Change Tone</button>
+    </div>
+
+    <div class="btnRow">
+      <button id="enterBtn">Enter Memory</button>
+      <button id="exitBtn" class="secondary">Exit Memory</button>
+    </div>
+
+    <div class="btnRow">
+      <button id="addMemoryBtn">Add Memory</button>
+      <button id="eraseBtn" class="secondary">Erase Memory</button>
+    </div>
+    
+    <div class="btnRow">
+      <button id="resetArchiveBtn" class="secondary">Reset Archive</button>
+    </div>
+
+    <div id="controlsHint">
+      Select a memory frame to focus it.<br>
+      Save Name updates the selected memory.<br>
+      Undo restores the previous saved name.<br>
+      Add, erase, or reset the archive from this console.<br>
+      Enter Memory opens the focused memory scene.<br>
+      Drag to orbit. The slider controls perspective and memory clarity.
+    </div>
+  </div>
+</div>
+
+<div id="editPanel">
+  <div id="editPanelTop">
+    <h3>Memory Edit Tools</h3>
+    <button id="toggleEditPanelBtn">Minimize</button>
+  </div>
+
+  <div id="editPanelBody">
+    <div class="label">Object Type</div>
+    <select id="objectTypeSelect">
+      <option value="cube">Cube</option>
+      <option value="tallBox">Tall Box</option>
+      <option value="sphere">Sphere</option>
+      <option value="cylinderStool">Cylinder Stool</option>
+      <option value="conePlant">Cone Plant</option>
+      <option value="smallTable">Small Table</option>
+      <option value="lamp">Lamp</option>
+      <option value="vase">Vase</option>
+      <option value="memoryPillar">Memory Pillar</option>
+      <option value="crystal">Crystal</option>
+    </select>
+
+    <div class="btnRow">
+      <button id="addObjectBtn">Add Object</button>
+      <button id="removeObjectBtn" class="secondary">Remove Object</button>
+    </div>
+
+    <div id="editControlsHint">
+      In memory mode: click objects to select them.<br>
+      Arrow keys move selected object.<br>
+      W / E rotate selected object.<br>
+      Q / R scale selected object down or up.<br>
+      Use Add Object and Remove Object for editable memory fragments.
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/RGBELoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/lights/RectAreaLightUniformsLib.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+
+<script>
+  function createBlankCanvasTexture(seed) {
+    const c = document.createElement("canvas");
+    c.width = 512;
+    c.height = 768;
+    const g = c.getContext("2d");
+
+    const tones = [
+      ["#1d2128", "#2b313b"],
+      ["#242129", "#36313c"],
+      ["#1b2427", "#2d383d"],
+      ["#26211f", "#39302d"],
+      ["#1e2026", "#2f3440"]
+    ];
+    const pair = tones[seed % tones.length];
+
+    const grad = g.createLinearGradient(0, 0, 0, c.height);
+    grad.addColorStop(0, pair[0]);
+    grad.addColorStop(1, pair[1]);
+    g.fillStyle = grad;
+    g.fillRect(0, 0, c.width, c.height);
+
+    g.fillStyle = "rgba(255,255,255,0.018)";
+    for (let i = 0; i < 120; i++) {
+      const x = Math.random() * c.width;
+      const y = Math.random() * c.height;
+      const r = Math.random() * 2 + 0.5;
+      g.beginPath();
+      g.arc(x, y, r, 0, Math.PI * 2);
+      g.fill();
+    }
+
+    g.strokeStyle = "rgba(255,255,255,0.03)";
+    g.lineWidth = 2;
+    g.strokeRect(24, 24, c.width - 48, c.height - 48);
+
+    const tex = new THREE.CanvasTexture(c);
+    tex.needsUpdate = true;
+    return tex;
+  }
+
+  function createConsoleTexture() {
+    const c = document.createElement("canvas");
+    c.width = 1800;
+    c.height = 900;
+    const g = c.getContext("2d");
+
+    g.clearRect(0, 0, c.width, c.height);
+
+    g.strokeStyle = "rgba(165,235,255,0.95)";
+    g.lineWidth = 4;
+    g.strokeRect(36, 36, c.width - 72, c.height - 72);
+
+    g.strokeStyle = "rgba(160,230,255,0.16)";
+    g.lineWidth = 2;
+    g.strokeRect(120, 170, 460, 250);
+    g.strokeRect(720, 170, 460, 280);
+    g.strokeRect(1260, 140, 500, 320);
+    g.strokeRect(170, 570, 460, 260);
+    g.strokeRect(760, 560, 600, 300);
+
+    g.fillStyle = "rgba(185,242,255,0.95)";
+    g.fillRect(190, 240, 260, 12);
+    g.fillRect(190, 288, 210, 10);
+    g.fillRect(190, 326, 300, 10);
+    g.fillRect(190, 364, 165, 10);
+
+    g.strokeStyle = "rgba(185,242,255,0.98)";
+    g.lineWidth = 4;
+    g.beginPath();
+    g.arc(1470, 300, 100, 0, Math.PI * 2);
+    g.stroke();
+    g.beginPath();
+    g.arc(1470, 300, 58, 0, Math.PI * 2);
+    g.stroke();
+
+    g.beginPath();
+    g.arc(1315, 430, 74, 0, Math.PI * 2);
+    g.stroke();
+
+    g.beginPath();
+    g.moveTo(880, 770);
+    g.lineTo(1010, 645);
+    g.lineTo(1135, 735);
+    g.lineTo(1320, 560);
+    g.stroke();
+
+    g.lineWidth = 2;
+    for (let i = 0; i < 6; i++) {
+      g.beginPath();
+      g.moveTo(230, 645 + i * 28);
+      g.lineTo(505, 645 + i * 28);
+      g.stroke();
+    }
+
+    g.strokeStyle = "rgba(173,237,255,0.26)";
+    g.strokeRect(1260, 600, 240, 130);
+    g.strokeRect(1210, 170, 150, 180);
+
+    const tex = new THREE.CanvasTexture(c);
+    tex.needsUpdate = true;
+    return tex;
+  }
+
+  function getAdaptiveFrameScale(totalFrames) {
+    if (totalFrames <= 72) return 0.92;
+    if (totalFrames <= 132) return 0.78;
+    if (totalFrames <= 192) return 0.66;
+    if (totalFrames <= 260) return 0.58;
+    return 0.52;
+  }
+
+  let appState = "menu";
+
+  const scene = new THREE.Scene();
+  scene.fog = new THREE.FogExp2(0x111122, 0.02);
+
+  const camera = new THREE.PerspectiveCamera(
+    75,
+    window.innerWidth / window.innerHeight,
+    0.1,
+    1000
+  );
+  camera.position.set(0, 4.2, 11.8);
+
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.0;
+  renderer.physicallyCorrectLights = true;
+  document.body.appendChild(renderer.domElement);
+
+  const pmremGenerator = new THREE.PMREMGenerator(renderer);
+  pmremGenerator.compileEquirectangularShader();
+  new THREE.RGBELoader().load('../assets/hdri/studio_small_09_1k.hdr', function(hdrTexture) {
+    const envMap = pmremGenerator.fromEquirectangular(hdrTexture).texture;
+    scene.environment = envMap;
+    hdrTexture.dispose();
+    pmremGenerator.dispose();
+  });
+
+  THREE.RectAreaLightUniformsLib.init();
+
+  const composer = new THREE.EffectComposer(renderer);
+  const renderPass = new THREE.RenderPass(scene, camera);
+  composer.addPass(renderPass);
+  const bloomPass = new THREE.UnrealBloomPass(
+    new THREE.Vector2(window.innerWidth / 2, window.innerHeight / 2),
+    0.3, 0.4, 0.85
+  );
+  composer.addPass(bloomPass);
+
+  const controls = new THREE.OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.enablePan = false;
+  controls.enableZoom = false;
+  controls.minDistance = 1.5;
+  controls.maxDistance = 24;
+  controls.target.set(0, 2.1, 0);
+  controls.update();
+
+  const keyLight = new THREE.SpotLight(0xffffff, 2.6, 65, Math.PI / 6, 0.45, 1.15);
+  keyLight.position.set(0, 17, 5);
+  keyLight.target.position.set(0, 2.2, 0);
+  
+  keyLight.castShadow = true;
+  keyLight.shadow.mapSize.width = 4096;
+  keyLight.shadow.mapSize.height = 4096;
+  keyLight.shadow.bias = -0.00015;
+  keyLight.shadow.normalBias = 0.02;
+  keyLight.shadow.camera.near = 1;
+  keyLight.shadow.camera.far = 65;
+
+  scene.add(keyLight);
+  scene.add(keyLight.target);
+
+  const fillLight = new THREE.PointLight(0x87a9ff, 0.7, 35);
+  fillLight.position.set(-8, 6, -8);
+  scene.add(fillLight);
+
+  const rimLight = new THREE.PointLight(0xc6d7ff, 0.4, 30);
+  rimLight.position.set(7, 6, 8);
+  scene.add(rimLight);
+
+  const consoleLight = new THREE.PointLight(0x7fd7ff, 1.05, 22);
+  consoleLight.position.set(0, 3.25, -1.75);
+  scene.add(consoleLight);
+
+  const ambient = new THREE.AmbientLight(0xffffff, 0.35);
+  scene.add(ambient);
+
+  const memoryWarmLight = new THREE.PointLight(0xffd6b3, 1.8, 22);
+  memoryWarmLight.position.set(-2.4, 2.8, -1.2);
+  scene.add(memoryWarmLight);
+
+  const memoryCoolLight = new THREE.PointLight(0x8ab8ff, 1.8, 24);
+  memoryCoolLight.position.set(0, 3.2, -5.1);
+  scene.add(memoryCoolLight);
+
+  const memoryBackGlow = new THREE.SpotLight(0xa7c4ff, 1.8, 22, Math.PI / 5, 0.45, 1.1);
+  memoryBackGlow.position.set(0, 4.8, -3.8);
+  memoryBackGlow.target.position.set(0, 1.8, -2.2);
+  scene.add(memoryBackGlow);
+  scene.add(memoryBackGlow.target);
+
+  const recessedPositions = [
+    { x: -3, z: -3 }, { x: 3, z: -3 },
+    { x: -3, z: 2 },  { x: 3, z: 2 },
+    { x: 0, z: -1 }
+  ];
+  for (let i = 0; i < recessedPositions.length; i++) {
+    const rp = recessedPositions[i];
+    const rLight = new THREE.SpotLight(0xfff5e6, 1.2, 12, Math.PI / 4, 0.6, 1.5);
+    rLight.position.set(rp.x, 5.9, rp.z);
+    rLight.target.position.set(rp.x, 0, rp.z);
+    rLight.castShadow = false;
+    scene.add(rLight);
+    scene.add(rLight.target);
+
+  }
+
+  const sphereGeo = new THREE.SphereGeometry(30, 64, 64);
+  const sphereMat = new THREE.MeshStandardMaterial({
+    color: 0x0b0b14,
+    side: THREE.BackSide,
+    roughness: 1,
+    metalness: 0
+  });
+  const museumSphere = new THREE.Mesh(sphereGeo, sphereMat);
+  scene.add(museumSphere);
+
+  const DEFAULT_MEMORY_COUNT = 6;
+  const savedMemories = JSON.parse(localStorage.getItem("dreamscape_memories") || "null");
+  
+  const memories =
+    Array.isArray(savedMemories) && savedMemories.length > 0
+      ? savedMemories.map((m, i) => ({
+          id: i,
+          name: m.name || `Memory ${String(i + 1).padStart(2, "0")}`,
+          clarity: typeof m.clarity === "number" ? m.clarity : 0.5,
+          tone: (!m.tone || m.tone === "neutral") ? getToneForMemoryIndex(i) : m.tone,
+          edited: !!m.edited,
+          history: Array.isArray(m.history) ? m.history : [],
+          objects: Array.isArray(m.objects) ? m.objects : []
+        }))
+      : Array.from({ length: DEFAULT_MEMORY_COUNT }, (_, i) => ({
+          id: i,
+          name: `Memory ${String(i + 1).padStart(2, "0")}`,
+          clarity: 0.5,
+          tone: getToneForMemoryIndex(i),
+          edited: false,
+          history: [],
+          objects: []
+        }));
+
+  let selectedMemoryId = 0;
+  let selectedFrame = null;
+  let memoryFocusTarget = new THREE.Vector3(0, 2.12, -1.6);
+  let memoryEntryTarget = new THREE.Vector3(0, 2.12, -1.6);
+  let memoryEntryCameraPos = new THREE.Vector3(0, 2.12, 0.4);
+  let hubTarget = new THREE.Vector3(0, 2.3, -1.2);
+  let previewFrameTarget = new THREE.Vector3(0, 2.55, -0.95);
+  let previewFrameActive = false;
+  
+  let isMemoryTransitioning = false;
+  let memoryTransitionProgress = 0;
+  
+  let transitionPhase1StartPos = new THREE.Vector3();
+  let transitionPhase1EndPos = new THREE.Vector3();
+  
+  let transitionEyePos = new THREE.Vector3();
+  let transitionFrameCenter = new THREE.Vector3();
+  let transitionFramePassThroughPos = new THREE.Vector3();
+  
+  let transitionCurveP0 = new THREE.Vector3();
+  let transitionCurveP1 = new THREE.Vector3();
+  let transitionCurveP2 = new THREE.Vector3();
+  let transitionCurveP3 = new THREE.Vector3();
+
+  const PLAYER_HEIGHT = 1.64;
+  let memoryCameraTarget = new THREE.Vector3(0, 1.64, -1.95);
+  let memoryCameraBasePos = new THREE.Vector3(0, 1.74, 4.8);
+  let memoryCameraPos = memoryCameraBasePos.clone();
+  
+  let memoryControlsInitialized = false;
+  let memoryObjectFloatEnabled = false;
+  let doorOpenAmount = 0;
+
+  let isWalkingMode = false;
+
+  const movement = {
+    forward: false,
+    backward: false,
+    left: false,
+    right: false
+  };
+  
+  let playerVelocity = new THREE.Vector3();
+  const moveSpeed = 0.08;
+
+  const staticCollisionObjects = [];
+  const playerRadius = 0.32;
+
+  const ROOM_MIN_X = -6.2;
+  const ROOM_MAX_X = 6.2;
+  const ROOM_MIN_Z = -5.2;
+  const ROOM_MAX_Z = 5.2;
+
+  let memoryAtmospherePulse = 0;
+  let memoryWarmBase = 0.90;
+  let memoryCoolBase = 1.15;
+
+  let walkBobTime = 0;
+  
+  function saveMemories() {
+    localStorage.setItem("dreamscape_memories", JSON.stringify(memories));
+  }
+
+  function getToneForMemoryIndex(index) {
+    const tones = ["neutral", "warm", "cool", "dream", "echo"];
+    return tones[index % tones.length];
+  }
+
+  function cycleSelectedMemoryTone() {
+    const tones = ["neutral", "warm", "cool", "dream", "echo"];
+    const memory = memories[selectedMemoryId];
+    if (!memory) return;
+  
+    const currentIndex = tones.indexOf(memory.tone);
+    const nextIndex = currentIndex >= 0 ? (currentIndex + 1) % tones.length : 0;
+  
+    memory.tone = tones[nextIndex];
+    saveMemories();
+    updateMemoryPanel();
+    applyMemoryTone();
+  }
+
+  function resetMovementFlags() {
+    movement.forward = false;
+    movement.backward = false;
+    movement.left = false;
+    movement.right = false;
+  }
+
+  function clampPlayerInsideRoom() {
+    const offset = controls.target.clone().sub(camera.position);
+  
+    camera.position.x = THREE.MathUtils.clamp(camera.position.x, ROOM_MIN_X, ROOM_MAX_X);
+    camera.position.z = THREE.MathUtils.clamp(camera.position.z, ROOM_MIN_Z, ROOM_MAX_Z);
+  
+    controls.target.copy(camera.position).add(offset);
+  }
+
+  function getArchiveStats() {
+    const totalFrames = Math.max(memories.length * 12, 48);
+  
+    let shellCount = 1;
+    if (totalFrames > 70) shellCount = 2;
+    if (totalFrames > 140) shellCount = 3;
+    if (totalFrames > 240) shellCount = 4;
+  
+    const baseRadius = 6.9;
+    const shellGap = 1.65;
+    const outerRadius = baseRadius + (shellCount - 1) * shellGap;
+  
+    return {
+      memoryCount: memories.length,
+      totalFrames,
+      shellCount,
+      outerRadius
+    };
+  }
+
+  const platformGroup = new THREE.Group();
+
+  const topDisk = new THREE.Mesh(
+    new THREE.CylinderGeometry(2.15, 2.7, 0.38, 56),
+    new THREE.MeshStandardMaterial({
+      color: 0x5a535d,
+      roughness: 0.96,
+      metalness: 0.02
+    })
+  );
+  topDisk.position.y = 0.28;
+  platformGroup.add(topDisk);
+
+  const lowerCone = new THREE.Mesh(
+    new THREE.ConeGeometry(1.7, 2.35, 56),
+    new THREE.MeshStandardMaterial({
+      color: 0x454049,
+      roughness: 0.99,
+      metalness: 0.01
+    })
+  );
+  lowerCone.position.y = -1.15;
+  platformGroup.add(lowerCone);
+
+  const undersideRing = new THREE.Mesh(
+    new THREE.TorusGeometry(1.5, 0.05, 12, 80),
+    new THREE.MeshStandardMaterial({
+      color: 0x7b727f,
+      roughness: 0.9,
+      metalness: 0.02
+    })
+  );
+  undersideRing.rotation.x = Math.PI / 2;
+  undersideRing.position.y = -0.22;
+  platformGroup.add(undersideRing);
+
+  platformGroup.position.set(0, 0.55, 0);
+  scene.add(platformGroup);
+
+  const avatarGroup = new THREE.Group();
+
+  const avatarMat = new THREE.MeshStandardMaterial({
+    color: 0x262b3d,
+    roughness: 0.88,
+    metalness: 0.03,
+    emissive: 0x101421,
+    emissiveIntensity: 0.12
+  });
+
+  const legGeo = new THREE.CylinderGeometry(0.06, 0.06, 1.02, 14);
+  const legLeft = new THREE.Mesh(legGeo, avatarMat);
+  legLeft.position.set(-0.11, 0.58, 0);
+  avatarGroup.add(legLeft);
+
+  const legRight = new THREE.Mesh(legGeo, avatarMat);
+  legRight.position.set(0.11, 0.58, 0);
+  avatarGroup.add(legRight);
+
+  const torsoGeo = new THREE.CylinderGeometry(0.18, 0.22, 1.35, 18);
+  const torso = new THREE.Mesh(torsoGeo, avatarMat);
+  torso.position.set(0, 1.48, 0);
+  avatarGroup.add(torso);
+
+  const shoulders = new THREE.Mesh(
+    new THREE.SphereGeometry(0.2, 18, 18),
+    avatarMat
+  );
+  shoulders.position.set(0, 1.95, 0);
+  shoulders.scale.set(1.5, 0.72, 0.9);
+  avatarGroup.add(shoulders);
+
+  const head = new THREE.Mesh(
+    new THREE.SphereGeometry(0.155, 18, 18),
+    avatarMat
+  );
+  head.position.set(0, 2.26, 0.02);
+  avatarGroup.add(head);
+
+  const armGeo = new THREE.CylinderGeometry(0.05, 0.055, 1.08, 12);
+
+  const armLeft = new THREE.Mesh(armGeo, avatarMat);
+  armLeft.position.set(-0.5, 1.72, 0.02);
+  armLeft.rotation.z = -1.08;
+  avatarGroup.add(armLeft);
+
+  const armRight = new THREE.Mesh(armGeo, avatarMat);
+  armRight.position.set(0.5, 1.72, 0.02);
+  armRight.rotation.z = 1.08;
+  avatarGroup.add(armRight);
+
+  avatarGroup.position.set(0, 0.72, 0.02);
+  scene.add(avatarGroup);
+
+  const consoleGroup = new THREE.Group();
+
+  const consoleTexture = createConsoleTexture();
+
+  const consoleGlass = new THREE.Mesh(
+    new THREE.PlaneGeometry(4.35, 2.2),
+    new THREE.MeshBasicMaterial({
+      color: 0x83d7ff,
+      transparent: true,
+      opacity: 0.06
+    })
+  );
+  consoleGlass.position.set(0, 2.12, -0.04);
+  consoleGroup.add(consoleGlass);
+
+  const mainScreen = new THREE.Mesh(
+    new THREE.PlaneGeometry(4.05, 2.02),
+    new THREE.MeshBasicMaterial({
+      map: consoleTexture,
+      transparent: true,
+      opacity: 0.97
+    })
+  );
+  mainScreen.position.set(0, 2.12, 0);
+  consoleGroup.add(mainScreen);
+
+  const innerFrame = new THREE.Mesh(
+    new THREE.PlaneGeometry(3.65, 1.78),
+    new THREE.MeshBasicMaterial({
+      color: 0x90deff,
+      transparent: true,
+      opacity: 0.045
+    })
+  );
+  innerFrame.position.set(0, 2.12, 0.02);
+  consoleGroup.add(innerFrame);
+
+  const lowerPlate = new THREE.Mesh(
+    new THREE.PlaneGeometry(4.25, 0.26),
+    new THREE.MeshBasicMaterial({
+      color: 0x7fd7ff,
+      transparent: true,
+      opacity: 0.09
+    })
+  );
+  lowerPlate.position.set(0, 1.47, 0.01);
+  consoleGroup.add(lowerPlate);
+
+  const sidePanelL = new THREE.Mesh(
+    new THREE.PlaneGeometry(0.82, 0.48),
+    new THREE.MeshBasicMaterial({
+      color: 0x9ddfff,
+      transparent: true,
+      opacity: 0.1
+    })
+  );
+  sidePanelL.position.set(-2.22, 2.02, 0.01);
+  sidePanelL.rotation.y = 0.32;
+  consoleGroup.add(sidePanelL);
+
+  const sidePanelR = new THREE.Mesh(
+    new THREE.PlaneGeometry(0.92, 0.58),
+    new THREE.MeshBasicMaterial({
+      color: 0x9ddfff,
+      transparent: true,
+      opacity: 0.1
+    })
+  );
+  sidePanelR.position.set(2.16, 1.88, 0.01);
+  sidePanelR.rotation.y = -0.28;
+  consoleGroup.add(sidePanelR);
+
+  const orbitCircle1 = new THREE.Mesh(
+    new THREE.TorusGeometry(0.17, 0.008, 12, 64),
+    new THREE.MeshBasicMaterial({
+      color: 0x96dcff,
+      transparent: true,
+      opacity: 0.72
+    })
+  );
+  orbitCircle1.position.set(1.2, 2.2, 0.02);
+  consoleGroup.add(orbitCircle1);
+
+  const orbitCircle2 = new THREE.Mesh(
+    new THREE.TorusGeometry(0.28, 0.01, 12, 64),
+    new THREE.MeshBasicMaterial({
+      color: 0x96dcff,
+      transparent: true,
+      opacity: 0.72
+    })
+  );
+  orbitCircle2.position.set(1.65, 1.98, 0.02);
+  consoleGroup.add(orbitCircle2);
+
+  const scanlineBar = new THREE.Mesh(
+    new THREE.PlaneGeometry(4.05, 0.05),
+    new THREE.MeshBasicMaterial({
+      color: 0xb8efff,
+      transparent: true,
+      opacity: 0.18
+    })
+  );
+  scanlineBar.position.set(0, 2.1, 0.03);
+  consoleGroup.add(scanlineBar);
+
+  const pulseBar = new THREE.Mesh(
+    new THREE.PlaneGeometry(1.05, 0.06),
+    new THREE.MeshBasicMaterial({
+      color: 0xc7f3ff,
+      transparent: true,
+      opacity: 0.24
+    })
+  );
+  pulseBar.position.set(-1.25, 2.3, 0.03);
+  consoleGroup.add(pulseBar);
+
+  const chartGlow = new THREE.Mesh(
+    new THREE.PlaneGeometry(1.25, 0.7),
+    new THREE.MeshBasicMaterial({
+      color: 0x75d6ff,
+      transparent: true,
+      opacity: 0.055
+    })
+  );
+  chartGlow.position.set(-0.05, 1.92, 0.03);
+  consoleGroup.add(chartGlow);
+
+  const centerGlow = new THREE.Mesh(
+    new THREE.PlaneGeometry(2.25, 1.22),
+    new THREE.MeshBasicMaterial({
+      color: 0x92e5ff,
+      transparent: true,
+      opacity: 0.035
+    })
+  );
+  centerGlow.position.set(0.02, 2.02, 0.025);
+  consoleGroup.add(centerGlow);
+
+  consoleGroup.position.set(0, 0.22, -1.82);
+  consoleGroup.rotation.y = 0;
+  const consoleBaseY = consoleGroup.position.y;
+  scene.add(consoleGroup);
+
+  const framesGroup = new THREE.Group();
+  scene.add(framesGroup);
+
+  const frameMeshes = [];
+
+  function createFrame(seed, totalFrames) {
+    const frame = new THREE.Group();
+
+    const bronzeMat = new THREE.MeshStandardMaterial({
+      color: 0x9a7b57,
+      roughness: 0.8,
+      metalness: 0.08,
+      emissive: 0x3d2819,
+      emissiveIntensity: 0.15
+    });
+
+    const densityScale = getAdaptiveFrameScale(totalFrames);
+
+    const w = (0.78 + (seed % 3) * 0.13) * densityScale;
+    const h = (0.98 + ((seed + 1) % 3) * 0.16) * densityScale;
+
+    const topBar = new THREE.Mesh(new THREE.BoxGeometry(w + 0.18, 0.08, 0.05), bronzeMat.clone());
+    topBar.position.set(0, h / 2, 0);
+    frame.add(topBar);
+
+    const bottomBar = new THREE.Mesh(new THREE.BoxGeometry(w + 0.18, 0.08, 0.05), bronzeMat.clone());
+    bottomBar.position.set(0, -h / 2, 0);
+    frame.add(bottomBar);
+
+    const leftBar = new THREE.Mesh(new THREE.BoxGeometry(0.08, h + 0.16, 0.05), bronzeMat.clone());
+    leftBar.position.set(-w / 2, 0, 0);
+    frame.add(leftBar);
+
+    const rightBar = new THREE.Mesh(new THREE.BoxGeometry(0.08, h + 0.16, 0.05), bronzeMat.clone());
+    rightBar.position.set(w / 2, 0, 0);
+    frame.add(rightBar);
+
+    const backing = new THREE.Mesh(
+      new THREE.PlaneGeometry(w, h),
+      new THREE.MeshStandardMaterial({
+        color: 0x2f3440,
+        roughness: 0.95,
+        metalness: 0.01,
+        side: THREE.DoubleSide
+      })
+    );
+    backing.position.z = 0.015;
+    frame.add(backing);
+
+    const inner = new THREE.Mesh(
+      new THREE.PlaneGeometry(w - 0.06, h - 0.06),
+      new THREE.MeshBasicMaterial({
+        map: createBlankCanvasTexture(seed),
+        transparent: false,
+        opacity: 1
+      })
+    );
+    inner.position.z = 0.03;
+    frame.add(inner);
+
+    frame.userData.borderBars = [topBar, bottomBar, leftBar, rightBar];
+    frame.userData.backing = backing;
+    frame.userData.inner = inner;
+
+    return frame;
+  }
+
+  function layoutFrames() {
+    framesGroup.clear();
+    frameMeshes.length = 0;
+  
+    const totalFrames = Math.max(memories.length * 12, 48);
+  
+    let shellCount = 1;
+    if (totalFrames > 60) shellCount = 2;
+    if (totalFrames > 120) shellCount = 3;
+    if (totalFrames > 210) shellCount = 4;
+  
+    const framesPerShell = [];
+    let remaining = totalFrames;
+  
+    for (let i = 0; i < shellCount; i++) {
+      const shellsLeft = shellCount - i;
+      const countForThisShell = Math.ceil(remaining / shellsLeft);
+      framesPerShell.push(countForThisShell);
+      remaining -= countForThisShell;
+    }
+  
+    const baseRadius = 6.9;
+    const shellGap = 1.65;
+    const poleLimit = 0.9;
+    const goldenAngle = Math.PI * (3 - Math.sqrt(5));
+  
+    let frameIndex = 0;
+  
+    for (let shellIndex = 0; shellIndex < shellCount; shellIndex++) {
+      const shellFrameCount = framesPerShell[shellIndex];
+      const shellRadius = baseRadius + shellIndex * shellGap;
+  
+      for (let i = 0; i < shellFrameCount; i++) {
+        const t = shellFrameCount === 1 ? 0.5 : i / (shellFrameCount - 1);
+  
+        const yNorm = poleLimit - t * (poleLimit * 2);
+        const radial = Math.sqrt(Math.max(0.0001, 1 - yNorm * yNorm));
+        const theta = goldenAngle * i + shellIndex * 0.45;
+  
+        const x = Math.cos(theta) * radial * shellRadius;
+        const y = yNorm * shellRadius + 2.55;
+        const z = Math.sin(theta) * radial * shellRadius;
+  
+        const frame = createFrame(frameIndex + 1, totalFrames);
+        frame.position.set(x, y, z);
+        frame.lookAt(0, 2.55, 0);
+  
+        frame.userData.memoryId = frameIndex % memories.length;
+        frame.userData.baseTheta = theta;
+        frame.userData.baseYNorm = yNorm;
+        frame.userData.baseRadius = shellRadius;
+        frame.userData.angularSpeed = (shellIndex % 2 === 0 ? 1 : -1) * (0.035 + (i % 7) * 0.002);
+        frame.userData.floatOffset = Math.random() * Math.PI * 2;
+        frame.userData.shellIndex = shellIndex;
+  
+        framesGroup.add(frame);
+        frameMeshes.push(frame);
+        frameIndex++;
+      }
+    }
+  }
+  
+  layoutFrames();
+
+  const dustGroup = new THREE.Group();
+  scene.add(dustGroup);
+
+  for (let i = 0; i < 140; i++) {
+    const dot = new THREE.Mesh(
+      new THREE.SphereGeometry(0.03 + Math.random() * 0.03, 8, 8),
+      new THREE.MeshBasicMaterial({
+        color: 0xd9ecff,
+        transparent: true,
+        opacity: 0.35
+      })
+    );
+    dot.position.set(
+      (Math.random() - 0.5) * 18,
+      Math.random() * 10 - 1,
+      (Math.random() - 0.5) * 18
+    );
+    dot.userData.baseY = dot.position.y;
+    dot.userData.offset = Math.random() * Math.PI * 2;
+    dustGroup.add(dot);
+  }
+
+  const texLoader = new THREE.TextureLoader();
+  const texBase = '../assets/textures/';
+  function loadPBR(name, repeatX, repeatY) {
+    const maps = {};
+    ['diff', 'nor_gl', 'rough'].forEach(function(type) {
+      const url = texBase + name + '_' + type + '_1k.jpg';
+      const t = texLoader.load(url, undefined, undefined, function() {
+        console.warn('Texture not found: ' + url);
+      });
+      t.wrapS = t.wrapT = THREE.RepeatWrapping;
+      t.repeat.set(repeatX, repeatY || repeatX);
+      if (type === 'diff') t.encoding = THREE.sRGBEncoding;
+      maps[type] = t;
+    });
+    return { map: maps.diff, normalMap: maps.nor_gl, roughnessMap: maps.rough };
+  }
+
+  const floorTex = loadPBR('wood_floor_deck', 3, 3);
+  const wallTex = loadPBR('beige_wall_001', 2, 2);
+  const rugTex = loadPBR('brown_leather', 2, 2);
+  const woodTrimTex = loadPBR('brown_planks_03', 1, 1);
+  const asphaltTex = loadPBR('asphalt_04', 3, 3);
+  const brickTex = loadPBR('castle_brick_07', 4, 1);
+
+  const gltfLoader = new THREE.GLTFLoader();
+  const modelBase = '../assets/models/';
+  const loadedModels = {};
+
+  function loadModel(name) {
+    return new Promise(function(resolve) {
+      gltfLoader.load(modelBase + name + '.glb', function(gltf) {
+        const model = gltf.scene;
+        model.traverse(function(child) {
+          if (child.isMesh) {
+            child.castShadow = true;
+            child.receiveShadow = true;
+          }
+        });
+        loadedModels[name] = model;
+        resolve(model);
+      }, undefined, function(err) {
+        console.warn('Failed to load model: ' + name, err);
+        loadedModels[name] = new THREE.Group();
+        resolve(loadedModels[name]);
+      });
+    });
+  }
+
+  Promise.all([
+    loadModel('desk'),
+    loadModel('desktop_computer'),
+    loadModel('armchair'),
+    loadModel('sofa'),
+    loadModel('bookshelf'),
+    loadModel('credenza'),
+    loadModel('realistic_tree'),
+    loadModel('house_kenney_a'),
+    loadModel('house_kenney_b'),
+    loadModel('house_kenney_c'),
+    loadModel('house_kenney_d'),
+    loadModel('house_kenney_e')
+  ]).then(function() {
+    console.log('All models loaded');
+
+    const houseModelNames = ['house_kenney_a', 'house_kenney_b', 'house_kenney_c', 'house_kenney_d', 'house_kenney_e'];
+    for (let i = 0; i < housePlaceholders.length; i++) {
+      const hp = housePlaceholders[i];
+      const modelName = houseModelNames[i % houseModelNames.length];
+      const h = loadedModels[modelName].clone();
+      h.scale.set(hp.s, hp.s, hp.s);
+      hp.group.add(h);
+    }
+
+    for (let i = 0; i < treePlaceholders.length; i++) {
+      const tp = treePlaceholders[i];
+      const t = loadedModels.realistic_tree.clone();
+      t.scale.set(tp.s, tp.s, tp.s);
+      tp.group.add(t);
+    }
+
+    const deskClone = loadedModels.desk.clone();
+    deskClone.scale.set(0.35, 0.175, 0.35);
+    deskClone.traverse(function(child) {
+      if (child.name && (child.name.indexOf('Upper') !== -1 || child.name.indexOf('BoardAbove') !== -1)) {
+        child.visible = false;
+      }
+    });
+    deskModel.add(deskClone);
+
+    const pcClone = loadedModels.desktop_computer.clone();
+    const pcScale = 0.001;
+    pcClone.scale.setScalar(pcScale);
+    pcClone.position.set(0, 3.8 * 0.175 + 640 * pcScale, 0);
+    monitorModel.add(pcClone);
+
+    const bookshelfClone = loadedModels.bookshelf.clone();
+    bookshelfClone.scale.set(2.17, 2.8, 2.17);
+    bookshelfClone.position.set(-8.9 * 2.17, 0, -0.18 * 2.17);
+    leftCabinetGroup.add(bookshelfClone);
+
+    const cornerShelfClone = loadedModels.bookshelf.clone();
+    cornerShelfClone.scale.setScalar(2.17);
+    cornerShelfClone.position.set(-8.9 * 2.17, 0, -0.18 * 2.17);
+    cornerBookshelf.add(cornerShelfClone);
+
+    const credenzaClone = loadedModels.credenza.clone();
+    credenzaClone.scale.setScalar(0.56);
+    credenzaClone.position.set(-100 * 0.56, -0.57 * 0.56, -21 * 0.56);
+    credenzaClone.traverse(function(c) {
+      if (c.isMesh) {
+        c.material = new THREE.MeshStandardMaterial({
+          color: 0x8b6b4a,
+          map: woodTrimTex.map,
+          normalMap: woodTrimTex.normalMap,
+          roughnessMap: woodTrimTex.roughnessMap,
+          roughness: 0.8,
+          metalness: 0.02
+        });
+      }
+    });
+    rightCabinetGroup.add(credenzaClone);
+
+    const sofaClone = loadedModels.sofa.clone();
+    sofaClone.scale.set(2.5, 1.5, 1.8);
+    sofaClone.position.set(0, 0.5 * 1.5, 0);
+    bench.add(sofaClone);
+
+    const chairClone = loadedModels.armchair.clone();
+    chairClone.scale.setScalar(1.37);
+    chairGroup.add(chairClone);
+
+
+    document.getElementById('startBtn').disabled = false;
+  });
+
+  const memoryWorldGroup = new THREE.Group();
+  scene.add(memoryWorldGroup);
+  memoryWorldGroup.visible = false;
+
+  const memoryRoomMat = new THREE.MeshStandardMaterial({
+    color: 0x2a2330,
+    roughness: 0.95,
+    metalness: 0.03,
+    side: THREE.DoubleSide
+  });
+
+  const memoryTrimMat = new THREE.MeshStandardMaterial({
+    color: 0x3d3446,
+    roughness: 0.88,
+    metalness: 0.04,
+    map: woodTrimTex.map,
+    normalMap: woodTrimTex.normalMap,
+    roughnessMap: woodTrimTex.roughnessMap
+  });
+
+  const memoryAccentMat = new THREE.MeshStandardMaterial({
+    color: 0x6d78b8,
+    emissive: 0x2a3266,
+    emissiveIntensity: 0.35,
+    roughness: 0.45,
+    metalness: 0.12
+  });
+
+  const memoryFloor = new THREE.Mesh(
+    new THREE.PlaneGeometry(14, 14),
+    new THREE.MeshStandardMaterial({
+      map: floorTex.map,
+      normalMap: floorTex.normalMap,
+      roughnessMap: floorTex.roughnessMap,
+      roughness: 1.0,
+      metalness: 0.0,
+      envMapIntensity: 0.4
+    })
+  );
+  memoryFloor.rotation.x = -Math.PI / 2;
+  memoryFloor.position.set(0, 0, 0);
+  memoryFloor.receiveShadow = true;
+  memoryWorldGroup.add(memoryFloor);
+
+  const areaRug = new THREE.Mesh(
+    new THREE.PlaneGeometry(5.7, 3.25),
+    new THREE.MeshStandardMaterial({
+      map: rugTex.map,
+      normalMap: rugTex.normalMap,
+      roughnessMap: rugTex.roughnessMap,
+      roughness: 1.0,
+      metalness: 0.0
+    })
+  );
+  areaRug.rotation.x = -Math.PI / 2;
+  areaRug.position.set(0.15, 0.014, -1.25);
+  areaRug.receiveShadow = true;
+  memoryWorldGroup.add(areaRug);
+  
+  const roomShell = new THREE.Group();
+  memoryWorldGroup.add(roomShell);
+  
+  const roomSurfaceMat = new THREE.MeshStandardMaterial({
+    color: 0xc4b8aa,
+    roughness: 0.95,
+    metalness: 0.03,
+    side: THREE.DoubleSide,
+    map: wallTex.map,
+    normalMap: wallTex.normalMap,
+    roughnessMap: wallTex.roughnessMap,
+    envMapIntensity: 0.3
+  });
+
+  const backWallMat = new THREE.MeshStandardMaterial({
+    color: 0xc4b8aa,
+    roughness: 0.95,
+    metalness: 0.03,
+    side: THREE.DoubleSide,
+    map: wallTex.map,
+    normalMap: wallTex.normalMap,
+    roughnessMap: wallTex.roughnessMap,
+    envMapIntensity: 0.3
+  });
+  
+  const ceiling = new THREE.Mesh(
+    new THREE.PlaneGeometry(14, 12),
+    roomSurfaceMat
+  );
+  ceiling.rotation.x = Math.PI / 2;
+  ceiling.position.set(0, 6, 0);
+  ceiling.receiveShadow = true;
+  roomShell.add(ceiling);
+  
+  const leftWall = new THREE.Mesh(
+    new THREE.PlaneGeometry(12, 6),
+    roomSurfaceMat
+  );
+  leftWall.rotation.y = Math.PI / 2;
+  leftWall.position.set(-7, 3, 0);
+  leftWall.receiveShadow = true;
+  roomShell.add(leftWall);
+  
+  const rightWall = new THREE.Mesh(
+    new THREE.PlaneGeometry(12, 6),
+    roomSurfaceMat
+  );
+  rightWall.rotation.y = -Math.PI / 2;
+  rightWall.position.set(7, 3, 0);
+  rightWall.receiveShadow = true;
+  roomShell.add(rightWall);
+  
+  const frontWall = new THREE.Mesh(
+    new THREE.PlaneGeometry(14, 6),
+    roomSurfaceMat
+  );
+  frontWall.position.set(0, 3, 6);
+  frontWall.rotation.y = Math.PI;
+  frontWall.receiveShadow = true;
+  roomShell.add(frontWall);
+  
+  
+  const winOpenW = 8.25, winOpenH = 2.85, winCenterY = 2.45;
+  const winTop = winCenterY + winOpenH / 2;   
+  const winBot = winCenterY - winOpenH / 2;   
+  const winLeft = -winOpenW / 2;              
+  const winRight = winOpenW / 2;              
+  const bwZ = -5.98;
+
+  const backWallTop = new THREE.Mesh(
+    new THREE.PlaneGeometry(14, 6 - winTop),
+    backWallMat
+  );
+  backWallTop.position.set(0, (winTop + 6) / 2, bwZ);
+  backWallTop.receiveShadow = true;
+  roomShell.add(backWallTop);
+
+  const backWallBottom = new THREE.Mesh(
+    new THREE.PlaneGeometry(14, winBot),
+    backWallMat
+  );
+  backWallBottom.position.set(0, winBot / 2, bwZ);
+  backWallBottom.receiveShadow = true;
+  roomShell.add(backWallBottom);
+
+  const sideW = (14 - winOpenW) / 2; 
+  const backWallLeft = new THREE.Mesh(
+    new THREE.PlaneGeometry(sideW, winOpenH),
+    backWallMat
+  );
+  backWallLeft.position.set(-7 + sideW / 2, winCenterY, bwZ);
+  backWallLeft.receiveShadow = true;
+  roomShell.add(backWallLeft);
+
+  const backWallRight = new THREE.Mesh(
+    new THREE.PlaneGeometry(sideW, winOpenH),
+    backWallMat
+  );
+  backWallRight.position.set(7 - sideW / 2, winCenterY, bwZ);
+  backWallRight.receiveShadow = true;
+  roomShell.add(backWallRight);
+
+  const baseboardMat = new THREE.MeshStandardMaterial({
+    color: 0x4a3f4d,
+    roughness: 0.92,
+    map: woodTrimTex.map,
+    normalMap: woodTrimTex.normalMap
+  });
+  
+  const baseboardBack = new THREE.Mesh(
+    new THREE.BoxGeometry(13.9, 0.15, 0.15),
+    baseboardMat
+  );
+  baseboardBack.position.set(0, 0.08, -5.925);
+  memoryWorldGroup.add(baseboardBack);
+  
+  const baseboardLeft = new THREE.Mesh(
+    new THREE.BoxGeometry(0.15, 0.15, 11.9),
+    baseboardMat
+  );
+  baseboardLeft.position.set(-6.925, 0.08, 0);
+  memoryWorldGroup.add(baseboardLeft);
+  
+  const baseboardRight = new THREE.Mesh(
+    new THREE.BoxGeometry(0.15, 0.15, 11.9),
+    baseboardMat
+  );
+  baseboardRight.position.set(6.925, 0.08, 0);
+  memoryWorldGroup.add(baseboardRight);
+
+  const baseboardFront = new THREE.Mesh(
+    new THREE.BoxGeometry(13.9, 0.15, 0.15),
+    baseboardMat
+  );
+  baseboardFront.position.set(0, 0.08, 5.925);
+  memoryWorldGroup.add(baseboardFront);
+  
+  const doorwayGroup = new THREE.Group();
+  memoryWorldGroup.add(doorwayGroup);
+
+  const doorTrimMat = new THREE.MeshStandardMaterial({
+    color: 0x4a4048,
+    roughness: 0.9,
+    metalness: 0.03
+  });
+
+  const doorMat = new THREE.MeshStandardMaterial({
+    color: 0x8b6b4a,
+    roughness: 0.75,
+    metalness: 0.02,
+    map: woodTrimTex.map,
+    normalMap: woodTrimTex.normalMap,
+    roughnessMap: woodTrimTex.roughnessMap
+  });
+
+  const knobMat = new THREE.MeshStandardMaterial({
+    color: 0xc8b07d,
+    roughness: 0.25,
+    metalness: 0.9
+  });
+
+  const doorwayBack = new THREE.Mesh(
+    new THREE.PlaneGeometry(1.65, 3.5),
+    new THREE.MeshStandardMaterial({
+      color: 0x11131a,
+      roughness: 1.0,
+      metalness: 0.0
+    })
+  );
+  doorwayBack.position.set(7.02, 1.75, 2.0);
+  doorwayBack.rotation.y = -Math.PI / 2;
+  doorwayGroup.add(doorwayBack);
+  
+  const frameLeft = new THREE.Mesh(
+    new THREE.BoxGeometry(0.16, 3.7, 0.18),
+    doorTrimMat
+  );
+  frameLeft.position.set(6.92, 1.85, 2.78);
+  doorwayGroup.add(frameLeft);
+
+  const frameRight = new THREE.Mesh(
+    new THREE.BoxGeometry(0.16, 3.7, 0.18),
+    doorTrimMat
+  );
+  frameRight.position.set(6.92, 1.85, 1.22);
+  doorwayGroup.add(frameRight);
+
+  const frameTop = new THREE.Mesh(
+    new THREE.BoxGeometry(0.16, 0.12, 1.74),
+    doorTrimMat
+  );
+  frameTop.position.set(6.92, 3.65, 2.0);
+  doorwayGroup.add(frameTop);
+  
+  const doorPivot = new THREE.Group();
+  doorPivot.position.set(6.88, 0.18, 2.56);
+  doorwayGroup.add(doorPivot);
+  
+  const door = new THREE.Mesh(
+    new THREE.BoxGeometry(0.08, 3.5, 1.45),
+    doorMat
+  );
+  door.position.set(0, 1.57, -0.53);
+  door.castShadow = true;
+  door.receiveShadow = true;
+  doorPivot.add(door);
+
+  const doorPanelInset = new THREE.Mesh(
+    new THREE.BoxGeometry(0.02, 2.8, 1.05),
+    new THREE.MeshStandardMaterial({
+      color: 0x7a5c3e,
+      roughness: 0.8,
+      metalness: 0.01,
+      map: woodTrimTex.map,
+      normalMap: woodTrimTex.normalMap
+    })
+  );
+  doorPanelInset.position.set(-0.031, 1.02, -0.53);
+  doorPivot.add(doorPanelInset);
+
+  const knob = new THREE.Mesh(
+    new THREE.SphereGeometry(0.045, 18, 18),
+    knobMat
+  );
+  knob.position.set(-0.07, 1.57, -0.99);
+  doorPivot.add(knob);
+
+  const knobStem = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.012, 0.012, 0.08, 12),
+    knobMat
+  );
+  knobStem.rotation.z = Math.PI / 2;
+  knobStem.position.set(-0.04, 1.57, -0.99);
+  doorPivot.add(knobStem);
+
+  doorPivot.rotation.y = 0;
+
+  const doorwayGlow = new THREE.PointLight(0x8dafff, 0.45, 8);
+  doorwayGlow.position.set(6.2, 1.8, 2.0);
+  memoryWorldGroup.add(doorwayGlow);
+  
+  const frameMat = memoryTrimMat;
+  const frameDepth = 0.18;
+  const frameWidth = 0.42;
+  const outerW = 8.65, outerH = 3.15;
+  const innerW = outerW - frameWidth * 2, innerH = outerH - frameWidth * 2;
+  const frameY = 2.45, frameZ = -5.93;
+
+  const windowFrameTop = new THREE.Mesh(
+    new THREE.BoxGeometry(outerW, frameWidth, frameDepth), frameMat
+  );
+  windowFrameTop.position.set(0, frameY + outerH / 2 - frameWidth / 2, frameZ);
+  windowFrameTop.castShadow = true;
+  memoryWorldGroup.add(windowFrameTop);
+
+  const windowFrameBottom = new THREE.Mesh(
+    new THREE.BoxGeometry(outerW, frameWidth, frameDepth), frameMat
+  );
+  windowFrameBottom.position.set(0, frameY - outerH / 2 + frameWidth / 2, frameZ);
+  windowFrameBottom.castShadow = true;
+  memoryWorldGroup.add(windowFrameBottom);
+
+  const windowFrameLeft = new THREE.Mesh(
+    new THREE.BoxGeometry(frameWidth, innerH, frameDepth), frameMat
+  );
+  windowFrameLeft.position.set(-outerW / 2 + frameWidth / 2, frameY, frameZ);
+  windowFrameLeft.castShadow = true;
+  memoryWorldGroup.add(windowFrameLeft);
+
+  const windowFrameRight = new THREE.Mesh(
+    new THREE.BoxGeometry(frameWidth, innerH, frameDepth), frameMat
+  );
+  windowFrameRight.position.set(outerW / 2 - frameWidth / 2, frameY, frameZ);
+  windowFrameRight.castShadow = true;
+  memoryWorldGroup.add(windowFrameRight);
+
+  const windowInnerBacking = new THREE.Mesh(
+    new THREE.PlaneGeometry(10.8, 4.8),
+    new THREE.MeshStandardMaterial({
+      color: 0xffcaa0,
+      emissive: 0xffa866,
+      emissiveIntensity: 0.08,
+      roughness: 0.95,
+      metalness: 0.0,
+      transparent: true,
+      opacity: 0.0
+    })
+  );
+  windowInnerBacking.position.set(0, 3.15, -14.2);
+  memoryWorldGroup.add(windowInnerBacking);
+  
+  const memoryWindow = new THREE.Mesh(
+    new THREE.PlaneGeometry(innerW, innerH),
+    new THREE.MeshPhysicalMaterial({
+      color: 0xa8c8f0,
+      roughness: 0.05,
+      metalness: 0.0,
+      transmission: 0.88,
+      transparent: true,
+      opacity: 0.18,
+      ior: 1.5,
+      reflectivity: 0.4,
+      clearcoat: 1.0,
+      clearcoatRoughness: 0.05,
+      side: THREE.DoubleSide,
+      depthWrite: false
+    })
+  );
+  memoryWindow.position.set(0, 2.45, -5.90);
+  memoryWindow.renderOrder = 2;
+  memoryWorldGroup.add(memoryWindow);
+  
+  const windowMullionV = new THREE.Mesh(
+    new THREE.BoxGeometry(0.12, innerH, 0.08),
+    memoryTrimMat
+  );
+  windowMullionV.position.set(0, 2.45, -5.88);
+  memoryWorldGroup.add(windowMullionV);
+
+  const windowMullionH = new THREE.Mesh(
+    new THREE.BoxGeometry(innerW, 0.12, 0.08),
+    memoryTrimMat
+  );
+  windowMullionH.position.set(0, 2.45, -5.88);
+  memoryWorldGroup.add(windowMullionH);
+
+  const windowSill = new THREE.Mesh(
+    new THREE.BoxGeometry(8.3, 0.14, 0.35),
+    memoryTrimMat
+  );
+  windowSill.position.set(0, 1.15, -5.60);
+  windowSill.castShadow = true;
+  windowSill.receiveShadow = true;
+  memoryWorldGroup.add(windowSill);
+
+  const windowRectLight = new THREE.RectAreaLight(0xffd4a8, 2.0, 7.8, 2.3);
+  windowRectLight.position.set(0, 2.45, -5.7);
+  windowRectLight.lookAt(0, 0, 0);
+  memoryWorldGroup.add(windowRectLight);
+
+  const outsideGroup = new THREE.Group();
+  memoryWorldGroup.add(outsideGroup);
+  
+  const sunsetSky = new THREE.Mesh(
+    new THREE.PlaneGeometry(28, 12),
+    new THREE.MeshBasicMaterial({
+      color: 0xffb27a,
+      transparent: true,
+      opacity: 0.92
+    })
+  );
+  sunsetSky.position.set(0, 4.0, -28);
+  outsideGroup.add(sunsetSky);
+
+  const upperSky = new THREE.Mesh(
+    new THREE.PlaneGeometry(40, 12),
+    new THREE.MeshBasicMaterial({
+      color: 0x8fa8ff,
+      transparent: true,
+      opacity: 0.58
+    })
+  );
+  upperSky.position.set(0, 8, -28);
+  outsideGroup.add(upperSky);
+
+  const sunGlow = new THREE.Mesh(
+    new THREE.CircleGeometry(1.5, 40),
+    new THREE.MeshBasicMaterial({
+      color: 0xffd7a3,
+      transparent: true,
+      opacity: 0.72
+    })
+  );
+  sunGlow.position.set(3.0, 3.5, -27);
+  outsideGroup.add(sunGlow);
+
+  const distantGround = new THREE.Mesh(
+    new THREE.PlaneGeometry(40, 10),
+    new THREE.MeshBasicMaterial({
+      color: 0x5a7a4a
+    })
+  );
+  distantGround.position.set(0, 0.5, -27);
+  outsideGroup.add(distantGround);
+
+  const yard = new THREE.Mesh(
+    new THREE.PlaneGeometry(18, 4),
+    new THREE.MeshStandardMaterial({
+      color: 0x4a7a3a,
+      roughness: 0.98,
+      metalness: 0.0
+    })
+  );
+  yard.rotation.x = -Math.PI / 2;
+  yard.position.set(0, 0.01, -8);
+  outsideGroup.add(yard);
+
+  const street = new THREE.Mesh(
+    new THREE.PlaneGeometry(18, 3),
+    new THREE.MeshStandardMaterial({
+      map: asphaltTex.map,
+      normalMap: asphaltTex.normalMap,
+      roughnessMap: asphaltTex.roughnessMap,
+      roughness: 1.0,
+      metalness: 0.0
+    })
+  );
+  street.rotation.x = -Math.PI / 2;
+  street.position.set(0, 0.02, -11);
+  street.receiveShadow = true;
+  outsideGroup.add(street);
+
+  const sidewalkLeft = new THREE.Mesh(
+    new THREE.BoxGeometry(18, 0.08, 0.5),
+    new THREE.MeshStandardMaterial({
+      color: 0x9a9088,
+      roughness: 0.95
+    })
+  );
+  sidewalkLeft.position.set(0, 0.04, -9.3);
+  outsideGroup.add(sidewalkLeft);
+
+  const sidewalkRight = new THREE.Mesh(
+    new THREE.BoxGeometry(18, 0.08, 0.5),
+    new THREE.MeshStandardMaterial({
+      color: 0x9a9088,
+      roughness: 0.95
+    })
+  );
+  sidewalkRight.position.set(0, 0.04, -12.7);
+  outsideGroup.add(sidewalkRight);
+  
+  const outsideSunLight = new THREE.DirectionalLight(0xffb56b, 2.5);
+  outsideSunLight.position.set(5, 10, -6);
+  outsideSunLight.target.position.set(0, 1, -10);
+  outsideSunLight.castShadow = true;
+  outsideSunLight.shadow.mapSize.width = 2048;
+  outsideSunLight.shadow.mapSize.height = 2048;
+  outsideGroup.add(outsideSunLight);
+  outsideGroup.add(outsideSunLight.target);
+  
+  const neighborhoodLight = new THREE.AmbientLight(0xffcaa2, 0.8);
+  outsideGroup.add(neighborhoodLight);
+
+  function createBird(color, breastColor) {
+    const bird = new THREE.Group();
+    const body = new THREE.Mesh(
+      new THREE.SphereGeometry(0.08, 8, 8),
+      new THREE.MeshStandardMaterial({ color: color, roughness: 0.8 })
+    );
+    body.scale.set(1, 0.7, 1.6);
+    bird.add(body);
+    
+    const head = new THREE.Mesh(
+      new THREE.SphereGeometry(0.055, 8, 8),
+      new THREE.MeshStandardMaterial({ color: color, roughness: 0.8 })
+    );
+    head.position.set(0, 0.04, 0.12);
+    bird.add(head);
+    
+    const breast = new THREE.Mesh(
+      new THREE.SphereGeometry(0.05, 8, 8),
+      new THREE.MeshStandardMaterial({ color: breastColor, roughness: 0.8 })
+    );
+    breast.position.set(0, -0.02, 0.05);
+    bird.add(breast);
+    
+    const beak = new THREE.Mesh(
+      new THREE.ConeGeometry(0.012, 0.04, 6),
+      new THREE.MeshStandardMaterial({ color: 0x3a3020, roughness: 0.5 })
+    );
+    beak.rotation.x = -Math.PI / 2;
+    beak.position.set(0, 0.04, 0.18);
+    bird.add(beak);
+    
+    for (let side = -1; side <= 1; side += 2) {
+      const wing = new THREE.Mesh(
+        new THREE.PlaneGeometry(0.12, 0.06),
+        new THREE.MeshStandardMaterial({ color: color, roughness: 0.8, side: THREE.DoubleSide })
+      );
+      wing.position.set(side * 0.07, 0.02, 0);
+      wing.rotation.z = side * 0.3;
+      wing.userData.wingSide = side;
+      bird.add(wing);
+    }
+    return bird;
+  }
+
+  function addBird(bodyColor, breastColor, x, y, z, speed, radius) {
+    const b = createBird(bodyColor, breastColor);
+    b.position.set(x, y, z);
+    b.userData.baseX = x;
+    b.userData.baseY = y;
+    b.userData.baseZ = z;
+    b.userData.speed = speed;
+    b.userData.radius = radius;
+    outsideGroup.add(b);
+    return b;
+  }
+
+  const birds = [
+    addBird(0x5a3a2a, 0xcc3322, 1.5, 3.5, -8, 0.8, 2.5),
+    addBird(0x5a3a2a, 0xcc3322, -2.5, 4.2, -9, 0.65, 3.0),
+    addBird(0x5a3a2a, 0xcc3322, 3.0, 3.0, -10, 0.9, 2.0),
+    addBird(0x2255aa, 0xdddddd, -1.0, 4.0, -9, 1.1, 3.0),
+    addBird(0x2255aa, 0xdddddd, 2.0, 3.8, -8.5, 0.75, 2.8),
+    addBird(0x2255aa, 0xdddddd, -3.0, 4.5, -10, 0.95, 3.5),
+    addBird(0xcc2222, 0xbb1111, 0.0, 4.8, -8, 0.7, 2.2)
+  ];
+
+  function createHouse(x, z, bodyColor, roofColor, scale = 1) {
+    const house = new THREE.Group();
+  
+    const body = new THREE.Mesh(
+      new THREE.BoxGeometry(1.8 * scale, 1.5 * scale, 1.5 * scale),
+      new THREE.MeshStandardMaterial({
+        color: bodyColor,
+        roughness: 0.92,
+        metalness: 0.02
+      })
+    );
+    body.position.y = 0.75 * scale;
+    body.castShadow = true;
+    body.receiveShadow = true;
+    house.add(body);
+  
+    const roof = new THREE.Mesh(
+      new THREE.ConeGeometry(1.45 * scale, 0.85 * scale, 4),
+      new THREE.MeshStandardMaterial({
+        color: roofColor,
+        roughness: 0.88,
+        metalness: 0.03
+      })
+    );
+    roof.rotation.y = Math.PI * 0.25;
+    roof.position.y = 1.88 * scale;
+    roof.castShadow = true;
+    roof.receiveShadow = true;
+    house.add(roof);
+  
+    const windowA = new THREE.Mesh(
+      new THREE.PlaneGeometry(0.30 * scale, 0.30 * scale),
+      new THREE.MeshBasicMaterial({
+        color: 0xffd8b2,
+        transparent: true,
+        opacity: 0.85
+      })
+    );
+    windowA.position.set(-0.42 * scale, 0.92 * scale, 0.76 * scale);
+    house.add(windowA);
+  
+    const windowB = new THREE.Mesh(
+      new THREE.PlaneGeometry(0.30 * scale, 0.30 * scale),
+      new THREE.MeshBasicMaterial({
+        color: 0xffd8b2,
+        transparent: true,
+        opacity: 0.85
+      })
+    );
+    windowB.position.set(0.42 * scale, 0.92 * scale, 0.76 * scale);
+    house.add(windowB);
+  
+    house.position.set(x, 0, z);
+    return house;
+  }
+  
+  const housePlaceholders = [];
+  const housePositions = [
+    { x: -3.5, z: -13, s: 3.0, ry: 0 },
+    { x: -1.0, z: -14, s: 2.8, ry: 0.2 },
+    { x: 1.5, z: -13.5, s: 3.2, ry: -0.15 },
+    { x: 3.8, z: -14.5, s: 2.6, ry: 0.1 },
+    { x: -2.5, z: -17, s: 2.4, ry: 0.3 },
+    { x: 0.5, z: -18, s: 2.2, ry: -0.2 },
+    { x: 3.0, z: -17.5, s: 2.5, ry: 0.15 }
+  ];
+  
+  for (let i = 0; i < housePositions.length; i++) {
+    const placeholder = new THREE.Group();
+    placeholder.position.set(housePositions[i].x, 0, housePositions[i].z);
+    placeholder.rotation.y = housePositions[i].ry;
+    outsideGroup.add(placeholder);
+    housePlaceholders.push({ group: placeholder, s: housePositions[i].s });
+  }
+  
+  function createTree(x, z, scale = 1) {
+    const tree = new THREE.Group();
+  
+    const trunk = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.10 * scale, 0.12 * scale, 1.0 * scale, 12),
+      new THREE.MeshStandardMaterial({
+        color: 0x6b4a36,
+        roughness: 0.95
+      })
+    );
+    trunk.position.y = 0.5 * scale;
+    trunk.castShadow = true;
+    trunk.receiveShadow = true;
+    tree.add(trunk);
+  
+    const leaves = new THREE.Mesh(
+      new THREE.SphereGeometry(0.55 * scale, 18, 18),
+      new THREE.MeshStandardMaterial({
+        color: 0x4b5f43,
+        roughness: 0.98
+      })
+    );
+    leaves.position.y = 1.38 * scale;
+    leaves.castShadow = true;
+    leaves.receiveShadow = true;
+    tree.add(leaves);
+  
+    tree.position.set(x, 0, z);
+    return tree;
+  }
+  
+  const treePlaceholders = [];
+  const treePositions = [
+    { x: -3.5, z: -8, s: 0.20 },
+    { x: -1.5, z: -9, s: 0.18 },
+    { x: 1.0, z: -8.5, s: 0.22 },
+    { x: 3.0, z: -9, s: 0.19 },
+    { x: -2.5, z: -11, s: 0.16 },
+    { x: 0.5, z: -12, s: 0.15 },
+    { x: 3.5, z: -11.5, s: 0.17 },
+    { x: -4.5, z: -10, s: 0.18 },
+    { x: 4.5, z: -10.5, s: 0.16 }
+  ];
+  
+  for (let i = 0; i < treePositions.length; i++) {
+    const placeholder = new THREE.Group();
+    placeholder.position.set(treePositions[i].x, 0, treePositions[i].z);
+    outsideGroup.add(placeholder);
+    treePlaceholders.push({ group: placeholder, s: treePositions[i].s });
+  }
+  
+  const deskModel = new THREE.Group();
+  deskModel.position.set(0, 0, -3.0);
+  deskModel.rotation.y = -Math.PI / 2;
+  memoryWorldGroup.add(deskModel);
+
+  const monitorModel = new THREE.Group();
+  monitorModel.position.set(0, 0, -3.0);
+  monitorModel.rotation.y = 0;
+  memoryWorldGroup.add(monitorModel);
+  
+  const keepsakeBox = new THREE.Mesh(
+    new THREE.BoxGeometry(0.5, 0.16, 0.32),
+    new THREE.MeshStandardMaterial({
+      color: 0x6d78b8,
+      emissive: 0x232d63,
+      emissiveIntensity: 0.18,
+      roughness: 0.58,
+      metalness: 0.1
+    })
+  );
+  keepsakeBox.position.set(0.82, 1.33, -2.12);
+  keepsakeBox.visible = false;
+  memoryWorldGroup.add(keepsakeBox);
+
+  keepsakeBox.userData.baseY = keepsakeBox.position.y;
+  
+  const leftCabinetGroup = new THREE.Group();
+  leftCabinetGroup.position.set(-6.2, 0, -5.0);
+  leftCabinetGroup.rotation.y = Math.PI / 2;
+  memoryWorldGroup.add(leftCabinetGroup);
+
+  
+  const cornerBookshelf = new THREE.Group();
+  cornerBookshelf.position.set(14.83, 0, -4.8);
+  cornerBookshelf.rotation.y = 0;
+  memoryWorldGroup.add(cornerBookshelf);
+
+  const rightCabinetGroup = new THREE.Group();
+  rightCabinetGroup.position.set(6.0, 0, -2.0);
+  rightCabinetGroup.rotation.y = -Math.PI / 2;
+  memoryWorldGroup.add(rightCabinetGroup);
+  
+  const bench = new THREE.Group();
+  bench.position.set(-4.5, 0, 4.0);
+  bench.rotation.y = Math.PI / 4;
+  memoryWorldGroup.add(bench);
+
+  const chairGroup = new THREE.Group();
+  chairGroup.position.set(0, 0, 0.5);
+  chairGroup.rotation.y = Math.PI;
+  memoryWorldGroup.add(chairGroup);
+  
+  const memoryFramesInside = [];
+  const frameColors = [
+    ['#2d5a4e', '#4a8b6e', '#1a3d32', '#6db88a'],
+    ['#5a2d4e', '#8b4a6e', '#3d1a32', '#b86d8a'],
+    ['#4e5a2d', '#6e8b4a', '#323d1a', '#8ab86d']
+  ];
+  
+  for (let i = 0; i < 3; i++) {
+    const artFrame = new THREE.Mesh(
+      new THREE.BoxGeometry(0.08, 1.2, 1.6),
+      memoryTrimMat
+    );
+    artFrame.position.set(-6.95, 3.0, -2.2 + i * 2.2);
+    memoryWorldGroup.add(artFrame);
+    memoryFramesInside.push(artFrame);
+
+    const artCanvas = document.createElement('canvas');
+    artCanvas.width = 256;
+    artCanvas.height = 192;
+    
+    const actx = artCanvas.getContext('2d');
+    
+    const agrd = actx.createLinearGradient(0, 0, 256, 192);
+    agrd.addColorStop(0, '#0f0f1a');
+    agrd.addColorStop(1, '#1a1a2e');
+    actx.fillStyle = agrd;
+    actx.fillRect(0, 0, 256, 192);
+    
+    const fc = frameColors[i];
+    
+    for (let p = 0; p < 8; p++) {
+      actx.beginPath();
+      
+      const cx = Math.random() * 256, cy = Math.random() * 192;
+      const pts = 3 + Math.floor(Math.random() * 3);
+      
+      for (let j = 0; j < pts; j++) {
+        const angle = (j / pts) * Math.PI * 2 + Math.random() * 0.4;
+        const r = 15 + Math.random() * 50;
+        if (j === 0) actx.moveTo(cx + Math.cos(angle) * r, cy + Math.sin(angle) * r);
+        else actx.lineTo(cx + Math.cos(angle) * r, cy + Math.sin(angle) * r);
+      }
+      actx.closePath();
+      actx.fillStyle = fc[p % fc.length];
+      actx.globalAlpha = 0.5 + Math.random() * 0.4;
+      actx.fill();
+    }
+    actx.globalAlpha = 1;
+    
+    const artTex = new THREE.CanvasTexture(artCanvas);
+    artTex.encoding = THREE.sRGBEncoding;
+    
+    const artInner = new THREE.Mesh(
+      new THREE.PlaneGeometry(1.4, 1.0),
+      new THREE.MeshStandardMaterial({ map: artTex, roughness: 0.7 })
+    );
+    artInner.position.set(-6.90, 3.0, -2.2 + i * 2.2);
+    artInner.rotation.y = Math.PI / 2;
+    memoryWorldGroup.add(artInner);
+  }
+
+  const plant1Group = new THREE.Group();
+  plant1Group.position.set(5.8, 0, -4.2);
+  memoryWorldGroup.add(plant1Group);
+  
+  const pot1 = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.28, 0.22, 0.55, 16),
+    new THREE.MeshStandardMaterial({ color: 0x6b4530, roughness: 0.9 })
+  );
+  pot1.position.y = 0.275;
+  plant1Group.add(pot1);
+  
+  const soil1 = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.26, 0.26, 0.05, 16),
+    new THREE.MeshStandardMaterial({ color: 0x2a1e12, roughness: 1.0 })
+  );
+  soil1.position.y = 0.57;
+  plant1Group.add(soil1);
+  
+  for (let li = 0; li < 11; li++) {
+    const leaf = new THREE.Mesh(
+      new THREE.PlaneGeometry(0.4, 0.65),
+      new THREE.MeshStandardMaterial({ color: 0x041a0a, roughness: 0.95, metalness: 0.0, envMapIntensity: 0.05, side: THREE.DoubleSide })
+    );
+    
+    const angle = (li / 11) * Math.PI * 2;
+    const tilt = 0.25 + Math.random() * 0.4;
+    leaf.position.set(Math.cos(angle) * 0.25, 0.8 + Math.random() * 0.8, Math.sin(angle) * 0.25);
+    leaf.rotation.set(-tilt, angle, Math.random() * 0.3 - 0.15);
+    plant1Group.add(leaf);
+  }
+
+  const floorLampGroup = new THREE.Group();
+  floorLampGroup.position.set(6.3, 0, 5.2);
+  memoryWorldGroup.add(floorLampGroup);
+  
+  const lampBaseMat = new THREE.MeshStandardMaterial({ color: 0x8b6914, roughness: 0.35, metalness: 0.7 });
+  const lampBase = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.22, 0.25, 0.08, 20),
+    lampBaseMat
+  );
+  lampBase.position.y = 0.04;
+  floorLampGroup.add(lampBase);
+  
+  const lampStem = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.022, 0.028, 2.4, 12),
+    lampBaseMat
+  );
+  lampStem.position.y = 1.24;
+  floorLampGroup.add(lampStem);
+  
+  const lampShade = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.14, 0.3, 0.4, 20, 1, true),
+    new THREE.MeshStandardMaterial({ color: 0xe8d5b0, roughness: 0.85, side: THREE.DoubleSide })
+  );
+  lampShade.position.y = 2.5;
+  floorLampGroup.add(lampShade);
+  
+  const lampGlow = new THREE.PointLight(0xffd6a0, 0.8, 6);
+  lampGlow.position.y = 2.45;
+  floorLampGroup.add(lampGlow);
+
+  const sideTableGroup = new THREE.Group();
+  sideTableGroup.position.set(5.8, 0, 4.8);
+  memoryWorldGroup.add(sideTableGroup);
+  
+  const stBrownMat = new THREE.MeshStandardMaterial({ color: 0x4a3222, roughness: 0.8, metalness: 0.05 });
+  const stTop = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.55, 0.55, 0.06, 20),
+    new THREE.MeshStandardMaterial({ color: 0x7a5c3e, roughness: 0.8, map: woodTrimTex.map, normalMap: woodTrimTex.normalMap })
+  );
+  stTop.position.y = 0.58;
+  sideTableGroup.add(stTop);
+  
+  const stStem = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.04, 0.045, 0.38, 10),
+    stBrownMat
+  );
+  stStem.position.y = 0.38;
+  sideTableGroup.add(stStem);
+  
+  for (let li = 0; li < 3; li++) {
+    const legAngle = (li / 3) * Math.PI * 2;
+    const leg = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.02, 0.025, 0.45, 8),
+      stBrownMat
+    );
+    leg.position.set(Math.cos(legAngle) * 0.16, 0.15, Math.sin(legAngle) * 0.16);
+    leg.rotation.set(Math.sin(legAngle) * 0.35, 0, -Math.cos(legAngle) * 0.35);
+    sideTableGroup.add(leg);
+    
+    const foot = new THREE.Mesh(
+      new THREE.SphereGeometry(0.02, 8, 8),
+      stBrownMat
+    );
+    foot.position.set(Math.cos(legAngle) * 0.28, 0.01, Math.sin(legAngle) * 0.28);
+    sideTableGroup.add(foot);
+  }
+  
+  const smallPot = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.1, 0.08, 0.14, 12),
+    new THREE.MeshStandardMaterial({ color: 0xd4c4a8, roughness: 0.85 })
+  );
+  smallPot.position.y = 0.67;
+  sideTableGroup.add(smallPot);
+  
+  const smallSoil = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.09, 0.09, 0.03, 12),
+    new THREE.MeshStandardMaterial({ color: 0x2a1e12, roughness: 1.0 })
+  );
+  smallSoil.position.y = 0.75;
+  sideTableGroup.add(smallSoil);
+  
+  for (let li = 0; li < 5; li++) {
+    const leaf = new THREE.Mesh(
+      new THREE.PlaneGeometry(0.12, 0.18),
+      new THREE.MeshStandardMaterial({ color: 0x0e3820, roughness: 0.75, side: THREE.DoubleSide })
+    );
+    
+    const angle = (li / 5) * Math.PI * 2;
+    const tilt = 0.3 + Math.random() * 0.35;
+    
+    leaf.position.set(Math.cos(angle) * 0.06, 0.82 + Math.random() * 0.12, Math.sin(angle) * 0.06);
+    leaf.rotation.set(-tilt, angle, Math.random() * 0.2 - 0.1);
+    sideTableGroup.add(leaf);
+  }
+
+  const cornerChairGroup = new THREE.Group();
+  cornerChairGroup.position.set(4.5, 0, 4.8);
+  cornerChairGroup.rotation.y = -Math.PI / 2.5 - Math.PI / 2;
+  memoryWorldGroup.add(cornerChairGroup);
+  
+  const chairBrownMat = new THREE.MeshStandardMaterial({ color: 0x1a0e08, roughness: 0.95, metalness: 0.0, envMapIntensity: 0.1 });
+  const cSeat = new THREE.Mesh(
+    new THREE.BoxGeometry(0.9, 0.14, 0.85),
+    chairBrownMat
+  );
+  cSeat.position.y = 0.45;
+  cornerChairGroup.add(cSeat);
+  
+  const cBack = new THREE.Mesh(
+    new THREE.BoxGeometry(0.9, 0.75, 0.12),
+    chairBrownMat
+  );
+  cBack.position.set(0, 0.78, -0.38);
+  cBack.rotation.x = -0.08;
+  cornerChairGroup.add(cBack);
+  
+  for (let side = -1; side <= 1; side += 2) {
+    const arm = new THREE.Mesh(
+      new THREE.BoxGeometry(0.1, 0.25, 0.7),
+      chairBrownMat
+    );
+    arm.position.set(side * 0.45, 0.58, -0.02);
+    cornerChairGroup.add(arm);
+  }
+  const chairLegMat = new THREE.MeshStandardMaterial({ color: 0x4a3222, roughness: 0.7, metalness: 0.1 });
+  const legPositions = [[-0.36, -0.34], [0.36, -0.34], [-0.36, 0.34], [0.36, 0.34]];
+  for (let lp of legPositions) {
+    const cLeg = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.025, 0.025, 0.4, 8),
+      chairLegMat
+    );
+    cLeg.position.set(lp[0], 0.2, lp[1]);
+    cornerChairGroup.add(cLeg);
+  }
+
+  const memoryDustGroup = new THREE.Group();
+  memoryWorldGroup.add(memoryDustGroup);
+  
+  for (let i = 0; i < 55; i++) {
+    const mote = new THREE.Mesh(
+      new THREE.SphereGeometry(0.012 + Math.random() * 0.02, 8, 8),
+      new THREE.MeshBasicMaterial({
+        color: 0xf3e7d8,
+        transparent: true,
+        opacity: 0.10 + Math.random() * 0.14
+      })
+    );
+  
+    mote.position.set(
+      (Math.random() - 0.5) * 8.5,
+      0.8 + Math.random() * 3.6,
+      -4.8 + Math.random() * 6.8
+    );
+  
+    mote.userData.baseX = mote.position.x;
+    mote.userData.baseY = mote.position.y;
+    mote.userData.baseZ = mote.position.z;
+    mote.userData.offset = Math.random() * Math.PI * 2;
+    mote.userData.speed = 0.15 + Math.random() * 0.25;
+  
+    memoryDustGroup.add(mote);
+  }
+
+  const sideArtworkFrame = new THREE.Mesh(
+    new THREE.BoxGeometry(2.8, 1.8, 0.08),
+    new THREE.MeshStandardMaterial({
+      color: 0x2a2018,
+      roughness: 0.82,
+      metalness: 0.05
+    })
+  );
+  sideArtworkFrame.position.set(6.94, 3.0, -2.0);
+  sideArtworkFrame.rotation.y = -Math.PI / 2;
+  memoryWorldGroup.add(sideArtworkFrame);
+  
+  const paintingCanvas = document.createElement('canvas');
+  paintingCanvas.width = 512;
+  paintingCanvas.height = 320;
+  
+  const pctx = paintingCanvas.getContext('2d');
+  const grad = pctx.createLinearGradient(0, 0, 512, 320);
+  grad.addColorStop(0, '#0a1628');
+  grad.addColorStop(0.5, '#1a2d4d');
+  grad.addColorStop(1, '#0d1f3a');
+  pctx.fillStyle = grad;
+  pctx.fillRect(0, 0, 512, 320);
+  
+  const colors = ['#c4956a', '#8b5e3c', '#d4a574', '#e8c99b', '#6d4c3d', '#2a4a6b', '#3d6b8e', '#1a3355'];
+  for (let p = 0; p < 12; p++) {
+    pctx.beginPath();
+    
+    const cx = Math.random() * 512, cy = Math.random() * 320;
+    const pts = 3 + Math.floor(Math.random() * 4);
+    
+    for (let j = 0; j < pts; j++) {
+      const angle = (j / pts) * Math.PI * 2 + Math.random() * 0.5;
+      const r = 30 + Math.random() * 80;
+      const px = cx + Math.cos(angle) * r;
+      const py = cy + Math.sin(angle) * r;
+      if (j === 0) pctx.moveTo(px, py);
+      else pctx.lineTo(px, py);
+    }
+    pctx.closePath();
+    pctx.fillStyle = colors[p % colors.length];
+    pctx.globalAlpha = 0.4 + Math.random() * 0.5;
+    pctx.fill();
+  }
+  pctx.globalAlpha = 1;
+  
+  const paintingTexture = new THREE.CanvasTexture(paintingCanvas);
+  paintingTexture.encoding = THREE.sRGBEncoding;
+
+  const sideArtworkInner = new THREE.Mesh(
+    new THREE.PlaneGeometry(2.4, 1.5),
+    new THREE.MeshStandardMaterial({
+      map: paintingTexture,
+      roughness: 0.72,
+      metalness: 0.02
+    })
+  );
+  sideArtworkInner.position.set(6.89, 3.0, -2.0);
+  sideArtworkInner.rotation.y = -Math.PI / 2;
+  memoryWorldGroup.add(sideArtworkInner);
+  
+  const hud = document.getElementById("hud");
+  const timeline = document.getElementById("timeline");
+  const timelineLabel = document.getElementById("timelineLabel");
+  const fpsEl = document.getElementById("fps");
+
+  const startOverlay = document.getElementById("startOverlay");
+  const startBtn = document.getElementById("startBtn");
+  const backToMenuBtn = document.getElementById("backToMenuBtn");
+
+  const memoryPanel = document.getElementById("memoryPanel");
+  const togglePanelBtn = document.getElementById("togglePanelBtn");
+  const editPanel = document.getElementById("editPanel");
+  const toggleEditPanelBtn = document.getElementById("toggleEditPanelBtn");
+  const memoryNameInput = document.getElementById("memoryName");
+  const memoryIdText = document.getElementById("memoryIdText");
+  const clarityText = document.getElementById("clarityText");
+  const toneText = document.getElementById("toneText");
+  const stateText = document.getElementById("stateText");
+
+  const saveBtn = document.getElementById("saveBtn");
+  const undoBtn = document.getElementById("undoBtn");
+  const enterBtn = document.getElementById("enterBtn");
+  const exitBtn = document.getElementById("exitBtn");
+  const addMemoryBtn = document.getElementById("addMemoryBtn");
+  const eraseBtn = document.getElementById("eraseBtn");
+  const resetArchiveBtn = document.getElementById("resetArchiveBtn");
+  const addObjectBtn = document.getElementById("addObjectBtn");
+  const removeObjectBtn = document.getElementById("removeObjectBtn");
+
+  const cycleToneBtn = document.getElementById("cycleToneBtn");
+  
+  const selectedObjectText = document.getElementById("selectedObjectText");
+  const objectTypeSelect = document.getElementById("objectTypeSelect");
+  
+  const raycaster = new THREE.Raycaster();
+  const mouse = new THREE.Vector2();
+  
+  let pointerDownX = 0;
+  let pointerDownY = 0;
+  let pointerMoved = false;
+  const CLICK_MOVE_THRESHOLD = 8;
+  
+  let selectedMemoryObject = null;
+  const memorySelectableRoots = [];
+  const spawnedMemoryObjects = [];
+
+  function createObjectRecord(type, root, label) {
+    return {
+      recordId: `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+      type,
+      label,
+      position: {
+        x: root.position.x,
+        y: root.position.y,
+        z: root.position.z
+      },
+      rotation: {
+        x: root.rotation.x,
+        y: root.rotation.y,
+        z: root.rotation.z
+      },
+      scale: {
+        x: root.scale.x,
+        y: root.scale.y,
+        z: root.scale.z
+      }
+    };
+  }
+  
+  function applyRecordToObject(root, record) {
+    root.position.set(
+      record.position?.x ?? root.position.x,
+      record.position?.y ?? root.position.y,
+      record.position?.z ?? root.position.z
+    );
+  
+    root.rotation.set(
+      record.rotation?.x ?? root.rotation.x,
+      record.rotation?.y ?? root.rotation.y,
+      record.rotation?.z ?? root.rotation.z
+    );
+  
+    root.scale.set(
+      record.scale?.x ?? 1,
+      record.scale?.y ?? 1,
+      record.scale?.z ?? 1
+    );
+  }
+  
+  function clearSpawnedMemoryObjects() {
+    while (spawnedMemoryObjects.length > 0) {
+      const spawned = spawnedMemoryObjects.pop();
+      memoryWorldGroup.remove(spawned);
+  
+      const selectableIndex = memorySelectableRoots.indexOf(spawned);
+      if (selectableIndex >= 0) {
+        memorySelectableRoots.splice(selectableIndex, 1);
+      }
+    }
+  
+    selectedMemoryObject = null;
+    selectedObjectText.textContent = "none";
+    updateHud();
+  }
+  
+  function loadSelectedMemoryObjects() {
+    clearSpawnedMemoryObjects();
+  
+    const memory = memories[selectedMemoryId];
+    if (!memory || !Array.isArray(memory.objects)) return;
+  
+    for (const record of memory.objects) {
+      const built = buildSpawnedObject(record.type || "cube");
+      const objectRoot = built.root;
+  
+      applyRecordToObject(objectRoot, record);
+  
+      objectRoot.userData.recordId = record.recordId;
+  
+      memoryWorldGroup.add(objectRoot);
+      registerMemorySelectable(
+        objectRoot,
+        record.label || built.label,
+        true
+      );
+      objectRoot.userData.memoryLabel = record.label || built.label;
+      spawnedMemoryObjects.push(objectRoot);
+    }
+  }
+  
+  function syncSelectedObjectToMemoryData() {
+    if (!selectedMemoryObject) return;
+  
+    const memory = memories[selectedMemoryId];
+    if (!memory || !Array.isArray(memory.objects)) return;
+  
+    const recordId = selectedMemoryObject.userData.recordId;
+    const record = memory.objects.find(obj => obj.recordId === recordId);
+  
+    if (!record) return;
+  
+    record.position = {
+      x: selectedMemoryObject.position.x,
+      y: selectedMemoryObject.position.y,
+      z: selectedMemoryObject.position.z
+    };
+  
+    record.rotation = {
+      x: selectedMemoryObject.rotation.x,
+      y: selectedMemoryObject.rotation.y,
+      z: selectedMemoryObject.rotation.z
+    };
+  
+    record.scale = {
+      x: selectedMemoryObject.scale.x,
+      y: selectedMemoryObject.scale.y,
+      z: selectedMemoryObject.scale.z
+    };
+  
+    saveMemories();
+  }
+  
+  function registerMemorySelectable(root, label, removable = false) {
+    root.userData.isMemorySelectable = true;
+    root.userData.memoryLabel = label;
+    root.userData.removable = removable;
+  
+    root.traverse((obj) => {
+      if (!obj.isMesh || !obj.material) return;
+  
+      if (Array.isArray(obj.material)) {
+        obj.material = obj.material.map((mat) => {
+          const cloned = mat.clone();
+          return cloned;
+        });
+      } else {
+        obj.material = obj.material.clone();
+      }
+  
+      if (Array.isArray(obj.material)) {
+        for (const mat of obj.material) {
+          if ("emissive" in mat) {
+            obj.userData.baseEmissive = mat.emissive.clone();
+            obj.userData.baseEmissiveIntensity = mat.emissiveIntensity || 0;
+            break;
+          }
+        }
+      } else if ("emissive" in obj.material) {
+        obj.userData.baseEmissive = obj.material.emissive.clone();
+        obj.userData.baseEmissiveIntensity = obj.material.emissiveIntensity || 0;
+      }
+    });
+  
+    memorySelectableRoots.push(root);
+  }
+  
+  function applyMemoryObjectHighlight(root, isSelected) {
+    root.traverse((obj) => {
+      if (!obj.isMesh || !obj.material || !("emissive" in obj.material)) return;
+  
+      if (isSelected) {
+        obj.material.emissive.set(0x4f7dff);
+        obj.material.emissiveIntensity = 0.35;
+      } else {
+        if (obj.userData.baseEmissive) {
+          obj.material.emissive.copy(obj.userData.baseEmissive);
+        } else {
+          obj.material.emissive.set(0x000000);
+        }
+        obj.material.emissiveIntensity = obj.userData.baseEmissiveIntensity || 0;
+      }
+    });
+  }
+  
+  function clearMemoryObjectSelection() {
+    if (selectedMemoryObject) {
+      applyMemoryObjectHighlight(selectedMemoryObject, false);
+    }
+    selectedMemoryObject = null;
+    selectedObjectText.textContent = "none";
+    updateHud();
+  }
+  
+  function selectMemoryObject(root) {
+    if (selectedMemoryObject === root) return;
+  
+    if (selectedMemoryObject) {
+      applyMemoryObjectHighlight(selectedMemoryObject, false);
+    }
+  
+    selectedMemoryObject = root;
+    applyMemoryObjectHighlight(selectedMemoryObject, true);
+    selectedObjectText.textContent = selectedMemoryObject.userData.memoryLabel || "object";
+    updateHud();
+  }
+  
+  function moveSelectedMemoryObject(dx, dz) {
+    if (!selectedMemoryObject) return;
+    selectedMemoryObject.position.x += dx;
+    selectedMemoryObject.position.z += dz;
+    syncSelectedObjectToMemoryData();
+  }
+  
+  function rotateSelectedMemoryObject(amount) {
+    if (!selectedMemoryObject) return;
+    selectedMemoryObject.rotation.y += amount;
+    syncSelectedObjectToMemoryData();
+  }
+  
+  function scaleSelectedMemoryObject(amount) {
+    if (!selectedMemoryObject) return;
+  
+    const nextScaleX = THREE.MathUtils.clamp(selectedMemoryObject.scale.x + amount, 0.4, 2.2);
+    const nextScaleY = THREE.MathUtils.clamp(selectedMemoryObject.scale.y + amount, 0.4, 2.2);
+    const nextScaleZ = THREE.MathUtils.clamp(selectedMemoryObject.scale.z + amount, 0.4, 2.2);
+  
+    selectedMemoryObject.scale.set(nextScaleX, nextScaleY, nextScaleZ);
+  
+    const bbox = new THREE.Box3().setFromObject(selectedMemoryObject);
+    selectedMemoryObject.position.y += (0 - bbox.min.y);
+  
+    syncSelectedObjectToMemoryData();
+  }
+  
+  function setCastReceiveShadowDeep(root) {
+    root.traverse((obj) => {
+      if (obj.isMesh) {
+        obj.castShadow = true;
+        obj.receiveShadow = true;
+      }
+    });
+  }
+
+  function registerStaticCollider(root) {
+    staticCollisionObjects.push(root);
+  }
+  
+  function canMoveTo(nextX, nextZ) {
+    const playerMinX = nextX - playerRadius;
+    const playerMaxX = nextX + playerRadius;
+    const playerMinZ = nextZ - playerRadius;
+    const playerMaxZ = nextZ + playerRadius;
+  
+    for (const obj of staticCollisionObjects) {
+      const box = new THREE.Box3().setFromObject(obj);
+  
+      const hit =
+        playerMaxX > box.min.x &&
+        playerMinX < box.max.x &&
+        playerMaxZ > box.min.z &&
+        playerMinZ < box.max.z;
+  
+      if (hit) {
+        return false;
+      }
+    }
+  
+    return true;
+  }
+  
+  function buildSpawnedObject(type) {
+    let root;
+    let label;
+  
+    if (type === "cube") {
+      root = new THREE.Mesh(
+        new THREE.BoxGeometry(0.42, 0.42, 0.42),
+        new THREE.MeshStandardMaterial({
+          color: 0x8ea2ff,
+          emissive: 0x2c3470,
+          emissiveIntensity: 0.16,
+          roughness: 0.5,
+          metalness: 0.12
+        })
+      );
+      root.position.y = 0.21;
+      label = "cube";
+    }
+  
+    if (type === "tallBox") {
+      root = new THREE.Mesh(
+        new THREE.BoxGeometry(0.36, 0.82, 0.36),
+        new THREE.MeshStandardMaterial({
+          color: 0xa48cff,
+          emissive: 0x34255e,
+          emissiveIntensity: 0.14,
+          roughness: 0.52,
+          metalness: 0.10
+        })
+      );
+      root.position.y = 0.41;
+      label = "tall box";
+    }
+  
+    if (type === "sphere") {
+      root = new THREE.Mesh(
+        new THREE.SphereGeometry(0.26, 24, 24),
+        new THREE.MeshStandardMaterial({
+          color: 0x9ac6ff,
+          emissive: 0x233b68,
+          emissiveIntensity: 0.16,
+          roughness: 0.35,
+          metalness: 0.18
+        })
+      );
+      root.position.y = 0.26;
+      label = "sphere";
+    }
+  
+    if (type === "cylinderStool") {
+      root = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.24, 0.28, 0.48, 24),
+        new THREE.MeshStandardMaterial({
+          color: 0x8d6e63,
+          emissive: 0x241714,
+          emissiveIntensity: 0.10,
+          roughness: 0.78,
+          metalness: 0.04
+        })
+      );
+      root.position.y = 0.24;
+      label = "stool";
+    }
+  
+    if (type === "conePlant") {
+      root = new THREE.Group();
+  
+      const pot = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.16, 0.20, 0.22, 20),
+        new THREE.MeshStandardMaterial({
+          color: 0x7a5a4f,
+          roughness: 0.82,
+          metalness: 0.04
+        })
+      );
+      pot.position.y = 0.11;
+      root.add(pot);
+  
+      const leaves = new THREE.Mesh(
+        new THREE.ConeGeometry(0.24, 0.58, 20),
+        new THREE.MeshStandardMaterial({
+          color: 0x6fa06d,
+          emissive: 0x1d331d,
+          emissiveIntensity: 0.08,
+          roughness: 0.84,
+          metalness: 0.02
+        })
+      );
+      leaves.position.y = 0.48;
+      root.add(leaves);
+  
+      label = "plant";
+    }
+  
+    if (type === "smallTable") {
+      root = new THREE.Group();
+  
+      const top = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.34, 0.34, 0.06, 24),
+        new THREE.MeshStandardMaterial({
+          color: 0x6b5248,
+          roughness: 0.82,
+          metalness: 0.04
+        })
+      );
+      top.position.y = 0.46;
+      root.add(top);
+  
+      const leg = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.05, 0.06, 0.46, 16),
+        new THREE.MeshStandardMaterial({
+          color: 0x4b3c36,
+          roughness: 0.84,
+          metalness: 0.04
+        })
+      );
+      leg.position.y = 0.23;
+      root.add(leg);
+  
+      const base = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.18, 0.20, 0.04, 20),
+        new THREE.MeshStandardMaterial({
+          color: 0x4b3c36,
+          roughness: 0.84,
+          metalness: 0.04
+        })
+      );
+      base.position.y = 0.02;
+      root.add(base);
+  
+      label = "small table";
+    }
+  
+    if (type === "lamp") {
+      root = new THREE.Group();
+  
+      const base = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.16, 0.18, 0.05, 20),
+        new THREE.MeshStandardMaterial({
+          color: 0x7f6d5f,
+          roughness: 0.72,
+          metalness: 0.16
+        })
+      );
+      base.position.y = 0.025;
+      root.add(base);
+  
+      const stem = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.03, 0.03, 0.48, 14),
+        new THREE.MeshStandardMaterial({
+          color: 0xb9a48d,
+          roughness: 0.48,
+          metalness: 0.35
+        })
+      );
+      stem.position.y = 0.29;
+      root.add(stem);
+  
+      const shade = new THREE.Mesh(
+        new THREE.ConeGeometry(0.22, 0.28, 20, 1, true),
+        new THREE.MeshStandardMaterial({
+          color: 0xd9d0c8,
+          emissive: 0x3d3126,
+          emissiveIntensity: 0.10,
+          roughness: 0.84,
+          metalness: 0.02,
+          side: THREE.DoubleSide
+        })
+      );
+      shade.position.y = 0.63;
+      shade.rotation.x = Math.PI;
+      root.add(shade);
+  
+      label = "lamp";
+    }
+  
+    if (type === "vase") {
+      root = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.10, 0.16, 0.44, 20),
+        new THREE.MeshStandardMaterial({
+          color: 0x8eb8c8,
+          emissive: 0x203746,
+          emissiveIntensity: 0.08,
+          roughness: 0.34,
+          metalness: 0.18
+        })
+      );
+      root.position.y = 0.22;
+      label = "vase";
+    }
+  
+    if (type === "memoryPillar") {
+      root = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.16, 0.20, 0.92, 20),
+        new THREE.MeshStandardMaterial({
+          color: 0x7c86d6,
+          emissive: 0x27307c,
+          emissiveIntensity: 0.18,
+          roughness: 0.42,
+          metalness: 0.14
+        })
+      );
+      root.position.y = 0.46;
+      label = "memory pillar";
+    }
+  
+    if (type === "crystal") {
+      root = new THREE.Mesh(
+        new THREE.OctahedronGeometry(0.26),
+        new THREE.MeshStandardMaterial({
+          color: 0x9fe7ff,
+          emissive: 0x1e4c5d,
+          emissiveIntensity: 0.16,
+          roughness: 0.28,
+          metalness: 0.22
+        })
+      );
+      root.position.y = 0.26;
+      label = "crystal";
+    }
+  
+    if (!root) {
+      root = new THREE.Mesh(
+        new THREE.BoxGeometry(0.42, 0.42, 0.42),
+        new THREE.MeshStandardMaterial({
+          color: 0x8ea2ff,
+          emissive: 0x2c3470,
+          emissiveIntensity: 0.16,
+          roughness: 0.5,
+          metalness: 0.12
+        })
+      );
+      root.position.y = 0.21;
+      label = "cube";
+    }
+  
+    setCastReceiveShadowDeep(root);
+    return { root, label };
+  }
+  
+  function addMemoryObject() {
+    if (appState !== "memory") return;
+  
+    const chosenType = objectTypeSelect.value;
+    const built = buildSpawnedObject(chosenType);
+    const objectRoot = built.root;
+    const objectLabel = built.label;
+  
+    objectRoot.position.x = 0;
+    objectRoot.position.z = 1.2;
+  
+    const record = createObjectRecord(chosenType, objectRoot, `${objectLabel} ${memories[selectedMemoryId].objects.length + 1}`);
+    objectRoot.userData.recordId = record.recordId;
+  
+    memoryWorldGroup.add(objectRoot);
+    registerMemorySelectable(
+      objectRoot,
+      record.label,
+      true
+    );
+    objectRoot.userData.memoryLabel = record.label;
+  
+    spawnedMemoryObjects.push(objectRoot);
+    memories[selectedMemoryId].objects.push(record);
+  
+    saveMemories();
+    selectMemoryObject(objectRoot);
+  }
+  
+  function removeSelectedMemoryObject() {
+    if (!selectedMemoryObject) return;
+    if (!selectedMemoryObject.userData.removable) return;
+  
+    const objectToRemove = selectedMemoryObject;
+    const recordId = objectToRemove.userData.recordId;
+  
+    applyMemoryObjectHighlight(objectToRemove, false);
+    memoryWorldGroup.remove(objectToRemove);
+  
+    const selectableIndex = memorySelectableRoots.indexOf(objectToRemove);
+    if (selectableIndex >= 0) {
+      memorySelectableRoots.splice(selectableIndex, 1);
+    }
+  
+    const spawnedIndex = spawnedMemoryObjects.indexOf(objectToRemove);
+    if (spawnedIndex >= 0) {
+      spawnedMemoryObjects.splice(spawnedIndex, 1);
+    }
+  
+    const memory = memories[selectedMemoryId];
+    if (memory && Array.isArray(memory.objects)) {
+      const recordIndex = memory.objects.findIndex(obj => obj.recordId === recordId);
+      if (recordIndex >= 0) {
+        memory.objects.splice(recordIndex, 1);
+      }
+    }
+  
+    selectedMemoryObject = null;
+    selectedObjectText.textContent = "none";
+    saveMemories();
+    updateHud();
+  }
+
+  registerMemorySelectable(leftCabinetGroup, "left cabinet");
+  registerMemorySelectable(rightCabinetGroup, "right cabinet");
+  registerMemorySelectable(chairGroup, "chair");
+  registerMemorySelectable(bench, "bench");
+  registerMemorySelectable(keepsakeBox, "keepsake box");
+
+  registerStaticCollider(leftCabinetGroup);
+  registerStaticCollider(rightCabinetGroup);
+  registerStaticCollider(chairGroup);
+  registerStaticCollider(bench);
+  registerStaticCollider(deskModel);
+  registerStaticCollider(monitorModel);
+  registerStaticCollider(keepsakeBox);
+
+  function updateHud() {
+    if (appState === "menu") {
+      hud.textContent = "memory archive: standby";
+      return;
+    }
+  
+    if (appState === "memory") {
+      const selectedLabel = selectedMemoryObject
+        ? ` | selected: ${selectedMemoryObject.userData.memoryLabel || "object"}`
+        : "";
+      hud.textContent = `memory focus: ${memories[selectedMemoryId].name}${selectedLabel}`;
+      return;
+    }
+  
+    const archive = getArchiveStats();
+  
+    hud.textContent =
+      `memory archive: ${archive.memoryCount} memories | density: ${archive.shellCount} shells`;
+  }
+
+  function updateMemoryPanel() {
+    const memory = memories[selectedMemoryId];
+    memoryNameInput.value = memory.name;
+    memoryIdText.textContent = memory.id;
+    clarityText.textContent = memory.clarity.toFixed(2);
+    toneText.textContent = memory.tone;
+  }
+
+  function applyMemoryTone() {
+    const memory = memories[selectedMemoryId];
+    if (!memory) return;
+  
+    const tone = memory.tone || "neutral";
+  
+    if (tone === "warm") {
+      scene.fog.color.set(0x3a2016);
+      museumSphere.material.color.set(0x24130e);
+      memoryWarmBase = 1.35;
+      memoryCoolBase = 0.70;
+      memoryWindow.material.color.set(0xfff1e6);
+      memoryWindow.material.opacity = 0.28;
+      windowInnerBacking.material.color.set(0xffb27c);
+      windowInnerBacking.material.emissive.set(0xa35a2e);
+      windowInnerBacking.material.emissiveIntensity = 0.30;
+      sunsetSky.material.color.set(0xffa86b);
+      upperSky.material.color.set(0xffc3a0);
+      windowRectLight.color.set(0xffb87a);
+      windowRectLight.intensity = 2.8;
+      bloomPass.strength = 0.35;
+      bloomPass.threshold = 0.80;
+      renderer.toneMappingExposure = 1.1;
+    } else if (tone === "cool") {
+      scene.fog.color.set(0x16263a);
+      museumSphere.material.color.set(0x0d1824);
+      memoryWarmBase = 0.55;
+      memoryCoolBase = 1.45;
+      memoryWindow.material.color.set(0xe7f2ff);
+      memoryWindow.material.opacity = 0.34;
+      windowInnerBacking.material.color.set(0x85a8e8);
+      windowInnerBacking.material.emissive.set(0x2f6fb5);
+      windowInnerBacking.material.emissiveIntensity = 0.28;
+      sunsetSky.material.color.set(0x6f8fdc);
+      upperSky.material.color.set(0xbfd5ff);
+      windowRectLight.color.set(0x8ab8ff);
+      windowRectLight.intensity = 1.6;
+      bloomPass.strength = 0.25;
+      bloomPass.threshold = 0.90;
+      renderer.toneMappingExposure = 0.95;
+    } else if (tone === "dream") {
+      scene.fog.color.set(0x34163a);
+      museumSphere.material.color.set(0x1f0d24);
+      memoryWarmBase = 1.00;
+      memoryCoolBase = 1.05;
+      memoryWindow.material.color.set(0xf8eaff);
+      memoryWindow.material.opacity = 0.36;
+      windowInnerBacking.material.color.set(0xd18cff);
+      windowInnerBacking.material.emissive.set(0x8d42b8);
+      windowInnerBacking.material.emissiveIntensity = 0.30;
+      sunsetSky.material.color.set(0xc07cff);
+      upperSky.material.color.set(0xf0b4ff);
+      windowRectLight.color.set(0xc890ff);
+      windowRectLight.intensity = 2.2;
+      bloomPass.strength = 0.5;
+      bloomPass.threshold = 0.75;
+      renderer.toneMappingExposure = 1.05;
+    } else if (tone === "echo") {
+      scene.fog.color.set(0x2b2b31);
+      museumSphere.material.color.set(0x151519);
+      memoryWarmBase = 0.45;
+      memoryCoolBase = 0.55;
+      memoryWindow.material.color.set(0xf1f3f6);
+      memoryWindow.material.opacity = 0.26;
+      windowInnerBacking.material.color.set(0x8f95a1);
+      windowInnerBacking.material.emissive.set(0x5f6878);
+      windowInnerBacking.material.emissiveIntensity = 0.16;
+      sunsetSky.material.color.set(0x6e6875);
+      upperSky.material.color.set(0xa8acb8);
+      windowRectLight.color.set(0xb0b8c5);
+      windowRectLight.intensity = 1.0;
+      bloomPass.strength = 0.15;
+      bloomPass.threshold = 0.92;
+      renderer.toneMappingExposure = 0.85;
+    } else {
+      scene.fog.color.set(0x24182e);
+      museumSphere.material.color.set(0x120f1a);
+      memoryWarmBase = 0.90;
+      memoryCoolBase = 1.15;
+      memoryWindow.material.color.set(0xf3f7ff);
+      memoryWindow.material.opacity = 0.32;
+      windowInnerBacking.material.color.set(0xffcaa0);
+      windowInnerBacking.material.emissive.set(0x273b72);
+      windowInnerBacking.material.emissiveIntensity = 0.22;
+      sunsetSky.material.color.set(0xffb27a);
+      upperSky.material.color.set(0x8fa8ff);
+      windowRectLight.color.set(0xffd4a8);
+      windowRectLight.intensity = 2.0;
+      bloomPass.strength = 0.3;
+      bloomPass.threshold = 0.85;
+      renderer.toneMappingExposure = 1.0;
+    }
+  
+    toneText.textContent = tone;
+  }
+  
+  function highlightFrames() {
+    const t = Number(timeline.value) / 100;
+  
+    for (const frame of frameMeshes) {
+      const isSelected = frame === selectedFrame;
+  
+      for (const bar of frame.userData.borderBars) {
+        bar.material.emissiveIntensity = isSelected ? (0.35 + t * 0.9) : (0.08 + t * 0.08);
+        bar.material.color.set(isSelected ? 0xe7c79f : 0x8e7354);
+      }
+  
+      frame.userData.backing.material.color.set(isSelected ? 0x3f4958 : 0x262a34);
+      frame.userData.backing.material.emissive.set(isSelected ? 0x1b2432 : 0x0a0c10);
+      frame.userData.backing.material.emissiveIntensity = isSelected ? (0.10 + t * 0.32) : 0.02;
+  
+      frame.userData.inner.material.opacity = isSelected ? (0.78 + t * 0.22) : (0.28 + (1 - t) * 0.22);
+    }
+  }
+
+  function selectMemoryFrame(frame) {
+    selectedFrame = frame;
+    selectedMemoryId = frame.userData.memoryId;
+    previewFrameActive = true;
+  
+    clearMemoryObjectSelection();
+  
+    updatePreviewFrameTarget();
+    updateMemoryFocusTarget();
+    updateMemoryEntryTarget();
+    updateMemoryPanel();
+    applyMemoryTone();
+  
+    if (appState === "memory") {
+      loadSelectedMemoryObjects();
+    }
+  
+    highlightFrames();
+    updateHud();
+  }
+
+  function updateMemoryFocusTarget() {
+    if (!selectedFrame) {
+      memoryFocusTarget.set(0, 2.12, -1.6);
+      return;
+    }
+  
+    if (previewFrameActive) {
+      memoryFocusTarget.copy(previewFrameTarget.clone().add(new THREE.Vector3(0, 0, -0.55)));
+      return;
+    }
+  
+    const worldPos = new THREE.Vector3();
+    selectedFrame.getWorldPosition(worldPos);
+  
+    const inwardDir = worldPos.clone().sub(new THREE.Vector3(0, 2.55, 0)).normalize();
+  
+    memoryFocusTarget.copy(worldPos.clone().sub(inwardDir.multiplyScalar(0.9)));
+  }
+  
+  function updateMemoryEntryTarget() {
+    if (!selectedFrame) {
+      memoryEntryTarget.set(0, 2.12, -1.6);
+      memoryEntryCameraPos.set(0, 2.12, 0.4);
+      return;
+    }
+  
+    if (previewFrameActive) {
+      memoryEntryTarget.copy(previewFrameTarget);
+      memoryEntryCameraPos.copy(previewFrameTarget.clone().add(new THREE.Vector3(0, 0.02, 2.0)));
+      return;
+    }
+  
+    const worldPos = new THREE.Vector3();
+    selectedFrame.getWorldPosition(worldPos);
+  
+    const archiveCenter = new THREE.Vector3(0, 2.55, 0);
+    const inwardDir = worldPos.clone().sub(archiveCenter).normalize();
+  
+    memoryEntryTarget.copy(worldPos.clone().sub(inwardDir.multiplyScalar(0.15)));
+    memoryEntryCameraPos.copy(worldPos.clone().sub(inwardDir.multiplyScalar(2.1)));
+  }
+
+  function beginMemoryTransition() {
+    if (!selectedFrame) return;
+  
+    updatePreviewFrameTarget();
+    updateMemoryFocusTarget();
+    updateMemoryEntryTarget();
+  
+    controls.enabled = false;
+  
+    previewFrameActive = true;
+    isMemoryTransitioning = true;
+    memoryTransitionProgress = 0;
+  
+    memoryWorldGroup.visible = true;
+    framesGroup.visible = true;
+    platformGroup.visible = true;
+    avatarGroup.visible = true;
+    consoleGroup.visible = true;
+  
+    transitionPhase1StartPos.copy(camera.position);
+  
+    transitionPhase1EndPos.copy(
+      previewFrameTarget.clone().add(new THREE.Vector3(0, 0.18, 3.0))
+    );
+  
+    transitionEyePos.copy(
+      previewFrameTarget.clone().add(new THREE.Vector3(0, 0.05, 1.65))
+    );
+  
+    transitionFrameCenter.copy(
+      previewFrameTarget.clone().add(new THREE.Vector3(0, 0.05, 0.0))
+    );
+  
+    transitionFramePassThroughPos.copy(
+      previewFrameTarget.clone().add(new THREE.Vector3(0, 0.04, -0.92))
+    );
+  
+    transitionCurveP0.copy(transitionPhase1EndPos);
+    transitionCurveP1.copy(
+      transitionEyePos.clone().lerp(
+        transitionFrameCenter.clone().add(new THREE.Vector3(0, 0.02, 0.25)),
+        0.45
+      )
+    );
+    transitionCurveP2.copy(
+      transitionFramePassThroughPos.clone().add(new THREE.Vector3(0, 0.02, 0.7))
+    );
+    transitionCurveP3.copy(memoryCameraPos);
+  
+    memoryWorldGroup.traverse((obj) => {
+      if (obj.material && "transparent" in obj.material) {
+        obj.material.transparent = true;
+        obj.material.opacity = 0;
+      }
+    });
+  }
+
+  function updatePreviewFrameTarget() {
+    previewFrameTarget.set(0, 2.62, -0.82);
+  }
+  
+  function easeInOutCubic(x) {
+    return x < 0.5
+      ? 4 * x * x * x
+      : 1 - Math.pow(-2 * x + 2, 3) / 2;
+  }
+
+  function easeInCubic(x) {
+    return x * x * x;
+  }
+
+  function easeOutCubic(x) {
+    return 1 - Math.pow(1 - x, 3);
+  }
+  
+  function getCubicPoint(p0, p1, p2, p3, t) {
+    const u = 1 - t;
+    const tt = t * t;
+    const uu = u * u;
+    const uuu = uu * u;
+    const ttt = tt * t;
+  
+    return new THREE.Vector3()
+      .add(p0.clone().multiplyScalar(uuu))
+      .add(p1.clone().multiplyScalar(3 * uu * t))
+      .add(p2.clone().multiplyScalar(3 * u * tt))
+      .add(p3.clone().multiplyScalar(ttt));
+  }
+
+  function configureMemoryControls() {
+    controls.enabled = true;
+    controls.enablePan = false;
+    controls.enableZoom = true;
+    controls.enableRotate = true;
+    controls.enableDamping = true;
+    controls.rotateSpeed = 0.75;
+    controls.zoomSpeed = 1.2;
+  
+    const currentLookDir = new THREE.Vector3();
+    camera.getWorldDirection(currentLookDir);
+    controls.target.copy(camera.position).add(currentLookDir);
+  
+    controls.minDistance = 0.15;
+    controls.maxDistance = 12.0;
+  
+    controls.minPolarAngle = 0.35;
+    controls.maxPolarAngle = Math.PI - 0.35;
+  
+    memoryControlsInitialized = true;
+    controls.update();
+  }
+  
+  function configureHubControls() {
+    controls.enabled = true;
+    controls.enablePan = false;
+    controls.enableZoom = false;
+    controls.enableRotate = true;
+    controls.enableDamping = true;
+
+    controls.minDistance = 1.5;
+    controls.maxDistance = 24;
+    controls.minPolarAngle = 0;
+    controls.maxPolarAngle = Math.PI;
+  
+    memoryControlsInitialized = false;
+    controls.update();
+  }
+  
+  function saveSelectedMemoryName() {
+    const memory = memories[selectedMemoryId];
+    const trimmed = memoryNameInput.value.trim();
+    if (!trimmed) return;
+
+    memory.history.push(memory.name);
+    memory.name = trimmed;
+    saveMemories();
+    updateMemoryPanel();
+    updateHud();
+  }
+
+  function undoMemoryName() {
+    const memory = memories[selectedMemoryId];
+    if (memory.history.length > 0) {
+      memory.name = memory.history.pop();
+      saveMemories();
+      updateMemoryPanel();
+      updateHud();
+    }
+  }
+
+  function addMemory() {
+    const nextId = memories.length;
+  
+    memories.push({
+      id: nextId,
+      name: `Memory ${String(nextId + 1).padStart(2, "0")}`,
+      clarity: 0.5,
+      tone: getToneForMemoryIndex(nextId),
+      edited: false,
+      history: [],
+      objects: []
+    });
+  
+    saveMemories();
+    layoutFrames();
+  
+    selectedMemoryId = nextId;
+    selectedFrame =
+      frameMeshes.find(frame => frame.userData.memoryId === selectedMemoryId) ||
+      frameMeshes[0] ||
+      null;
+
+      updateMemoryFocusTarget();
+      updateMemoryEntryTarget();
+      updateMemoryPanel();
+      applyMemoryTone();
+      highlightFrames();
+      updateHud();
+  }
+
+  function eraseSelectedMemory() {
+    if (memories.length <= 1) return;
+  
+    memories.splice(selectedMemoryId, 1);
+  
+    memories.forEach((m, i) => {
+      m.id = i;
+    });
+  
+    saveMemories();
+    layoutFrames();
+  
+    selectedMemoryId = Math.max(0, selectedMemoryId - 1);
+    selectedFrame =
+      frameMeshes.find(frame => frame.userData.memoryId === selectedMemoryId) ||
+      frameMeshes[0] ||
+      null;
+  
+    updateMemoryPanel();
+    applyMemoryTone();
+    highlightFrames();
+    updateHud();
+    updateMemoryFocusTarget();
+    updateMemoryEntryTarget();
+  }
+
+  function resetArchive() {
+    localStorage.removeItem("dreamscape_memories");
+
+    clearSpawnedMemoryObjects();
+    
+    memories.length = 0;
+  
+    for (let i = 0; i < DEFAULT_MEMORY_COUNT; i++) {
+      memories.push({
+        id: i,
+        name: `Memory ${String(i + 1).padStart(2, "0")}`,
+        clarity: 0.5,
+        tone: getToneForMemoryIndex(i),
+        edited: false,
+        history: [],
+        objects: []
+      });
+    }
+  
+    layoutFrames();
+  
+    selectedMemoryId = 0;
+    selectedFrame = frameMeshes[0] || null;
+    previewFrameActive = selectedFrame !== null;
+    isMemoryTransitioning = false;
+    memoryTransitionProgress = 0;
+  
+    updatePreviewFrameTarget();
+    updateMemoryFocusTarget();
+    updateMemoryEntryTarget();
+    updateMemoryPanel();
+    applyMemoryTone();
+    highlightFrames();
+    updateHud();
+  }
+
+  togglePanelBtn.addEventListener("click", () => {
+    memoryPanel.classList.toggle("minimized");
+    togglePanelBtn.textContent = memoryPanel.classList.contains("minimized") ? "Expand" : "Minimize";
+  });
+
+  toggleEditPanelBtn.addEventListener("click", () => {
+    editPanel.classList.toggle("minimized");
+    toggleEditPanelBtn.textContent = editPanel.classList.contains("minimized") ? "Expand" : "Minimize";
+  });
+
+  window.addEventListener("pointerdown", (event) => {
+    pointerDownX = event.clientX;
+    pointerDownY = event.clientY;
+    pointerMoved = false;
+  });
+  
+  window.addEventListener("pointermove", (event) => {
+    const dx = event.clientX - pointerDownX;
+    const dy = event.clientY - pointerDownY;
+  
+    if (Math.sqrt(dx * dx + dy * dy) > CLICK_MOVE_THRESHOLD) {
+      pointerMoved = true;
+    }
+  });
+  
+  renderer.domElement.addEventListener("wheel", (event) => {
+    if (appState === "hub" || appState === "memory" && !isMemoryTransitioning) {
+      event.preventDefault();
+      const delta = event.deltaY > 0 ? -5 : 5;
+      const newVal = Math.max(0, Math.min(100, Number(timeline.value) + delta));
+      timeline.value = newVal;
+    }
+  }, { passive: false });
+
+  window.addEventListener("pointerup", (event) => {
+    if (pointerMoved) return;
+  
+    const clickedUI =
+      memoryPanel.contains(event.target) ||
+      editPanel.contains(event.target) ||
+      startOverlay.contains(event.target) ||
+      event.target === timeline;
+  
+    if (clickedUI) return;
+  
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+  
+    raycaster.setFromCamera(mouse, camera);
+  
+    if (appState === "hub") {
+      const intersects = raycaster.intersectObjects(frameMeshes, true);
+  
+      if (intersects.length > 0) {
+        let obj = intersects[0].object;
+  
+        while (obj.parent && obj.parent !== framesGroup) {
+          obj = obj.parent;
+        }
+  
+        selectMemoryFrame(obj);
+      }
+      return;
+    }
+  
+    if (appState === "memory") {
+      const intersects = raycaster.intersectObjects(memorySelectableRoots, true);
+  
+      if (intersects.length > 0) {
+        let obj = intersects[0].object;
+  
+        while (obj && !obj.userData.isMemorySelectable) {
+          obj = obj.parent;
+        }
+  
+        if (obj) {
+          selectMemoryObject(obj);
+        }
+      } else {
+        clearMemoryObjectSelection();
+      }
+    }
+  });
+
+  saveBtn.addEventListener("click", saveSelectedMemoryName);
+  undoBtn.addEventListener("click", undoMemoryName);
+
+  cycleToneBtn.addEventListener("click", cycleSelectedMemoryTone);
+
+  enterBtn.addEventListener("click", () => {
+    if (!selectedFrame) return;
+
+    loadSelectedMemoryObjects();
+    beginMemoryTransition();
+    setAppState("memory");
+
+    updateMemoryPanel();
+    applyMemoryTone();
+  });
+
+  exitBtn.addEventListener("click", () => {
+    isMemoryTransitioning = false;
+    memoryTransitionProgress = 0;
+    memoryWorldGroup.visible = false;
+  
+    resetMovementFlags();
+    clearSpawnedMemoryObjects();
+  
+    previewFrameActive = !!selectedFrame;
+  
+    updatePreviewFrameTarget();
+    updateMemoryFocusTarget();
+    updateMemoryEntryTarget();
+  
+    framesGroup.visible = true;
+    platformGroup.visible = true;
+    consoleGroup.visible = true;
+    avatarGroup.visible = true;
+  
+    camera.position.set(0, 4.2, 11.8);
+    controls.target.copy(hubTarget);
+    controls.update();
+  
+    setAppState("hub");
+    highlightFrames();
+    updateHud();
+  });
+
+  addMemoryBtn.addEventListener("click", addMemory);
+  eraseBtn.addEventListener("click", eraseSelectedMemory);
+  resetArchiveBtn.addEventListener("click", resetArchive);
+  addObjectBtn.addEventListener("click", addMemoryObject);
+  removeObjectBtn.addEventListener("click", removeSelectedMemoryObject);
+
+  startBtn.addEventListener("click", () => {
+    setAppState("hub");
+  });
+
+  backToMenuBtn.addEventListener("click", () => {
+    isMemoryTransitioning = false;
+    memoryTransitionProgress = 0;
+    memoryWorldGroup.visible = false;
+    previewFrameActive = false;
+    
+    resetMovementFlags();
+    clearSpawnedMemoryObjects();
+  
+    setAppState("menu");
+  });
+
+  window.addEventListener("keydown", (e) => {
+    const typingInInput =
+      document.activeElement === memoryNameInput ||
+      document.activeElement === objectTypeSelect;
+
+    if (appState === "memory" && !selectedMemoryObject) {
+      if (e.key === "w" || e.key === "W") movement.forward = true;
+      if (e.key === "s" || e.key === "S") movement.backward = true;
+      if (e.key === "a" || e.key === "A") movement.left = true;
+      if (e.key === "d" || e.key === "D") movement.right = true;
+    }
+  
+    if (!typingInInput && appState !== "memory" && (e.key === "r" || e.key === "R")) {
+      saveSelectedMemoryName();
+    }
+  
+    if (!typingInInput && (e.key === "u" || e.key === "U")) {
+      undoMemoryName();
+    }
+  
+    if (!typingInInput && appState === "memory" && selectedMemoryObject) {
+      if (e.key === "ArrowUp") {
+        e.preventDefault();
+        moveSelectedMemoryObject(0, -0.12);
+      }
+  
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        moveSelectedMemoryObject(0, 0.12);
+      }
+  
+      if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        moveSelectedMemoryObject(-0.12, 0);
+      }
+  
+      if (e.key === "ArrowRight") {
+        e.preventDefault();
+        moveSelectedMemoryObject(0.12, 0);
+      }
+  
+      if (e.key === "w" || e.key === "W") {
+        e.preventDefault();
+        rotateSelectedMemoryObject(0.12);
+      }
+
+      if (e.key === "e" || e.key === "E") {
+        e.preventDefault();
+        rotateSelectedMemoryObject(-0.12);
+      }
+
+      if (e.key === "q" || e.key === "Q") {
+        e.preventDefault();
+        scaleSelectedMemoryObject(-0.08);
+      }
+
+      if (e.key === "r" || e.key === "R") {
+        e.preventDefault();
+        scaleSelectedMemoryObject(0.08);
+      }
+
+      if (e.key === "Delete" || e.key === "Backspace") {
+        e.preventDefault();
+        removeSelectedMemoryObject();
+      }
+    }
+  
+    if (e.key === "Escape") {
+      if (appState === "memory" && selectedMemoryObject) {
+        resetMovementFlags();
+        clearMemoryObjectSelection();
+        return;
+      }
+    
+      if (appState === "memory") {
+        resetMovementFlags();
+        clearSpawnedMemoryObjects();
+        memoryWorldGroup.visible = false;
+        isMemoryTransitioning = false;
+        memoryTransitionProgress = 0;
+        previewFrameActive = false;
+      }
+    
+      setAppState("menu");
+    }
+  });
+
+  window.addEventListener("keyup", (e) => {
+    if (e.key === "w" || e.key === "W") movement.forward = false;
+    if (e.key === "s" || e.key === "S") movement.backward = false;
+    if (e.key === "a" || e.key === "A") movement.left = false;
+    if (e.key === "d" || e.key === "D") movement.right = false;
+  });
+
+  function setAppState(nextState) {
+    appState = nextState;
+    stateText.textContent = nextState;
+
+    if (nextState === "menu") {
+      clearMemoryObjectSelection();
+      startOverlay.style.display = "flex";
+      memoryPanel.style.display = "none";
+      editPanel.style.display = "none";
+      timeline.style.display = "none";
+      timelineLabel.style.display = "none";
+      updateHud();
+    }
+
+    if (nextState === "hub") {
+      clearMemoryObjectSelection();
+      startOverlay.style.display = "none";
+      memoryPanel.style.display = "block";
+      editPanel.style.display = "none";
+      timeline.style.display = "block";
+      timelineLabel.style.display = "block";
+      updateHud();
+      
+      configureHubControls();
+      scene.fog.color.set(0x111122);
+      museumSphere.material.color.set(0x0b0b14);
+      scene.fog.density = 0.02;
+      framesGroup.visible = true;
+      platformGroup.visible = true;
+      avatarGroup.visible = true;
+      consoleGroup.visible = true;
+      memoryWorldGroup.visible = false;
+
+      previewFrameActive = !!selectedFrame;
+      updatePreviewFrameTarget();
+      updateMemoryFocusTarget();
+      updateMemoryEntryTarget();
+      
+      controls.target.copy(hubTarget);
+      controls.update();
+
+      if (!selectedFrame && frameMeshes.length > 0) {
+        selectMemoryFrame(frameMeshes[0]);
+      }
+    }
+
+    if (nextState === "memory") {
+      startOverlay.style.display = "none";
+      memoryPanel.style.display = "block";
+      editPanel.style.display = "block";
+      timeline.style.display = "block";
+      timelineLabel.style.display = "block";
+      updateHud();
+      controls.enabled = false;
+      memoryControlsInitialized = false;
+      
+      scene.fog.density = 0.05;
+      applyMemoryTone();
+    
+      framesGroup.visible = true;
+      platformGroup.visible = true;
+      avatarGroup.visible = true;
+      consoleGroup.visible = true;
+      memoryWorldGroup.visible = false;
+    
+      updateMemoryFocusTarget();
+      updateMemoryEntryTarget();
+    }
+  }
+
+  let lastFpsTime = performance.now();
+  let frames = 0;
+  
+  if (frameMeshes.length > 0) {
+    selectedFrame = frameMeshes[0];
+    selectedMemoryId = selectedFrame.userData.memoryId;
+    updateMemoryFocusTarget();
+    updateMemoryEntryTarget();
+  }
+  
+  updateMemoryPanel();
+  applyMemoryTone();
+  highlightFrames();
+  updateHud();
+  setAppState("menu");
+
+  function animate() {
+    requestAnimationFrame(animate);
+
+    const t = Number(timeline.value) / 100;
+    const time = performance.now() * 0.001;
+
+    const memoryZoomZ = THREE.MathUtils.lerp(2.2, 1.4, t);
+    memoryCameraPos.set(0, PLAYER_HEIGHT, memoryZoomZ);
+
+    let desiredTarget = hubTarget;
+    let targetDistance = 18.5 - t * 16.6;
+
+    if (appState === "hub") {
+      scene.fog.density = 0.011 + t * 0.026;
+      museumSphere.material.color.set(0x0b0b14);
+      memories[selectedMemoryId].clarity = t;
+      clarityText.textContent = t.toFixed(2);
+      highlightFrames();
+    }
+
+    if (appState === "memory") {
+      scene.fog.density = 0.03 + t * 0.035;
+      memories[selectedMemoryId].clarity = t;
+      clarityText.textContent = t.toFixed(2);
+      highlightFrames();
+    
+      if (!isMemoryTransitioning && !selectedMemoryObject) {
+        const direction = new THREE.Vector3();
+    
+        if (movement.forward) direction.z -= 1;
+        if (movement.backward) direction.z += 1;
+        if (movement.left) direction.x -= 1;
+        if (movement.right) direction.x += 1;
+    
+        let isMoving = false;
+    
+        if (direction.length() > 0) {
+          direction.normalize();
+    
+          const forward = new THREE.Vector3();
+          camera.getWorldDirection(forward);
+          forward.y = 0;
+          forward.normalize();
+    
+          const right = new THREE.Vector3();
+          right.crossVectors(forward, new THREE.Vector3(0, 1, 0)).normalize();
+    
+          const moveDir = new THREE.Vector3();
+          moveDir.addScaledVector(forward, -direction.z);
+          moveDir.addScaledVector(right, direction.x);
+          moveDir.normalize();
+    
+          const proposedX = camera.position.x + moveDir.x * moveSpeed;
+          const proposedZ = camera.position.z + moveDir.z * moveSpeed;
+    
+          if (canMoveTo(proposedX, proposedZ)) {
+            camera.position.x = proposedX;
+            camera.position.z = proposedZ;
+            controls.target.x += moveDir.x * moveSpeed;
+            controls.target.z += moveDir.z * moveSpeed;
+            isMoving = true;
+          }
+        }
+    
+        if (isMoving) {
+          walkBobTime += 0.14;
+        } else {
+          walkBobTime *= 0.9;
+        }
+    
+        const bobAmount = isMoving ? Math.sin(walkBobTime) * 0.035 : 0;
+    
+        const lookOffset = controls.target.clone().sub(camera.position);
+    
+        camera.position.y = PLAYER_HEIGHT + bobAmount;
+        controls.target.copy(camera.position).add(lookOffset);
+    
+        clampPlayerInsideRoom();
+      }
+    }
+    
+    if (appState === "memory" && isMemoryTransitioning) {
+      memoryTransitionProgress = Math.min(1, memoryTransitionProgress + 0.018);
+    
+      const phaseSplit = 0.34;
+    
+      let desiredCameraPos;
+      let desiredLookTarget;
+    
+      if (memoryTransitionProgress < phaseSplit) {
+        const p = easeInCubic(memoryTransitionProgress / phaseSplit);
+    
+        desiredCameraPos = transitionPhase1StartPos.clone().lerp(transitionPhase1EndPos, p);
+        desiredLookTarget = transitionFrameCenter.clone();
+    
+        avatarGroup.visible = true;
+        framesGroup.visible = true;
+        platformGroup.visible = true;
+        consoleGroup.visible = true;
+        memoryWorldGroup.visible = false;
+    
+        if (selectedFrame) {
+          for (const bar of selectedFrame.userData.borderBars) {
+            bar.material.transparent = false;
+            bar.material.opacity = 1;
+          }
+    
+          selectedFrame.userData.backing.material.transparent = false;
+          selectedFrame.userData.backing.material.opacity = 1;
+    
+          selectedFrame.userData.inner.material.transparent = false;
+          selectedFrame.userData.inner.material.opacity = 1;
+        }
+      } else {
+        const p = easeOutCubic((memoryTransitionProgress - phaseSplit) / (1 - phaseSplit));
+    
+        desiredCameraPos = getCubicPoint(
+          transitionCurveP0,
+          transitionCurveP1,
+          transitionCurveP2,
+          transitionCurveP3,
+          p
+        );
+    
+        desiredLookTarget = transitionFrameCenter.clone().lerp(memoryCameraTarget, p);
+    
+        const frameFade = Math.max(0, 1 - (p - 0.08) / 0.30);
+        const worldOpacity = THREE.MathUtils.clamp((p - 0.10) / 0.28, 0, 1);
+    
+        avatarGroup.visible = p < 0.16;
+        framesGroup.visible = p < 0.72;
+        platformGroup.visible = p < 0.72;
+        consoleGroup.visible = p < 0.72;
+    
+        memoryWorldGroup.visible = true;
+        memoryWorldGroup.traverse((obj) => {
+          if (obj.material && "opacity" in obj.material) {
+            obj.material.transparent = true;
+            obj.material.opacity = worldOpacity;
+          }
+        });
+    
+        if (selectedFrame) {
+          for (const bar of selectedFrame.userData.borderBars) {
+            bar.material.transparent = true;
+            bar.material.opacity = frameFade;
+          }
+    
+          selectedFrame.userData.backing.material.transparent = true;
+          selectedFrame.userData.backing.material.opacity = frameFade;
+    
+          selectedFrame.userData.inner.material.transparent = true;
+          selectedFrame.userData.inner.material.opacity = Math.max(0, frameFade * 0.9);
+        }
+      }
+    
+      camera.position.copy(desiredCameraPos);
+      controls.target.copy(desiredLookTarget);
+    
+      if (memoryTransitionProgress >= 1) {
+        isMemoryTransitioning = false;
+        previewFrameActive = false;
+    
+        memoryWorldGroup.visible = true;
+        memoryWorldGroup.traverse((obj) => {
+          if (obj.material && "opacity" in obj.material) {
+            obj.material.transparent = true;
+            obj.material.opacity = 1;
+          }
+        });
+    
+        if (selectedFrame) {
+          for (const bar of selectedFrame.userData.borderBars) {
+            bar.material.transparent = false;
+            bar.material.opacity = 1;
+          }
+    
+          selectedFrame.userData.backing.material.transparent = false;
+          selectedFrame.userData.backing.material.opacity = 1;
+    
+          selectedFrame.userData.inner.material.transparent = false;
+          selectedFrame.userData.inner.material.opacity = 1;
+        }
+    
+        framesGroup.visible = false;
+        platformGroup.visible = false;
+        consoleGroup.visible = false;
+        avatarGroup.visible = false;
+    
+        camera.position.copy(memoryCameraPos);
+        configureMemoryControls();
+      }
+    } else if (appState === "memory") {
+      memoryWorldGroup.visible = true;
+      framesGroup.visible = false;
+      platformGroup.visible = false;
+      consoleGroup.visible = false;
+      avatarGroup.visible = false;
+    
+      if (!memoryControlsInitialized) {
+        camera.position.copy(memoryCameraPos);
+        configureMemoryControls();
+      }
+    } else {
+      memoryWorldGroup.visible = false;
+      framesGroup.visible = true;
+      platformGroup.visible = true;
+      consoleGroup.visible = true;
+
+      if (t > 0.955) {
+        avatarGroup.visible = false;
+      } else if (appState !== "menu") {
+        avatarGroup.visible = true;
+      }
+
+      controls.target.lerp(desiredTarget, 0.06);
+
+      const dir = camera.position.clone().sub(controls.target);
+      if (dir.lengthSq() < 0.0001) {
+        dir.set(0, 0, 1);
+      }
+      dir.normalize();
+
+      const desiredPos = controls.target.clone().add(dir.multiplyScalar(targetDistance));
+      camera.position.lerp(desiredPos, 0.08);
+    }
+
+    if (framesGroup.visible) {
+      for (let i = 0; i < frameMeshes.length; i++) {
+        const frame = frameMeshes[i];
+        const isPreviewed = previewFrameActive && frame === selectedFrame;
+
+        if (isMemoryTransitioning) {
+          frame.visible = frame === selectedFrame;
+        } else {
+          frame.visible = true;
+        }
+
+        if (isPreviewed) {
+          frame.position.lerp(previewFrameTarget, 0.12);
+
+          frame.rotation.x += (0 - frame.rotation.x) * 0.12;
+          frame.rotation.y += (0 - frame.rotation.y) * 0.12;
+          frame.rotation.z += (0 - frame.rotation.z) * 0.12;
+        } else {
+          const theta = frame.userData.baseTheta + time * frame.userData.angularSpeed * 0.22;
+          const yNorm = frame.userData.baseYNorm + Math.sin(time * 0.45 + frame.userData.floatOffset) * 0.01;
+          const radial = Math.sqrt(Math.max(0.0001, 1 - yNorm * yNorm));
+          const shellRadius = frame.userData.baseRadius;
+
+          frame.position.x = Math.cos(theta) * radial * shellRadius;
+          frame.position.y = yNorm * shellRadius + 2.55;
+          frame.position.z = Math.sin(theta) * radial * shellRadius;
+
+          frame.lookAt(0, 2.55, 0);
+        }
+      }
+    }
+
+    if (memoryWorldGroup.visible) {
+      memoryAtmospherePulse = 0.5 + 0.5 * Math.sin(time * 0.42);
+    
+      memoryWindow.material.emissiveIntensity =
+        memoryWindow.material.emissiveIntensity * 0.92 + (0.008 + memoryAtmospherePulse * 0.004) * 0.08;
+      
+      memoryWindow.material.roughness =
+        memoryWindow.material.roughness * 0.9 + (0.03 + memoryAtmospherePulse * 0.01) * 0.1;
+      
+      windowInnerBacking.material.emissiveIntensity =
+        windowInnerBacking.material.emissiveIntensity * 0.9 + (0.05 + memoryAtmospherePulse * 0.02) * 0.1;
+      
+      windowInnerBacking.material.opacity =
+        windowInnerBacking.material.opacity * 0.9 + (0.13 + memoryAtmospherePulse * 0.02) * 0.1;
+    
+      for (let i = 0; i < memoryFramesInside.length; i++) {
+        memoryFramesInside[i].rotation.z = Math.sin(time * 0.35 + i * 0.8) * 0.006;
+      }
+    
+      memoryWarmLight.intensity =
+        memoryWarmBase + Math.sin(time * 0.55) * 0.05;
+    
+      memoryCoolLight.intensity =
+        memoryCoolBase + Math.cos(time * 0.60) * 0.05;
+    
+      doorwayGlow.intensity =
+        0.28 + memoryAtmospherePulse * 0.12;
+    
+      keepsakeBox.position.y =
+        keepsakeBox.userData.baseY + Math.sin(time * 0.9) * 0.025;
+    
+      for (const mote of memoryDustGroup.children) {
+        const driftTime = time * mote.userData.speed + mote.userData.offset;
+
+        mote.position.x = mote.userData.baseX + Math.sin(driftTime) * 0.06;
+        mote.position.y = mote.userData.baseY + Math.cos(driftTime * 0.8) * 0.04;
+        mote.position.z = mote.userData.baseZ + Math.sin(driftTime * 0.6) * 0.05;
+      }
+
+      for (let bi = 0; bi < birds.length; bi++) {
+        const bird = birds[bi];
+        const bt = time * bird.userData.speed + bi * 3.0;
+        const r = bird.userData.radius;
+        bird.position.x = bird.userData.baseX + Math.sin(bt) * r;
+        bird.position.y = bird.userData.baseY + Math.sin(bt * 1.3) * 0.5;
+        bird.position.z = bird.userData.baseZ + Math.cos(bt) * r * 0.5;
+        bird.rotation.y = Math.atan2(Math.cos(bt) * r, -Math.sin(bt) * r * 0.5);
+        bird.traverse(function(child) {
+          if (child.userData.wingSide) {
+            child.rotation.z = child.userData.wingSide * (0.3 + Math.sin(time * 12 + bi * 2) * 0.5);
+          }
+        });
+      }
+    
+      const doorCenter = new THREE.Vector3(6.88, PLAYER_HEIGHT, 2.0);
+      const playerPos2D = new THREE.Vector3(camera.position.x, PLAYER_HEIGHT, camera.position.z);
+      const distanceToDoor = playerPos2D.distanceTo(doorCenter);
+      
+      const targetDoorOpen =
+        distanceToDoor < 2.2 ? THREE.MathUtils.clamp((2.2 - distanceToDoor) / 2.2, 0, 1) : 0;
+      
+      doorOpenAmount = THREE.MathUtils.lerp(doorOpenAmount, targetDoorOpen, 0.08);
+      doorPivot.rotation.y = -doorOpenAmount * Math.PI * 0.5;
+      
+      doorwayGlow.intensity =
+        0.28 + memoryAtmospherePulse * 0.12 + doorOpenAmount * 0.35;
+    }
+
+    consoleGroup.position.y = consoleBaseY + Math.sin(time * 1.15) * 0.022;
+
+    scanlineBar.position.y = 1.62 + ((Math.sin(time * 1.4) + 1) * 0.48);
+    scanlineBar.material.opacity = 0.1 + ((Math.sin(time * 1.4) + 1) * 0.08);
+
+    pulseBar.scale.x = 0.95 + Math.sin(time * 2.1) * 0.09;
+    pulseBar.material.opacity = 0.16 + ((Math.sin(time * 2.1) + 1) * 0.07);
+
+    chartGlow.material.opacity = 0.04 + ((Math.sin(time * 1.8) + 1) * 0.02);
+    centerGlow.material.opacity = 0.028 + ((Math.sin(time * 1.2) + 1) * 0.015);
+
+    orbitCircle1.rotation.z += 0.009;
+    orbitCircle2.rotation.z -= 0.007;
+
+    sidePanelL.material.opacity = 0.08 + ((Math.sin(time * 1.1) + 1) * 0.02);
+    sidePanelR.material.opacity = 0.08 + ((Math.cos(time * 1.0) + 1) * 0.02);
+
+    consoleLight.intensity = 0.82 + ((Math.sin(time * 1.5) + 1) * 0.18);
+
+    controls.update();
+    composer.render();
+
+    frames++;
+    const now = performance.now();
+    if (now - lastFpsTime >= 500) {
+      const fps = Math.round((frames * 1000) / (now - lastFpsTime));
+      fpsEl.textContent = "fps: " + fps;
+      frames = 0;
+      lastFpsTime = now;
+    }
+  }
+  
+  animate();
+
+  window.addEventListener("resize", () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    composer.setSize(window.innerWidth, window.innerHeight);
+    bloomPass.resolution.set(window.innerWidth / 2, window.innerHeight / 2);
+  });
+</script>
+
+</body>
+</html>
