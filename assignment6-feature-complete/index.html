@@ -728,10 +728,10 @@
   const staticCollisionObjects = [];
   const playerRadius = 0.32;
 
-  const PLAY_MIN_X = -8.5;
-  const PLAY_MAX_X = 8.5;
+  const PLAY_MIN_X = -8.8;
+  const PLAY_MAX_X = 8.8;
   const PLAY_MIN_Z = -13.2;
-  const PLAY_MAX_Z = 5.2;
+  const PLAY_MAX_Z = 8.4;
 
   let memoryAtmospherePulse = 0;
   let memoryWarmBase = 0.90;
@@ -1956,29 +1956,29 @@
   outsideGroup.add(leftHousePath);
   
   const frontHousePath = new THREE.Mesh(
-    new THREE.PlaneGeometry(14.2, 2.4),
+    new THREE.PlaneGeometry(14.2, 1.4),
     exteriorPathMat
   );
   frontHousePath.rotation.x = -Math.PI / 2;
-  frontHousePath.position.set(0, 0.035, 6.8);
+  frontHousePath.position.set(0, 0.035, 7.25);
   frontHousePath.receiveShadow = true;
   outsideGroup.add(frontHousePath);
   
   const frontRightCornerPath = new THREE.Mesh(
-    new THREE.PlaneGeometry(2.8, 2.4),
+    new THREE.PlaneGeometry(2.8, 1.4),
     exteriorPathMat
   );
   frontRightCornerPath.rotation.x = -Math.PI / 2;
-  frontRightCornerPath.position.set(8.4, 0.036, 6.8);
+  frontRightCornerPath.position.set(8.4, 0.036, 7.25);
   frontRightCornerPath.receiveShadow = true;
   outsideGroup.add(frontRightCornerPath);
   
   const frontLeftCornerPath = new THREE.Mesh(
-    new THREE.PlaneGeometry(2.8, 2.4),
+    new THREE.PlaneGeometry(2.8, 1.4),
     exteriorPathMat
   );
   frontLeftCornerPath.rotation.x = -Math.PI / 2;
-  frontLeftCornerPath.position.set(-8.4, 0.037, 6.8);
+  frontLeftCornerPath.position.set(-8.4, 0.037, 7.25);
   frontLeftCornerPath.receiveShadow = true;
   outsideGroup.add(frontLeftCornerPath);
   
