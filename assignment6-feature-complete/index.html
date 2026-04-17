@@ -1574,10 +1574,10 @@
   doorwayGroup.add(doorPivot);
   
   const door = new THREE.Mesh(
-    new THREE.BoxGeometry(0.08, 3.5, 1.45),
+    new THREE.BoxGeometry(0.08, 3.66, 1.45),
     doorMat
   );
-  door.position.set(0, 1.57, -0.53);
+  door.position.set(0, 1.65, -0.53);
   door.castShadow = true;
   door.receiveShadow = true;
   doorPivot.add(door);
@@ -4156,7 +4156,7 @@
         distanceToDoor < 2.2 ? THREE.MathUtils.clamp((2.2 - distanceToDoor) / 2.2, 0, 1) : 0;
       
       doorOpenAmount = THREE.MathUtils.lerp(doorOpenAmount, targetDoorOpen, 0.08);
-      doorPivot.rotation.y = -doorOpenAmount * Math.PI * 0.5;
+      doorPivot.rotation.y = -doorOpenAmount * Math.PI * 0.70;
       
       doorwayGlow.intensity =
         0.28 + memoryAtmospherePulse * 0.12 + doorOpenAmount * 0.35;
