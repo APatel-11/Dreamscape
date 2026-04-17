@@ -732,6 +732,11 @@
   const ROOM_MAX_X = 6.2;
   const ROOM_MIN_Z = -5.2;
   const ROOM_MAX_Z = 5.2;
+  
+  const EXTERIOR_MIN_X = -8.5;
+  const EXTERIOR_MAX_X = 8.5;
+  const EXTERIOR_MIN_Z = -13.2;
+  const EXTERIOR_MAX_Z = 5.2;
 
   let memoryAtmospherePulse = 0;
   let memoryWarmBase = 0.90;
@@ -772,8 +777,8 @@
   function clampPlayerInsideRoom() {
     const offset = controls.target.clone().sub(camera.position);
   
-    camera.position.x = THREE.MathUtils.clamp(camera.position.x, ROOM_MIN_X, ROOM_MAX_X);
-    camera.position.z = THREE.MathUtils.clamp(camera.position.z, ROOM_MIN_Z, ROOM_MAX_Z);
+    camera.position.x = THREE.MathUtils.clamp(camera.position.x, EXTERIOR_MIN_X, EXTERIOR_MAX_X);
+    camera.position.z = THREE.MathUtils.clamp(camera.position.z, EXTERIOR_MIN_Z, EXTERIOR_MAX_Z);
   
     controls.target.copy(camera.position).add(offset);
   }
@@ -4156,7 +4161,7 @@
         distanceToDoor < 2.2 ? THREE.MathUtils.clamp((2.2 - distanceToDoor) / 2.2, 0, 1) : 0;
       
       doorOpenAmount = THREE.MathUtils.lerp(doorOpenAmount, targetDoorOpen, 0.08);
-      doorPivot.rotation.y = doorOpenAmount * Math.PI * 0.9;
+      doorPivot.rotation.y = doorOpenAmount * Math.PI * 0.85;
       
       doorwayGlow.intensity =
         0.28 + memoryAtmospherePulse * 0.12 + doorOpenAmount * 0.35;
