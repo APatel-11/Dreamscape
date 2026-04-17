@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8" />
-<title>Dreamscape Beta Build</title>
+<title>Dreamscape Feature Complete</title>
 <style>
   body {
     margin: 0;
@@ -1547,11 +1547,14 @@
     new THREE.MeshStandardMaterial({
       color: 0x11131a,
       roughness: 1.0,
-      metalness: 0.0
+      metalness: 0.0,
+      transparent: true,
+      opacity: 0.0
     })
   );
   doorwayBack.position.set(7.02, 1.75, 2.0);
   doorwayBack.rotation.y = -Math.PI / 2;
+  doorwayBack.visible = false;
   doorwayGroup.add(doorwayBack);
   
   const frameLeft = new THREE.Mesh(
