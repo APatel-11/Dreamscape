@@ -728,10 +728,15 @@
   const staticCollisionObjects = [];
   const playerRadius = 0.32;
 
+  const ROOM_MIN_X = -6.2;
+  const ROOM_MAX_X = 6.2;
+  const ROOM_MIN_Z = -5.2;
+  const ROOM_MAX_Z = 5.2;
+
   const PLAY_MIN_X = -8.8;
   const PLAY_MAX_X = 8.8;
   const PLAY_MIN_Z = -13.2;
-  const PLAY_MAX_Z = 8.4;
+  const PLAY_MAX_Z = 8.8;
 
   let memoryAtmospherePulse = 0;
   let memoryWarmBase = 0.90;
@@ -808,10 +813,20 @@
   function clampPlayerInsideRoom() {
     const offset = controls.target.clone().sub(camera.position);
   
-    camera.position.x = THREE.MathUtils.clamp(camera.position.x, PLAY_MIN_X, PLAY_MAX_X);
-    camera.position.z = THREE.MathUtils.clamp(camera.position.z, PLAY_MIN_Z, PLAY_MAX_Z);
+    const cameraIsInsideHouse = isInsideHouseFootprint(camera.position.x, camera.position.z, 0);
+  
+    const minX = cameraIsInsideHouse ? ROOM_MIN_X : PLAY_MIN_X;
+    const maxX = cameraIsInsideHouse ? ROOM_MAX_X : PLAY_MAX_X;
+    const minZ = cameraIsInsideHouse ? ROOM_MIN_Z : PLAY_MIN_Z;
+    const maxZ = cameraIsInsideHouse ? ROOM_MAX_Z : PLAY_MAX_Z;
+  
+    camera.position.x = THREE.MathUtils.clamp(camera.position.x, minX, maxX);
+    camera.position.z = THREE.MathUtils.clamp(camera.position.z, minZ, maxZ);
   
     controls.target.copy(camera.position).add(offset);
+  
+    controls.target.x = THREE.MathUtils.clamp(controls.target.x, PLAY_MIN_X, PLAY_MAX_X);
+    controls.target.z = THREE.MathUtils.clamp(controls.target.z, PLAY_MIN_Z, PLAY_MAX_Z);
   }
 
   function getArchiveStats() {
@@ -1910,86 +1925,44 @@
     metalness: 0.0
   });
   
-  const sideHousePath = new THREE.Mesh(
-    new THREE.PlaneGeometry(2.8, 12.4),
-    exteriorPathMat
-  );
-  sideHousePath.rotation.x = -Math.PI / 2;
-  sideHousePath.position.set(8.4, 0.03, 0.0);
-  sideHousePath.receiveShadow = true;
-  outsideGroup.add(sideHousePath);
+  const perimeterPathWidth = 1.8;
+  const perimeterPathThicknessY = 0.035;
   
-  const backHousePath = new THREE.Mesh(
-    new THREE.PlaneGeometry(14.2, 2.4),
+  const rightPerimeterPath = new THREE.Mesh(
+    new THREE.PlaneGeometry(perimeterPathWidth, 15.8),
     exteriorPathMat
   );
-  backHousePath.rotation.x = -Math.PI / 2;
-  backHousePath.position.set(0, 0.031, -6.8);
-  backHousePath.receiveShadow = true;
-  outsideGroup.add(backHousePath);
+  rightPerimeterPath.rotation.x = -Math.PI / 2;
+  rightPerimeterPath.position.set(7.9, perimeterPathThicknessY, 0.0);
+  rightPerimeterPath.receiveShadow = true;
+  outsideGroup.add(rightPerimeterPath);
   
-  const backCornerPath = new THREE.Mesh(
-    new THREE.PlaneGeometry(2.8, 2.4),
+  const leftPerimeterPath = new THREE.Mesh(
+    new THREE.PlaneGeometry(perimeterPathWidth, 15.8),
     exteriorPathMat
   );
-  backCornerPath.rotation.x = -Math.PI / 2;
-  backCornerPath.position.set(8.4, 0.032, -6.8);
-  backCornerPath.receiveShadow = true;
-  outsideGroup.add(backCornerPath);
+  leftPerimeterPath.rotation.x = -Math.PI / 2;
+  leftPerimeterPath.position.set(-7.9, perimeterPathThicknessY, 0.0);
+  leftPerimeterPath.receiveShadow = true;
+  outsideGroup.add(leftPerimeterPath);
   
-  const doorStepPad = new THREE.Mesh(
-    new THREE.PlaneGeometry(2.2, 2.0),
+  const backPerimeterPath = new THREE.Mesh(
+    new THREE.PlaneGeometry(17.6, perimeterPathWidth),
     exteriorPathMat
   );
-  doorStepPad.rotation.x = -Math.PI / 2;
-  doorStepPad.position.set(8.1, 0.033, 2.0);
-  doorStepPad.receiveShadow = true;
-  outsideGroup.add(doorStepPad);
-
-  const leftHousePath = new THREE.Mesh(
-    new THREE.PlaneGeometry(2.8, 12.4),
-    exteriorPathMat
-  );
-  leftHousePath.rotation.x = -Math.PI / 2;
-  leftHousePath.position.set(-8.4, 0.034, 0.0);
-  leftHousePath.receiveShadow = true;
-  outsideGroup.add(leftHousePath);
+  backPerimeterPath.rotation.x = -Math.PI / 2;
+  backPerimeterPath.position.set(0.0, perimeterPathThicknessY + 0.001, -6.9);
+  backPerimeterPath.receiveShadow = true;
+  outsideGroup.add(backPerimeterPath);
   
-  const frontHousePath = new THREE.Mesh(
-    new THREE.PlaneGeometry(14.2, 1.4),
+  const frontPerimeterPath = new THREE.Mesh(
+    new THREE.PlaneGeometry(17.6, perimeterPathWidth),
     exteriorPathMat
   );
-  frontHousePath.rotation.x = -Math.PI / 2;
-  frontHousePath.position.set(0, 0.035, 7.25);
-  frontHousePath.receiveShadow = true;
-  outsideGroup.add(frontHousePath);
-  
-  const frontRightCornerPath = new THREE.Mesh(
-    new THREE.PlaneGeometry(2.8, 1.4),
-    exteriorPathMat
-  );
-  frontRightCornerPath.rotation.x = -Math.PI / 2;
-  frontRightCornerPath.position.set(8.4, 0.036, 7.25);
-  frontRightCornerPath.receiveShadow = true;
-  outsideGroup.add(frontRightCornerPath);
-  
-  const frontLeftCornerPath = new THREE.Mesh(
-    new THREE.PlaneGeometry(2.8, 1.4),
-    exteriorPathMat
-  );
-  frontLeftCornerPath.rotation.x = -Math.PI / 2;
-  frontLeftCornerPath.position.set(-8.4, 0.037, 7.25);
-  frontLeftCornerPath.receiveShadow = true;
-  outsideGroup.add(frontLeftCornerPath);
-  
-  const backLeftCornerPath = new THREE.Mesh(
-    new THREE.PlaneGeometry(2.8, 2.4),
-    exteriorPathMat
-  );
-  backLeftCornerPath.rotation.x = -Math.PI / 2;
-  backLeftCornerPath.position.set(-8.4, 0.038, -6.8);
-  backLeftCornerPath.receiveShadow = true;
-  outsideGroup.add(backLeftCornerPath);
+  frontPerimeterPath.rotation.x = -Math.PI / 2;
+  frontPerimeterPath.position.set(0.0, perimeterPathThicknessY + 0.002, 6.9);
+  frontPerimeterPath.receiveShadow = true;
+  outsideGroup.add(frontPerimeterPath);
   
   const outsideSunLight = new THREE.DirectionalLight(0xffb56b, 2.5);
   outsideSunLight.position.set(5, 10, -6);
