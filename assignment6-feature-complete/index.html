@@ -793,21 +793,21 @@
   }
   
   function crossesHouseShell(currentX, currentZ, nextX, nextZ) {
-    const currentInside = isInsideHouseFootprint(currentX, currentZ);
-    const nextInside = isInsideHouseFootprint(nextX, nextZ);
+    const currentInside = isInsideHouseFootprint(currentX, currentZ, 0);
+    const nextInside = isInsideHouseFootprint(nextX, nextZ, 0);
   
     if (currentInside === nextInside) {
       return false;
     }
   
-    const nearDoorSide =
-      Math.abs(currentX - 7) < 0.8 || Math.abs(nextX - 7) < 0.8;
+    const crossedDoorPlane =
+      Math.max(currentX, nextX) >= 6.7 &&
+      Math.min(currentX, nextX) <= 7.3;
   
-    if (nearDoorSide && isWithinDoorOpening((currentZ + nextZ) * 0.5)) {
-      return false;
-    }
+    const midZ = (currentZ + nextZ) * 0.5;
+    const doorwayPass = crossedDoorPlane && isWithinDoorOpening(midZ, playerRadius + 0.08);
   
-    return true;
+    return !doorwayPass;
   }
 
   function clampPlayerInsideRoom() {
