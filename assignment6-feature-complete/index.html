@@ -1424,14 +1424,57 @@
   leftWall.receiveShadow = true;
   roomShell.add(leftWall);
   
-  const rightWall = new THREE.Mesh(
-    new THREE.PlaneGeometry(12, 6),
+  const rightWallGroup = new THREE.Group();
+  roomShell.add(rightWallGroup);
+  
+  const doorwayOpeningCenterZ = 2.0;
+  const doorwayOpeningWidth = 1.42;
+  const doorwayOpeningHeight = 2.58;
+  
+  const rightWallTotalWidth = 12;
+  const rightWallTotalHeight = 6;
+  
+  const rightWallSideDepth = (rightWallTotalWidth - doorwayOpeningWidth) / 2;
+  const rightWallTopHeight = rightWallTotalHeight - doorwayOpeningHeight;
+  
+  const rightWallBackSection = new THREE.Mesh(
+    new THREE.PlaneGeometry(rightWallSideDepth, rightWallTotalHeight),
     roomSurfaceMat
   );
-  rightWall.rotation.y = -Math.PI / 2;
-  rightWall.position.set(7, 3, 0);
-  rightWall.receiveShadow = true;
-  roomShell.add(rightWall);
+  rightWallBackSection.rotation.y = -Math.PI / 2;
+  rightWallBackSection.position.set(
+    7,
+    3,
+    doorwayOpeningCenterZ - doorwayOpeningWidth / 2 - rightWallSideDepth / 2
+  );
+  rightWallBackSection.receiveShadow = true;
+  rightWallGroup.add(rightWallBackSection);
+  
+  const rightWallFrontSection = new THREE.Mesh(
+    new THREE.PlaneGeometry(rightWallSideDepth, rightWallTotalHeight),
+    roomSurfaceMat
+  );
+  rightWallFrontSection.rotation.y = -Math.PI / 2;
+  rightWallFrontSection.position.set(
+    7,
+    3,
+    doorwayOpeningCenterZ + doorwayOpeningWidth / 2 + rightWallSideDepth / 2
+  );
+  rightWallFrontSection.receiveShadow = true;
+  rightWallGroup.add(rightWallFrontSection);
+  
+  const rightWallTopSection = new THREE.Mesh(
+    new THREE.PlaneGeometry(doorwayOpeningWidth, rightWallTopHeight),
+    roomSurfaceMat
+  );
+  rightWallTopSection.rotation.y = -Math.PI / 2;
+  rightWallTopSection.position.set(
+    7,
+    doorwayOpeningHeight + rightWallTopHeight / 2,
+    doorwayOpeningCenterZ
+  );
+  rightWallTopSection.receiveShadow = true;
+  rightWallGroup.add(rightWallTopSection);
   
   const frontWall = new THREE.Mesh(
     new THREE.PlaneGeometry(14, 6),
