@@ -728,15 +728,10 @@
   const staticCollisionObjects = [];
   const playerRadius = 0.32;
 
-  const ROOM_MIN_X = -6.2;
-  const ROOM_MAX_X = 6.2;
-  const ROOM_MIN_Z = -5.2;
-  const ROOM_MAX_Z = 5.2;
-  
-  const EXTERIOR_MIN_X = -8.5;
-  const EXTERIOR_MAX_X = 8.5;
-  const EXTERIOR_MIN_Z = -13.2;
-  const EXTERIOR_MAX_Z = 5.2;
+  const PLAY_MIN_X = -8.5;
+  const PLAY_MAX_X = 8.5;
+  const PLAY_MIN_Z = -13.2;
+  const PLAY_MAX_Z = 5.2;
 
   let memoryAtmospherePulse = 0;
   let memoryWarmBase = 0.90;
@@ -774,11 +769,47 @@
     movement.right = false;
   }
 
+  function isInsideHouseFootprint(x, z, padding = playerRadius) {
+    return (
+      x > -7 + padding &&
+      x < 7 - padding &&
+      z > -6 + padding &&
+      z < 6 - padding
+    );
+  }
+  
+  function isWithinDoorOpening(z, padding = playerRadius) {
+    const doorCenterZ = 2.0;
+    const doorOpeningWidth = 1.65;
+    return (
+      z > doorCenterZ - doorOpeningWidth / 2 - padding &&
+      z < doorCenterZ + doorOpeningWidth / 2 + padding
+    );
+  }
+  
+  function crossesHouseShell(currentX, currentZ, nextX, nextZ) {
+    const currentInside = isInsideHouseFootprint(currentX, currentZ);
+    const nextInside = isInsideHouseFootprint(nextX, nextZ);
+  
+    if (currentInside === nextInside) {
+      return false;
+    }
+  
+    const nearDoorSide =
+      Math.abs(currentX - 7) < 0.8 || Math.abs(nextX - 7) < 0.8;
+  
+    if (nearDoorSide && isWithinDoorOpening((currentZ + nextZ) * 0.5)) {
+      return false;
+    }
+  
+    return true;
+  }
+
   function clampPlayerInsideRoom() {
     const offset = controls.target.clone().sub(camera.position);
   
-    camera.position.x = THREE.MathUtils.clamp(camera.position.x, EXTERIOR_MIN_X, EXTERIOR_MAX_X);
-    camera.position.z = THREE.MathUtils.clamp(camera.position.z, EXTERIOR_MIN_Z, EXTERIOR_MAX_Z);
+    camera.position.x = THREE.MathUtils.clamp(camera.position.x, PLAY_MIN_X, PLAY_MAX_X);
+    camera.position.z = THREE.MathUtils.clamp(camera.position.z, PLAY_MIN_Z, PLAY_MAX_Z);
   
     controls.target.copy(camera.position).add(offset);
   }
@@ -2727,7 +2758,14 @@
     const playerMaxX = nextX + playerRadius;
     const playerMinZ = nextZ - playerRadius;
     const playerMaxZ = nextZ + playerRadius;
-  
+
+    const currentX = camera.position.x;
+    const currentZ = camera.position.z;
+    
+    if (crossesHouseShell(currentX, currentZ, nextX, nextZ)) {
+      return false;
+    }
+    
     for (const obj of staticCollisionObjects) {
       const box = new THREE.Box3().setFromObject(obj);
   
