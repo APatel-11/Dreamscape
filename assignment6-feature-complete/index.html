@@ -801,11 +801,12 @@
     }
   
     const crossedDoorPlane =
-      Math.max(currentX, nextX) >= 6.7 &&
-      Math.min(currentX, nextX) <= 7.3;
+      Math.max(currentX, nextX) >= 6.0 &&
+      Math.min(currentX, nextX) <= 7.35;
   
     const midZ = (currentZ + nextZ) * 0.5;
-    const doorwayPass = crossedDoorPlane && isWithinDoorOpening(midZ, playerRadius + 0.08);
+    const doorwayPass =
+      crossedDoorPlane && isWithinDoorOpening(midZ, playerRadius + 0.14);
   
     return !doorwayPass;
   }
@@ -815,10 +816,16 @@
   
     const cameraIsInsideHouse = isInsideHouseFootprint(camera.position.x, camera.position.z, 0);
   
-    const minX = cameraIsInsideHouse ? ROOM_MIN_X : PLAY_MIN_X;
-    const maxX = cameraIsInsideHouse ? ROOM_MAX_X : PLAY_MAX_X;
-    const minZ = cameraIsInsideHouse ? ROOM_MIN_Z : PLAY_MIN_Z;
-    const maxZ = cameraIsInsideHouse ? ROOM_MAX_Z : PLAY_MAX_Z;
+    const nearDoorCorridor =
+      isWithinDoorOpening(camera.position.z, playerRadius + 0.12) &&
+      camera.position.x > 5.4;
+  
+    const useRoomClamp = cameraIsInsideHouse && !nearDoorCorridor;
+  
+    const minX = useRoomClamp ? ROOM_MIN_X : PLAY_MIN_X;
+    const maxX = useRoomClamp ? ROOM_MAX_X : PLAY_MAX_X;
+    const minZ = useRoomClamp ? ROOM_MIN_Z : PLAY_MIN_Z;
+    const maxZ = useRoomClamp ? ROOM_MAX_Z : PLAY_MAX_Z;
   
     camera.position.x = THREE.MathUtils.clamp(camera.position.x, minX, maxX);
     camera.position.z = THREE.MathUtils.clamp(camera.position.z, minZ, maxZ);
