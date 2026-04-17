@@ -1903,6 +1903,48 @@
   );
   sidewalkRight.position.set(0, 0.04, -12.7);
   outsideGroup.add(sidewalkRight);
+
+  const exteriorPathMat = new THREE.MeshStandardMaterial({
+    color: 0xb6aca3,
+    roughness: 0.97,
+    metalness: 0.0
+  });
+  
+  const sideHousePath = new THREE.Mesh(
+    new THREE.PlaneGeometry(2.8, 12.4),
+    exteriorPathMat
+  );
+  sideHousePath.rotation.x = -Math.PI / 2;
+  sideHousePath.position.set(8.4, 0.03, 0.0);
+  sideHousePath.receiveShadow = true;
+  outsideGroup.add(sideHousePath);
+  
+  const backHousePath = new THREE.Mesh(
+    new THREE.PlaneGeometry(14.2, 2.4),
+    exteriorPathMat
+  );
+  backHousePath.rotation.x = -Math.PI / 2;
+  backHousePath.position.set(0, 0.031, -6.8);
+  backHousePath.receiveShadow = true;
+  outsideGroup.add(backHousePath);
+  
+  const backCornerPath = new THREE.Mesh(
+    new THREE.PlaneGeometry(2.8, 2.4),
+    exteriorPathMat
+  );
+  backCornerPath.rotation.x = -Math.PI / 2;
+  backCornerPath.position.set(8.4, 0.032, -6.8);
+  backCornerPath.receiveShadow = true;
+  outsideGroup.add(backCornerPath);
+  
+  const doorStepPad = new THREE.Mesh(
+    new THREE.PlaneGeometry(2.2, 2.0),
+    exteriorPathMat
+  );
+  doorStepPad.rotation.x = -Math.PI / 2;
+  doorStepPad.position.set(8.1, 0.033, 2.0);
+  doorStepPad.receiveShadow = true;
+  outsideGroup.add(doorStepPad);
   
   const outsideSunLight = new THREE.DirectionalLight(0xffb56b, 2.5);
   outsideSunLight.position.set(5, 10, -6);
