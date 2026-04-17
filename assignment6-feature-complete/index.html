@@ -1945,6 +1945,51 @@
   doorStepPad.position.set(8.1, 0.033, 2.0);
   doorStepPad.receiveShadow = true;
   outsideGroup.add(doorStepPad);
+
+  const leftHousePath = new THREE.Mesh(
+    new THREE.PlaneGeometry(2.8, 12.4),
+    exteriorPathMat
+  );
+  leftHousePath.rotation.x = -Math.PI / 2;
+  leftHousePath.position.set(-8.4, 0.034, 0.0);
+  leftHousePath.receiveShadow = true;
+  outsideGroup.add(leftHousePath);
+  
+  const frontHousePath = new THREE.Mesh(
+    new THREE.PlaneGeometry(14.2, 2.4),
+    exteriorPathMat
+  );
+  frontHousePath.rotation.x = -Math.PI / 2;
+  frontHousePath.position.set(0, 0.035, 6.8);
+  frontHousePath.receiveShadow = true;
+  outsideGroup.add(frontHousePath);
+  
+  const frontRightCornerPath = new THREE.Mesh(
+    new THREE.PlaneGeometry(2.8, 2.4),
+    exteriorPathMat
+  );
+  frontRightCornerPath.rotation.x = -Math.PI / 2;
+  frontRightCornerPath.position.set(8.4, 0.036, 6.8);
+  frontRightCornerPath.receiveShadow = true;
+  outsideGroup.add(frontRightCornerPath);
+  
+  const frontLeftCornerPath = new THREE.Mesh(
+    new THREE.PlaneGeometry(2.8, 2.4),
+    exteriorPathMat
+  );
+  frontLeftCornerPath.rotation.x = -Math.PI / 2;
+  frontLeftCornerPath.position.set(-8.4, 0.037, 6.8);
+  frontLeftCornerPath.receiveShadow = true;
+  outsideGroup.add(frontLeftCornerPath);
+  
+  const backLeftCornerPath = new THREE.Mesh(
+    new THREE.PlaneGeometry(2.8, 2.4),
+    exteriorPathMat
+  );
+  backLeftCornerPath.rotation.x = -Math.PI / 2;
+  backLeftCornerPath.position.set(-8.4, 0.038, -6.8);
+  backLeftCornerPath.receiveShadow = true;
+  outsideGroup.add(backLeftCornerPath);
   
   const outsideSunLight = new THREE.DirectionalLight(0xffb56b, 2.5);
   outsideSunLight.position.set(5, 10, -6);
