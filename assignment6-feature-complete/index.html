@@ -1424,58 +1424,6 @@
   leftWall.receiveShadow = true;
   roomShell.add(leftWall);
   
-  const rightWallGroup = new THREE.Group();
-  roomShell.add(rightWallGroup);
-  
-  const doorwayOpeningCenterZ = 2.0;
-  const doorwayOpeningWidth = 1.42;
-  const doorwayOpeningHeight = 2.58;
-  
-  const rightWallTotalWidth = 12;
-  const rightWallTotalHeight = 6;
-  
-  const rightWallSideDepth = (rightWallTotalWidth - doorwayOpeningWidth) / 2;
-  const rightWallTopHeight = rightWallTotalHeight - doorwayOpeningHeight;
-  
-  const rightWallBackSection = new THREE.Mesh(
-    new THREE.PlaneGeometry(rightWallSideDepth, rightWallTotalHeight),
-    roomSurfaceMat
-  );
-  rightWallBackSection.rotation.y = -Math.PI / 2;
-  rightWallBackSection.position.set(
-    7,
-    3,
-    doorwayOpeningCenterZ - doorwayOpeningWidth / 2 - rightWallSideDepth / 2
-  );
-  rightWallBackSection.receiveShadow = true;
-  rightWallGroup.add(rightWallBackSection);
-  
-  const rightWallFrontSection = new THREE.Mesh(
-    new THREE.PlaneGeometry(rightWallSideDepth, rightWallTotalHeight),
-    roomSurfaceMat
-  );
-  rightWallFrontSection.rotation.y = -Math.PI / 2;
-  rightWallFrontSection.position.set(
-    7,
-    3,
-    doorwayOpeningCenterZ + doorwayOpeningWidth / 2 + rightWallSideDepth / 2
-  );
-  rightWallFrontSection.receiveShadow = true;
-  rightWallGroup.add(rightWallFrontSection);
-  
-  const rightWallTopSection = new THREE.Mesh(
-    new THREE.PlaneGeometry(doorwayOpeningWidth, rightWallTopHeight),
-    roomSurfaceMat
-  );
-  rightWallTopSection.rotation.y = -Math.PI / 2;
-  rightWallTopSection.position.set(
-    7,
-    doorwayOpeningHeight + rightWallTopHeight / 2,
-    doorwayOpeningCenterZ
-  );
-  rightWallTopSection.receiveShadow = true;
-  rightWallGroup.add(rightWallTopSection);
-  
   const frontWall = new THREE.Mesh(
     new THREE.PlaneGeometry(14, 6),
     roomSurfaceMat
@@ -1667,6 +1615,67 @@
   const doorwayGlow = new THREE.PointLight(0x8dafff, 0.45, 8);
   doorwayGlow.position.set(6.2, 1.8, 2.0);
   memoryWorldGroup.add(doorwayGlow);
+
+  const doorwayWallGroup = new THREE.Group();
+  roomShell.add(doorwayWallGroup);
+  
+  const doorwayWallX = 7.0;
+  const doorwayWallTotalSpan = 12.0;
+  const doorwayWallHeight = 6.0;
+  
+  const doorwayOpeningCenterZ = 2.0;
+  const doorwayOpeningWidth = 1.65;
+  const doorwayOpeningCenterY = 1.75;
+  const doorwayOpeningHeight = 3.5;
+  
+  const doorwayOpeningMinZ = doorwayOpeningCenterZ - doorwayOpeningWidth / 2;
+  const doorwayOpeningMaxZ = doorwayOpeningCenterZ + doorwayOpeningWidth / 2;
+  
+  const doorwayWallMinZ = -6.0;
+  const doorwayWallMaxZ = 6.0;
+  
+  const doorwayLeftSpan = doorwayOpeningMinZ - doorwayWallMinZ;
+  const doorwayRightSpan = doorwayWallMaxZ - doorwayOpeningMaxZ;
+  const doorwayTopHeight = doorwayWallHeight - doorwayOpeningHeight;
+  
+  const doorwayWallLeftSection = new THREE.Mesh(
+    new THREE.PlaneGeometry(doorwayLeftSpan, doorwayWallHeight),
+    roomSurfaceMat
+  );
+  doorwayWallLeftSection.rotation.y = -Math.PI / 2;
+  doorwayWallLeftSection.position.set(
+    doorwayWallX,
+    doorwayWallHeight / 2,
+    doorwayWallMinZ + doorwayLeftSpan / 2
+  );
+  doorwayWallLeftSection.receiveShadow = true;
+  doorwayWallGroup.add(doorwayWallLeftSection);
+  
+  const doorwayWallRightSection = new THREE.Mesh(
+    new THREE.PlaneGeometry(doorwayRightSpan, doorwayWallHeight),
+    roomSurfaceMat
+  );
+  doorwayWallRightSection.rotation.y = -Math.PI / 2;
+  doorwayWallRightSection.position.set(
+    doorwayWallX,
+    doorwayWallHeight / 2,
+    doorwayOpeningMaxZ + doorwayRightSpan / 2
+  );
+  doorwayWallRightSection.receiveShadow = true;
+  doorwayWallGroup.add(doorwayWallRightSection);
+  
+  const doorwayWallTopSection = new THREE.Mesh(
+    new THREE.PlaneGeometry(doorwayOpeningWidth, doorwayTopHeight),
+    roomSurfaceMat
+  );
+  doorwayWallTopSection.rotation.y = -Math.PI / 2;
+  doorwayWallTopSection.position.set(
+    doorwayWallX,
+    doorwayOpeningHeight + doorwayTopHeight / 2,
+    doorwayOpeningCenterZ
+  );
+  doorwayWallTopSection.receiveShadow = true;
+  doorwayWallGroup.add(doorwayWallTopSection);
   
   const frameMat = memoryTrimMat;
   const frameDepth = 0.18;
