@@ -1188,11 +1188,11 @@
   const playerGroup = new THREE.Group();
   
   const observerCloakMat = new THREE.MeshStandardMaterial({
-    color: 0x242838,
-    roughness: 0.72,
-    metalness: 0.12,
-    emissive: 0x080d18,
-    emissiveIntensity: 0.18
+    color: 0x1a1f2b,
+    roughness: 0.85,
+    metalness: 0.1,
+    emissive: 0x0a1022,
+    emissiveIntensity: 0.35
   });
   
   const observerInnerMat = new THREE.MeshStandardMaterial({
@@ -1218,6 +1218,19 @@
   cloak.castShadow = true;
   cloak.receiveShadow = true;
   playerGroup.add(cloak);
+
+  const cloakInner = new THREE.Mesh(
+    new THREE.ConeGeometry(0.45, 1.6, 32, 1, true),
+    new THREE.MeshStandardMaterial({
+      color: 0x0b0f1a,
+      roughness: 0.9,
+      metalness: 0,
+      side: THREE.DoubleSide
+    })
+  );
+  
+  cloakInner.position.y = 1.15;
+  playerGroup.add(cloakInner);
   
   const innerShadow = new THREE.Mesh(
     new THREE.PlaneGeometry(0.38, 1.25),
@@ -1278,6 +1291,7 @@
   
   playerGroup.position.set(0, 0.72, 0.02);
   scene.add(playerGroup);
+  playerGroup.lookAt(0, 1.4, -2);
 
   const consoleGroup = new THREE.Group();
 
