@@ -1187,111 +1187,121 @@
 
   const playerGroup = new THREE.Group();
   
-  const observerCloakMat = new THREE.MeshStandardMaterial({
-    color: 0x1a1f2b,
-    roughness: 0.85,
-    metalness: 0.1,
-    emissive: 0x0a1022,
-    emissiveIntensity: 0.35
+  const cloakOuterMat = new THREE.MeshStandardMaterial({
+    color: 0x05070d,
+    roughness: 0.92,
+    metalness: 0.02,
+    emissive: 0x02040a,
+    emissiveIntensity: 0.18,
+    side: THREE.DoubleSide
   });
   
-  const observerInnerMat = new THREE.MeshStandardMaterial({
-    color: 0x0d1020,
-    roughness: 0.9,
-    metalness: 0.05,
-    emissive: 0x111b36,
-    emissiveIntensity: 0.28
+  const cloakMidMat = new THREE.MeshStandardMaterial({
+    color: 0x111827,
+    roughness: 0.88,
+    metalness: 0.04,
+    emissive: 0x07101f,
+    emissiveIntensity: 0.22,
+    side: THREE.DoubleSide
   });
   
-  const observerGlowMat = new THREE.MeshBasicMaterial({
-    color: 0x83ddff,
+  const cloakShadowMat = new THREE.MeshBasicMaterial({
+    color: 0x000000,
     transparent: true,
-    opacity: 0.55
+    opacity: 0.88,
+    side: THREE.DoubleSide
   });
   
-  const cloak = new THREE.Mesh(
-    new THREE.ConeGeometry(0.58, 1.75, 36, 1, true),
-    observerCloakMat
+  const cloakGlowMat = new THREE.MeshBasicMaterial({
+    color: 0x78d9ff,
+    transparent: true,
+    opacity: 0.35,
+    side: THREE.DoubleSide
+  });
+  
+  const cloakBody = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.88, 1.28, 2.05, 32, 1, true),
+    cloakOuterMat
   );
-  cloak.position.y = 1.18;
-  cloak.rotation.y = Math.PI / 36;
-  cloak.castShadow = true;
-  cloak.receiveShadow = true;
-  playerGroup.add(cloak);
-
-  const cloakInner = new THREE.Mesh(
-    new THREE.ConeGeometry(0.45, 1.6, 32, 1, true),
-    new THREE.MeshStandardMaterial({
-      color: 0x0b0f1a,
-      roughness: 0.9,
-      metalness: 0,
+  cloakBody.position.y = 1.2;
+  cloakBody.scale.set(0.72, 1.0, 0.46);
+  cloakBody.castShadow = true;
+  cloakBody.receiveShadow = true;
+  playerGroup.add(cloakBody);
+  
+  const shoulderCape = new THREE.Mesh(
+    new THREE.SphereGeometry(0.62, 32, 16),
+    cloakMidMat
+  );
+  shoulderCape.scale.set(1.35, 0.34, 0.72);
+  shoulderCape.position.y = 2.05;
+  shoulderCape.castShadow = true;
+  playerGroup.add(shoulderCape);
+  
+  const hood = new THREE.Mesh(
+    new THREE.SphereGeometry(0.42, 32, 18),
+    cloakOuterMat
+  );
+  hood.scale.set(0.82, 1.08, 0.72);
+  hood.position.set(0, 2.42, -0.02);
+  hood.castShadow = true;
+  playerGroup.add(hood);
+  
+  const hoodOpening = new THREE.Mesh(
+    new THREE.PlaneGeometry(0.34, 0.42),
+    cloakShadowMat
+  );
+  hoodOpening.position.set(0, 2.38, -0.31);
+  playerGroup.add(hoodOpening);
+  
+  const frontOpening = new THREE.Mesh(
+    new THREE.PlaneGeometry(0.32, 1.48),
+    cloakShadowMat
+  );
+  frontOpening.position.set(0, 1.35, -0.48);
+  playerGroup.add(frontOpening);
+  
+  const leftDrape = new THREE.Mesh(
+    new THREE.PlaneGeometry(0.46, 1.7),
+    cloakMidMat
+  );
+  leftDrape.position.set(-0.43, 1.12, -0.18);
+  leftDrape.rotation.z = -0.16;
+  leftDrape.rotation.y = 0.18;
+  playerGroup.add(leftDrape);
+  
+  const rightDrape = new THREE.Mesh(
+    new THREE.PlaneGeometry(0.46, 1.7),
+    cloakMidMat
+  );
+  rightDrape.position.set(0.43, 1.12, -0.18);
+  rightDrape.rotation.z = 0.16;
+  rightDrape.rotation.y = -0.18;
+  playerGroup.add(rightDrape);
+  
+  const chestGlow = new THREE.Mesh(
+    new THREE.CircleGeometry(0.12, 24),
+    cloakGlowMat
+  );
+  chestGlow.position.set(0, 1.62, -0.5);
+  playerGroup.add(chestGlow);
+  
+  const cloakBaseShadow = new THREE.Mesh(
+    new THREE.CircleGeometry(0.72, 32),
+    new THREE.MeshBasicMaterial({
+      color: 0x000000,
+      transparent: true,
+      opacity: 0.28,
       side: THREE.DoubleSide
     })
   );
-  
-  cloakInner.position.y = 1.15;
-  playerGroup.add(cloakInner);
-  
-  const innerShadow = new THREE.Mesh(
-    new THREE.PlaneGeometry(0.38, 1.25),
-    observerInnerMat
-  );
-  innerShadow.position.set(0, 1.13, 0.48);
-  innerShadow.rotation.x = -0.04;
-  playerGroup.add(innerShadow);
-  
-  const mantle = new THREE.Mesh(
-    new THREE.SphereGeometry(0.34, 24, 16),
-    observerCloakMat
-  );
-  mantle.scale.set(1.65, 0.32, 0.9);
-  mantle.position.y = 1.92;
-  mantle.castShadow = true;
-  playerGroup.add(mantle);
-  
-  const head = new THREE.Mesh(
-    new THREE.SphereGeometry(0.22, 24, 18),
-    new THREE.MeshStandardMaterial({
-      color: 0x2f3448,
-      roughness: 0.55,
-      metalness: 0.18,
-      emissive: 0x111a33,
-      emissiveIntensity: 0.2
-    })
-  );
-  head.position.y = 2.25;
-  head.castShadow = true;
-  playerGroup.add(head);
-  
-  const visor = new THREE.Mesh(
-    new THREE.PlaneGeometry(0.28, 0.08),
-    observerGlowMat
-  );
-  visor.position.set(0, 2.25, 0.205);
-  playerGroup.add(visor);
-  
-  const core = new THREE.Mesh(
-    new THREE.SphereGeometry(0.085, 16, 16),
-    observerGlowMat
-  );
-  core.position.set(0, 1.42, 0.42);
-  playerGroup.add(core);
-  
-  const auraRing = new THREE.Mesh(
-    new THREE.TorusGeometry(0.62, 0.012, 12, 80),
-    new THREE.MeshBasicMaterial({
-      color: 0x77d6ff,
-      transparent: true,
-      opacity: 0.22
-    })
-  );
-  auraRing.position.set(0, 1.55, -0.04);
-  auraRing.rotation.x = Math.PI / 2;
-  playerGroup.add(auraRing);
-  
+  cloakBaseShadow.rotation.x = -Math.PI / 2;
+  cloakBaseShadow.position.y = 0.03;
+  playerGroup.add(cloakBaseShadow);
+
   playerGroup.position.set(0, 0.72, 0.02);
+  playerGroup.rotation.y = Math.PI;
   scene.add(playerGroup);
-  playerGroup.lookAt(0, 1.4, -2);
 
   const consoleGroup = new THREE.Group();
 
