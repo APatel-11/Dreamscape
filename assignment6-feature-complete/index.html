@@ -1187,76 +1187,89 @@
 
   const playerGroup = new THREE.Group();
   
-  const bodyMat = new THREE.MeshStandardMaterial({
+  const playerBodyMat = new THREE.MeshStandardMaterial({
     color: 0x2a2f3a,
     roughness: 0.55,
-    metalness: 0.2
+    metalness: 0.18,
+    emissive: 0x0b1020,
+    emissiveIntensity: 0.12
   });
   
-  const accentMat = new THREE.MeshStandardMaterial({
+  const playerAccentMat = new THREE.MeshStandardMaterial({
     color: 0x7fd6ff,
     roughness: 0.3,
-    metalness: 0.6,
-    emissive: 0x0c1f33,
-    emissiveIntensity: 0.25
+    metalness: 0.5,
+    emissive: 0x10334f,
+    emissiveIntensity: 0.35
   });
   
-  const torso = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.18, 0.23, 1.35, 16),
-    bodyMat
+  const legGeo = new THREE.CylinderGeometry(0.075, 0.085, 0.95, 14);
+  
+  const legLeft = new THREE.Mesh(legGeo, playerBodyMat);
+  legLeft.position.set(-0.13, 0.55, 0);
+  playerGroup.add(legLeft);
+  
+  const legRight = new THREE.Mesh(legGeo, playerBodyMat);
+  legRight.position.set(0.13, 0.55, 0);
+  playerGroup.add(legRight);
+  
+  const footLeft = new THREE.Mesh(
+    new THREE.BoxGeometry(0.18, 0.08, 0.28),
+    playerBodyMat
   );
-  torso.position.y = 1.2;
+  footLeft.position.set(-0.13, 0.08, 0.08);
+  playerGroup.add(footLeft);
+  
+  const footRight = footLeft.clone();
+  footRight.position.x = 0.13;
+  playerGroup.add(footRight);
+  
+  const torso = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.18, 0.25, 0.95, 18),
+    playerBodyMat
+  );
+  torso.position.set(0, 1.42, 0);
   playerGroup.add(torso);
   
-  const shoulder = new THREE.Mesh(
-    new THREE.SphereGeometry(0.28, 16, 16),
-    bodyMat
+  const shoulders = new THREE.Mesh(
+    new THREE.SphereGeometry(0.2, 18, 18),
+    playerBodyMat
   );
-  shoulder.scale.set(1.25, 0.65, 0.9);
-  shoulder.position.y = 1.8;
-  playerGroup.add(shoulder);
+  shoulders.scale.set(1.35, 0.45, 0.8);
+  shoulders.position.set(0, 1.92, 0);
+  playerGroup.add(shoulders);
+  
+  const armGeo = new THREE.CylinderGeometry(0.055, 0.06, 0.92, 12);
+  
+  const armLeft = new THREE.Mesh(armGeo, playerBodyMat);
+  armLeft.position.set(-0.42, 1.5, 0.02);
+  armLeft.rotation.z = -0.22;
+  playerGroup.add(armLeft);
+  
+  const armRight = new THREE.Mesh(armGeo, playerBodyMat);
+  armRight.position.set(0.42, 1.5, 0.02);
+  armRight.rotation.z = 0.22;
+  playerGroup.add(armRight);
   
   const head = new THREE.Mesh(
-    new THREE.SphereGeometry(0.18, 16, 16),
-    bodyMat
+    new THREE.SphereGeometry(0.19, 18, 18),
+    playerBodyMat
   );
-  head.position.y = 2.2;
+  head.position.set(0, 2.28, 0.02);
   playerGroup.add(head);
   
   const visor = new THREE.Mesh(
-    new THREE.PlaneGeometry(0.26, 0.12),
-    accentMat
+    new THREE.PlaneGeometry(0.28, 0.1),
+    playerAccentMat
   );
-  visor.position.set(0, 2.2, 0.2);
+  visor.position.set(0, 2.29, 0.18);
   playerGroup.add(visor);
   
-  const legL = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.09, 0.1, 0.9, 12),
-    bodyMat
-  );
-  legL.position.set(-0.12, 0.5, 0);
-  playerGroup.add(legL);
-  
-  const legR = legL.clone();
-  legR.position.x = 0.12;
-  playerGroup.add(legR);
-  
-  const footL = new THREE.Mesh(
-    new THREE.BoxGeometry(0.18, 0.08, 0.28),
-    bodyMat
-  );
-  footL.position.set(-0.12, 0.05, 0.06);
-  playerGroup.add(footL);
-  
-  const footR = footL.clone();
-  footR.position.x = 0.12;
-  playerGroup.add(footR);
-  
   const core = new THREE.Mesh(
-    new THREE.SphereGeometry(0.08, 12, 12),
-    accentMat
+    new THREE.SphereGeometry(0.065, 12, 12),
+    playerAccentMat
   );
-  core.position.y = 1.2;
+  core.position.set(0, 1.45, 0.19);
   playerGroup.add(core);
   
   playerGroup.position.set(0, 0.72, 0.02);
