@@ -774,68 +774,58 @@
     movement.right = false;
   }
 
-  function isInsideHouseFootprint(x, z, padding = playerRadius) {
+  function isInsideHouseFootprint(x, z) {
     return (
-      x > -7 + padding &&
-      x < 7 - padding &&
-      z > -6 + padding &&
-      z < 6 - padding
+      x > -7 &&
+      x < 7 &&
+      z > -6 &&
+      z < 6
     );
   }
   
-  function isWithinDoorOpening(z, padding = playerRadius) {
+  function isWithinDoorOpening(z) {
     const doorCenterZ = 2.0;
-    const doorOpeningWidth = 1.65;
-    return (
-      z > doorCenterZ - doorOpeningWidth / 2 - padding &&
-      z < doorCenterZ + doorOpeningWidth / 2 + padding
-    );
+    const halfWidth = 1.65 / 2;
+  
+    return z >= (doorCenterZ - halfWidth) &&
+           z <= (doorCenterZ + halfWidth);
   }
   
   function crossesHouseShell(currentX, currentZ, nextX, nextZ) {
-    const currentInside = isInsideHouseFootprint(currentX, currentZ, 0);
-    const nextInside = isInsideHouseFootprint(nextX, nextZ, 0);
+    const currentInside = isInsideHouseFootprint(currentX, currentZ);
+    const nextInside = isInsideHouseFootprint(nextX, nextZ);
   
     if (currentInside === nextInside) {
       return false;
     }
   
-    const crossedDoorPlane =
-      Math.max(currentX, nextX) >= 6.0 &&
-      Math.min(currentX, nextX) <= 7.35;
+    const crossesRightWall =
+      (currentX < 7 && nextX >= 7) ||
+      (currentX > 7 && nextX <= 7);
   
     const midZ = (currentZ + nextZ) * 0.5;
-    const doorwayPass =
-      crossedDoorPlane && isWithinDoorOpening(midZ, playerRadius + 0.14);
   
-    return !doorwayPass;
+    const insideDoor = isWithinDoorOpening(midZ);
+  
+    if (crossesRightWall && insideDoor) {
+      return false;
+    }
+  
+    return true;
   }
-
+  
   function clampPlayerInsideRoom() {
     const offset = controls.target.clone().sub(camera.position);
   
-    const cameraIsInsideHouse = isInsideHouseFootprint(camera.position.x, camera.position.z, 0);
-  
-    const nearDoorCorridor =
-      isWithinDoorOpening(camera.position.z, playerRadius + 0.12) &&
-      camera.position.x > 5.4;
-  
-    const useRoomClamp = cameraIsInsideHouse && !nearDoorCorridor;
-  
-    const minX = useRoomClamp ? ROOM_MIN_X : PLAY_MIN_X;
-    const maxX = useRoomClamp ? ROOM_MAX_X : PLAY_MAX_X;
-    const minZ = useRoomClamp ? ROOM_MIN_Z : PLAY_MIN_Z;
-    const maxZ = useRoomClamp ? ROOM_MAX_Z : PLAY_MAX_Z;
-  
-    camera.position.x = THREE.MathUtils.clamp(camera.position.x, minX, maxX);
-    camera.position.z = THREE.MathUtils.clamp(camera.position.z, minZ, maxZ);
+    camera.position.x = THREE.MathUtils.clamp(camera.position.x, PLAY_MIN_X, PLAY_MAX_X);
+    camera.position.z = THREE.MathUtils.clamp(camera.position.z, PLAY_MIN_Z, PLAY_MAX_Z);
   
     controls.target.copy(camera.position).add(offset);
   
     controls.target.x = THREE.MathUtils.clamp(controls.target.x, PLAY_MIN_X, PLAY_MAX_X);
     controls.target.z = THREE.MathUtils.clamp(controls.target.z, PLAY_MIN_Z, PLAY_MAX_Z);
   }
-
+  
   function getArchiveStats() {
     const totalFrames = Math.max(memories.length * 12, 48);
   
