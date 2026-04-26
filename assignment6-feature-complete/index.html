@@ -1451,68 +1451,110 @@
 
   const frameMeshes = [];
 
-  function createFrame(seed, totalFrames) {
-    const frame = new THREE.Group();
+  function createFrame(width = 1, height = 1) {
 
-    const bronzeMat = new THREE.MeshStandardMaterial({
-      color: 0x9a7b57,
-      roughness: 0.8,
-      metalness: 0.08,
-      emissive: 0x3d2819,
-      emissiveIntensity: 0.15
+    const frameGroup = new THREE.Group();
+  
+    const goldMat = new THREE.MeshStandardMaterial({
+      color: 0xd4af37,
+      roughness: 0.35,
+      metalness: 0.85
     });
+  
+    const darkGoldMat = new THREE.MeshStandardMaterial({
+      color: 0x8c6b1f,
+      roughness: 0.6,
+      metalness: 0.7
+    });
+  
+    const backingMat = new THREE.MeshStandardMaterial({
+      color: 0x111111,
+      roughness: 0.9
+    });
+ 
+    const thickness = 0.12;
+    const depth = 0.08;
+    const innerPadding = 0.08;
+  
+    const outerW = width + thickness;
+    const outerH = height + thickness;
 
-    const densityScale = getAdaptiveFrameScale(totalFrames);
+    const top = new THREE.Mesh(
+      new THREE.BoxGeometry(outerW, thickness, depth),
+      goldMat
+    );
+    top.position.y = outerH / 2;
+    frameGroup.add(top);
+  
+    const bottom = top.clone();
+    bottom.position.y = -outerH / 2;
+    frameGroup.add(bottom);
+  
+    const left = new THREE.Mesh(
+      new THREE.BoxGeometry(thickness, outerH, depth),
+      goldMat
+    );
+    left.position.x = -outerW / 2;
+    frameGroup.add(left);
+  
+    const right = left.clone();
+    right.position.x = outerW / 2;
+    frameGroup.add(right);
+  
+    const innerW = width - innerPadding;
+    const innerH = height - innerPadding;
+  
+    const trimThickness = 0.05;
+  
+    const trimTop = new THREE.Mesh(
+      new THREE.BoxGeometry(innerW, trimThickness, depth * 0.6),
+      darkGoldMat
+    );
+    trimTop.position.y = innerH / 2;
+    trimTop.position.z = depth * 0.2;
+    frameGroup.add(trimTop);
+  
+    const trimBottom = trimTop.clone();
+    trimBottom.position.y = -innerH / 2;
+    frameGroup.add(trimBottom);
+  
+    const trimLeft = new THREE.Mesh(
+      new THREE.BoxGeometry(trimThickness, innerH, depth * 0.6),
+      darkGoldMat
+    );
+    trimLeft.position.x = -innerW / 2;
+    trimLeft.position.z = depth * 0.2;
+    frameGroup.add(trimLeft);
+  
+    const trimRight = trimLeft.clone();
+    trimRight.position.x = innerW / 2;
+    frameGroup.add(trimRight);
 
-    const w = (0.78 + (seed % 3) * 0.13) * densityScale;
-    const h = (0.98 + ((seed + 1) % 3) * 0.16) * densityScale;
-
-    const topBar = new THREE.Mesh(new THREE.BoxGeometry(w + 0.18, 0.08, 0.05), bronzeMat.clone());
-    topBar.position.set(0, h / 2, 0);
-    frame.add(topBar);
-
-    const bottomBar = new THREE.Mesh(new THREE.BoxGeometry(w + 0.18, 0.08, 0.05), bronzeMat.clone());
-    bottomBar.position.set(0, -h / 2, 0);
-    frame.add(bottomBar);
-
-    const leftBar = new THREE.Mesh(new THREE.BoxGeometry(0.08, h + 0.16, 0.05), bronzeMat.clone());
-    leftBar.position.set(-w / 2, 0, 0);
-    frame.add(leftBar);
-
-    const rightBar = new THREE.Mesh(new THREE.BoxGeometry(0.08, h + 0.16, 0.05), bronzeMat.clone());
-    rightBar.position.set(w / 2, 0, 0);
-    frame.add(rightBar);
-
+    const cornerGeo = new THREE.SphereGeometry(0.05, 8, 8);
+  
+    function addCorner(x, y) {
+      const corner = new THREE.Mesh(cornerGeo, goldMat);
+      corner.position.set(x, y, depth * 0.3);
+      frameGroup.add(corner);
+    }
+  
+    addCorner( outerW/2,  outerH/2);
+    addCorner(-outerW/2,  outerH/2);
+    addCorner( outerW/2, -outerH/2);
+    addCorner(-outerW/2, -outerH/2);
+ 
     const backing = new THREE.Mesh(
-      new THREE.PlaneGeometry(w, h),
-      new THREE.MeshStandardMaterial({
-        color: 0x2f3440,
-        roughness: 0.95,
-        metalness: 0.01,
-        side: THREE.DoubleSide
-      })
+      new THREE.PlaneGeometry(width, height),
+      backingMat
     );
-    backing.position.z = 0.015;
-    frame.add(backing);
-
-    const inner = new THREE.Mesh(
-      new THREE.PlaneGeometry(w - 0.06, h - 0.06),
-      new THREE.MeshBasicMaterial({
-        map: createBlankCanvasTexture(seed),
-        transparent: false,
-        opacity: 1
-      })
-    );
-    inner.position.z = 0.03;
-    frame.add(inner);
-
-    frame.userData.borderBars = [topBar, bottomBar, leftBar, rightBar];
-    frame.userData.backing = backing;
-    frame.userData.inner = inner;
-
-    return frame;
+    backing.position.z = -0.01;
+    frameGroup.add(backing);
+  
+    frameGroup.position.z = 0.02;
+  
+    return frameGroup;
   }
-
+  
   function layoutFrames() {
     framesGroup.clear();
     frameMeshes.length = 0;
