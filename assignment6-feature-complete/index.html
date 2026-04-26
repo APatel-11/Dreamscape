@@ -1543,31 +1543,9 @@
     loadModel('armchair'),
     loadModel('sofa'),
     loadModel('bookshelf'),
-    loadModel('credenza'),
-    loadModel('realistic_tree'),
-    loadModel('house_kenney_a'),
-    loadModel('house_kenney_b'),
-    loadModel('house_kenney_c'),
-    loadModel('house_kenney_d'),
-    loadModel('house_kenney_e')
+    loadModel('credenza')
   ]).then(function() {
     console.log('All models loaded');
-
-    const houseModelNames = ['house_kenney_a', 'house_kenney_b', 'house_kenney_c', 'house_kenney_d', 'house_kenney_e'];
-    for (let i = 0; i < housePlaceholders.length; i++) {
-      const hp = housePlaceholders[i];
-      const modelName = houseModelNames[i % houseModelNames.length];
-      const h = loadedModels[modelName].clone();
-      h.scale.set(hp.s, hp.s, hp.s);
-      hp.group.add(h);
-    }
-
-    for (let i = 0; i < treePlaceholders.length; i++) {
-      const tp = treePlaceholders[i];
-      const t = loadedModels.realistic_tree.clone();
-      t.scale.set(tp.s, tp.s, tp.s);
-      tp.group.add(t);
-    }
 
     const deskClone = loadedModels.desk.clone();
     deskClone.scale.set(0.35, 0.175, 0.35);
@@ -2348,6 +2326,110 @@
     house.position.set(x, 0, z);
     return house;
   }
+
+  const ExteriorSystem = {
+    houseColors: [0xd8c2a8, 0xc8b8a0, 0xb9a890, 0xd0b39a],
+    roofColors: [0x5a3a32, 0x4a3130, 0x6b4a3d],
+  
+    createHouseImpostor(scale = 1) {
+      const group = new THREE.Group();
+  
+      const body = new THREE.Mesh(
+        new THREE.PlaneGeometry(1.25 * scale, 1.0 * scale),
+        new THREE.MeshBasicMaterial({
+          color: this.houseColors[Math.floor(Math.random() * this.houseColors.length)],
+          side: THREE.DoubleSide
+        })
+      );
+      body.position.y = 0.75 * scale;
+      group.add(body);
+  
+      const roofShape = new THREE.Shape();
+      roofShape.moveTo(-0.75 * scale, 0);
+      roofShape.lineTo(0, 0.55 * scale);
+      roofShape.lineTo(0.75 * scale, 0);
+      roofShape.lineTo(-0.75 * scale, 0);
+  
+      const roof = new THREE.Mesh(
+        new THREE.ShapeGeometry(roofShape),
+        new THREE.MeshBasicMaterial({
+          color: this.roofColors[Math.floor(Math.random() * this.roofColors.length)],
+          side: THREE.DoubleSide
+        })
+      );
+      roof.position.y = 1.25 * scale;
+      group.add(roof);
+  
+      const windowMat = new THREE.MeshBasicMaterial({
+        color: 0xffd8a8,
+        transparent: true,
+        opacity: 0.85,
+        side: THREE.DoubleSide
+      });
+  
+      const windowA = new THREE.Mesh(new THREE.PlaneGeometry(0.22 * scale, 0.22 * scale), windowMat);
+      windowA.position.set(-0.32 * scale, 0.78 * scale, 0.01);
+      group.add(windowA);
+  
+      const windowB = new THREE.Mesh(new THREE.PlaneGeometry(0.22 * scale, 0.22 * scale), windowMat);
+      windowB.position.set(0.32 * scale, 0.78 * scale, 0.01);
+      group.add(windowB);
+  
+      return group;
+    },
+  
+    createTreeImpostor(scale = 1) {
+      const group = new THREE.Group();
+  
+      const trunk = new THREE.Mesh(
+        new THREE.PlaneGeometry(0.16 * scale, 0.75 * scale),
+        new THREE.MeshBasicMaterial({
+          color: 0x5a3828,
+          side: THREE.DoubleSide
+        })
+      );
+      trunk.position.y = 0.38 * scale;
+      group.add(trunk);
+  
+      const leaves = new THREE.Mesh(
+        new THREE.CircleGeometry(0.55 * scale, 12),
+        new THREE.MeshBasicMaterial({
+          color: 0x354f34,
+          side: THREE.DoubleSide
+        })
+      );
+      leaves.position.y = 1.05 * scale;
+      group.add(leaves);
+  
+      const leaves2 = new THREE.Mesh(
+        new THREE.CircleGeometry(0.42 * scale, 12),
+        new THREE.MeshBasicMaterial({
+          color: 0x45633f,
+          side: THREE.DoubleSide,
+          transparent: true,
+          opacity: 0.92
+        })
+      );
+      leaves2.position.set(0.18 * scale, 1.25 * scale, 0.01);
+      group.add(leaves2);
+  
+      return group;
+    },
+  
+    populateHousePlaceholder(placeholder, scale) {
+      placeholder.clear();
+      const house = this.createHouseImpostor(scale);
+      house.rotation.y = Math.PI;
+      placeholder.add(house);
+    },
+  
+    populateTreePlaceholder(placeholder, scale) {
+      placeholder.clear();
+      const tree = this.createTreeImpostor(scale * 6.0);
+      tree.rotation.y = Math.PI;
+      placeholder.add(tree);
+    }
+  };
   
   const housePlaceholders = [];
   const housePositions = [
@@ -2365,6 +2447,8 @@
     placeholder.position.set(housePositions[i].x, 0, housePositions[i].z);
     placeholder.rotation.y = housePositions[i].ry;
     outsideGroup.add(placeholder);
+  
+    ExteriorSystem.populateHousePlaceholder(placeholder, housePositions[i].s);
     housePlaceholders.push({ group: placeholder, s: housePositions[i].s });
   }
   
@@ -2416,6 +2500,8 @@
     const placeholder = new THREE.Group();
     placeholder.position.set(treePositions[i].x, 0, treePositions[i].z);
     outsideGroup.add(placeholder);
+  
+    ExteriorSystem.populateTreePlaceholder(placeholder, treePositions[i].s);
     treePlaceholders.push({ group: placeholder, s: treePositions[i].s });
   }
   
