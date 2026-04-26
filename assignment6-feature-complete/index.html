@@ -1202,7 +1202,7 @@
   });
   
   const torso = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.22, 0.26, 1.1, 16),
+    new THREE.CylinderGeometry(0.18, 0.23, 1.35, 16),
     bodyMat
   );
   torso.position.y = 1.2;
@@ -1212,12 +1212,12 @@
     new THREE.SphereGeometry(0.28, 16, 16),
     bodyMat
   );
-  shoulder.scale.set(1.6, 0.8, 1.2);
+  shoulder.scale.set(1.25, 0.65, 0.9);
   shoulder.position.y = 1.8;
   playerGroup.add(shoulder);
   
   const head = new THREE.Mesh(
-    new THREE.SphereGeometry(0.22, 16, 16),
+    new THREE.SphereGeometry(0.18, 16, 16),
     bodyMat
   );
   head.position.y = 2.2;
@@ -1259,7 +1259,7 @@
   core.position.y = 1.2;
   playerGroup.add(core);
   
-  playerGroup.position.set(0, 0, 0);
+  playerGroup.position.set(0, 0.72, 0.02);
   scene.add(playerGroup);
 
   const consoleGroup = new THREE.Group();
