@@ -774,56 +774,265 @@
     movement.right = false;
   }
 
+  const TraversalSystem = {
+    bounds: {
+      minX: PLAY_MIN_X,
+      maxX: PLAY_MAX_X,
+      minZ: PLAY_MIN_Z,
+      maxZ: PLAY_MAX_Z
+    },
+  
+    house: {
+      minX: -7,
+      maxX: 7,
+      minZ: -6,
+      maxZ: 6
+    },
+  
+    door: {
+      wallX: 7,
+      centerZ: 2.0,
+      width: 1.65
+    },
+  
+    lastSafeCameraPosition: new THREE.Vector3(),
+    lastSafeControlsTarget: new THREE.Vector3(),
+    initialized: false,
+  
+    isWithinPlayableBounds(x, z) {
+      return (
+        x >= this.bounds.minX &&
+        x <= this.bounds.maxX &&
+        z >= this.bounds.minZ &&
+        z <= this.bounds.maxZ
+      );
+    },
+  
+    isInsideHouse(x, z) {
+      return (
+        x > this.house.minX &&
+        x < this.house.maxX &&
+        z > this.house.minZ &&
+        z < this.house.maxZ
+      );
+    },
+  
+    isInsideDoorPortal(z) {
+      const halfWidth = this.door.width / 2;
+      const clearance = playerRadius * 0.55;
+  
+      return (
+        z >= this.door.centerZ - halfWidth + clearance &&
+        z <= this.door.centerZ + halfWidth - clearance
+      );
+    },
+  
+    verticalWallCrossing(fromX, fromZ, toX, toZ, wallX, minZ, maxZ) {
+      const dx = toX - fromX;
+  
+      if (Math.abs(dx) < 0.00001) {
+        return { hit: false, z: null };
+      }
+  
+      const t = (wallX - fromX) / dx;
+  
+      if (t < 0 || t > 1) {
+        return { hit: false, z: null };
+      }
+  
+      const z = fromZ + (toZ - fromZ) * t;
+  
+      return {
+        hit: z >= minZ && z <= maxZ,
+        z
+      };
+    },
+  
+    horizontalWallCrossing(fromX, fromZ, toX, toZ, wallZ, minX, maxX) {
+      const dz = toZ - fromZ;
+  
+      if (Math.abs(dz) < 0.00001) {
+        return { hit: false, x: null };
+      }
+  
+      const t = (wallZ - fromZ) / dz;
+  
+      if (t < 0 || t > 1) {
+        return { hit: false, x: null };
+      }
+  
+      const x = fromX + (toX - fromX) * t;
+  
+      return {
+        hit: x >= minX && x <= maxX,
+        x
+      };
+    },
+  
+    crossesSolidHouseWall(fromX, fromZ, toX, toZ) {
+      const h = this.house;
+  
+      const rightWall = this.verticalWallCrossing(
+        fromX, fromZ, toX, toZ,
+        h.maxX, h.minZ, h.maxZ
+      );
+  
+      if (rightWall.hit) {
+        return !this.isInsideDoorPortal(rightWall.z);
+      }
+  
+      const leftWall = this.verticalWallCrossing(
+        fromX, fromZ, toX, toZ,
+        h.minX, h.minZ, h.maxZ
+      );
+  
+      if (leftWall.hit) {
+        return true;
+      }
+  
+      const backWall = this.horizontalWallCrossing(
+        fromX, fromZ, toX, toZ,
+        h.minZ, h.minX, h.maxX
+      );
+  
+      if (backWall.hit) {
+        return true;
+      }
+  
+      const frontWall = this.horizontalWallCrossing(
+        fromX, fromZ, toX, toZ,
+        h.maxZ, h.minX, h.maxX
+      );
+  
+      if (frontWall.hit) {
+        return true;
+      }
+  
+      return false;
+    },
+  
+    hitsStaticCollider(nextX, nextZ) {
+      const playerMinX = nextX - playerRadius;
+      const playerMaxX = nextX + playerRadius;
+      const playerMinZ = nextZ - playerRadius;
+      const playerMaxZ = nextZ + playerRadius;
+  
+      for (const obj of staticCollisionObjects) {
+        const box = new THREE.Box3().setFromObject(obj);
+  
+        const hit =
+          playerMaxX > box.min.x &&
+          playerMinX < box.max.x &&
+          playerMaxZ > box.min.z &&
+          playerMinZ < box.max.z;
+  
+        if (hit) {
+          return true;
+        }
+      }
+  
+      return false;
+    },
+  
+    isLegalMove(fromX, fromZ, toX, toZ, checkStaticColliders = true) {
+      if (!this.isWithinPlayableBounds(toX, toZ)) {
+        return false;
+      }
+  
+      if (this.crossesSolidHouseWall(fromX, fromZ, toX, toZ)) {
+        return false;
+      }
+  
+      if (checkStaticColliders && this.hitsStaticCollider(toX, toZ)) {
+        return false;
+      }
+  
+      return true;
+    },
+  
+    clampToPlayableBounds() {
+      const offset = controls.target.clone().sub(camera.position);
+  
+      camera.position.x = THREE.MathUtils.clamp(
+        camera.position.x,
+        this.bounds.minX,
+        this.bounds.maxX
+      );
+  
+      camera.position.z = THREE.MathUtils.clamp(
+        camera.position.z,
+        this.bounds.minZ,
+        this.bounds.maxZ
+      );
+  
+      controls.target.copy(camera.position).add(offset);
+  
+      controls.target.x = THREE.MathUtils.clamp(
+        controls.target.x,
+        this.bounds.minX,
+        this.bounds.maxX
+      );
+  
+      controls.target.z = THREE.MathUtils.clamp(
+        controls.target.z,
+        this.bounds.minZ,
+        this.bounds.maxZ
+      );
+    },
+  
+    saveSafePose() {
+      this.lastSafeCameraPosition.copy(camera.position);
+      this.lastSafeControlsTarget.copy(controls.target);
+      this.initialized = true;
+    },
+  
+    restoreSafePose() {
+      camera.position.copy(this.lastSafeCameraPosition);
+      controls.target.copy(this.lastSafeControlsTarget);
+    },
+  
+    validateCameraPose() {
+      if (appState !== "memory" || isMemoryTransitioning || !memoryWorldGroup.visible) {
+        this.saveSafePose();
+        return;
+      }
+  
+      if (!this.initialized) {
+        this.saveSafePose();
+        return;
+      }
+  
+      const legal = this.isLegalMove(
+        this.lastSafeCameraPosition.x,
+        this.lastSafeCameraPosition.z,
+        camera.position.x,
+        camera.position.z,
+        false
+      );
+  
+      if (legal) {
+        this.clampToPlayableBounds();
+        this.saveSafePose();
+      } else {
+        this.restoreSafePose();
+      }
+    }
+  };
+  
   function isInsideHouseFootprint(x, z) {
-    return (
-      x > -7 &&
-      x < 7 &&
-      z > -6 &&
-      z < 6
-    );
+    return TraversalSystem.isInsideHouse(x, z);
   }
   
   function isWithinDoorOpening(z) {
-    const doorCenterZ = 2.0;
-    const halfWidth = 1.65 / 2;
-  
-    return z >= (doorCenterZ - halfWidth) &&
-           z <= (doorCenterZ + halfWidth);
+    return TraversalSystem.isInsideDoorPortal(z);
   }
   
   function crossesHouseShell(currentX, currentZ, nextX, nextZ) {
-    const currentInside = isInsideHouseFootprint(currentX, currentZ);
-    const nextInside = isInsideHouseFootprint(nextX, nextZ);
-  
-    if (currentInside === nextInside) {
-      return false;
-    }
-  
-    const crossesRightWall =
-      (currentX < 7 && nextX >= 7) ||
-      (currentX > 7 && nextX <= 7);
-  
-    const midZ = (currentZ + nextZ) * 0.5;
-  
-    const insideDoor = isWithinDoorOpening(midZ);
-  
-    if (crossesRightWall && insideDoor) {
-      return false;
-    }
-  
-    return true;
+    return TraversalSystem.crossesSolidHouseWall(currentX, currentZ, nextX, nextZ);
   }
   
   function clampPlayerInsideRoom() {
-    const offset = controls.target.clone().sub(camera.position);
-  
-    camera.position.x = THREE.MathUtils.clamp(camera.position.x, PLAY_MIN_X, PLAY_MAX_X);
-    camera.position.z = THREE.MathUtils.clamp(camera.position.z, PLAY_MIN_Z, PLAY_MAX_Z);
-  
-    controls.target.copy(camera.position).add(offset);
-  
-    controls.target.x = THREE.MathUtils.clamp(controls.target.x, PLAY_MIN_X, PLAY_MAX_X);
-    controls.target.z = THREE.MathUtils.clamp(controls.target.z, PLAY_MIN_Z, PLAY_MAX_Z);
+    TraversalSystem.clampToPlayableBounds();
   }
   
   function getArchiveStats() {
@@ -2811,33 +3020,13 @@
   }
   
   function canMoveTo(nextX, nextZ) {
-    const playerMinX = nextX - playerRadius;
-    const playerMaxX = nextX + playerRadius;
-    const playerMinZ = nextZ - playerRadius;
-    const playerMaxZ = nextZ + playerRadius;
-
-    const currentX = camera.position.x;
-    const currentZ = camera.position.z;
-    
-    if (crossesHouseShell(currentX, currentZ, nextX, nextZ)) {
-      return false;
-    }
-    
-    for (const obj of staticCollisionObjects) {
-      const box = new THREE.Box3().setFromObject(obj);
-  
-      const hit =
-        playerMaxX > box.min.x &&
-        playerMinX < box.max.x &&
-        playerMaxZ > box.min.z &&
-        playerMinZ < box.max.z;
-  
-      if (hit) {
-        return false;
-      }
-    }
-  
-    return true;
+    return TraversalSystem.isLegalMove(
+      camera.position.x,
+      camera.position.z,
+      nextX,
+      nextZ,
+      true
+    );
   }
   
   function buildSpawnedObject(type) {
@@ -3473,6 +3662,7 @@
   
     memoryControlsInitialized = true;
     controls.update();
+    TraversalSystem.saveSafePose();
   }
   
   function configureHubControls() {
@@ -4282,6 +4472,7 @@
     consoleLight.intensity = 0.82 + ((Math.sin(time * 1.5) + 1) * 0.18);
 
     controls.update();
+    TraversalSystem.validateCameraPose();
     composer.render();
 
     frames++;
