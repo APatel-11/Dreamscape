@@ -1551,6 +1551,13 @@
     frameGroup.add(backing);
   
     frameGroup.position.z = 0.02;
+
+    frameGroup.userData.borderBars = [];
+    frameGroup.traverse(obj => {
+      if (obj.isMesh) {
+        frameGroup.userData.borderBars.push(obj);
+      }
+    });
   
     return frameGroup;
   }
