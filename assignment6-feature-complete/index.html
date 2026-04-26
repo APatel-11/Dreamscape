@@ -3768,7 +3768,7 @@
     memoryWorldGroup.visible = true;
     framesGroup.visible = true;
     platformGroup.visible = true;
-    avatarGroup.visible = true;
+    playerGroup.visible = true;
     consoleGroup.visible = true;
   
     transitionPhase1StartPos.copy(camera.position);
@@ -4112,7 +4112,7 @@
     framesGroup.visible = true;
     platformGroup.visible = true;
     consoleGroup.visible = true;
-    avatarGroup.visible = true;
+    playerGroup.visible = true;
   
     camera.position.set(0, 4.2, 11.8);
     controls.target.copy(hubTarget);
@@ -4268,7 +4268,7 @@
       scene.fog.density = 0.02;
       framesGroup.visible = true;
       platformGroup.visible = true;
-      avatarGroup.visible = true;
+      playerGroup.visible = true;
       consoleGroup.visible = true;
       memoryWorldGroup.visible = false;
 
@@ -4300,7 +4300,7 @@
     
       framesGroup.visible = true;
       platformGroup.visible = true;
-      avatarGroup.visible = true;
+      playerGroup.visible = true;
       consoleGroup.visible = true;
       memoryWorldGroup.visible = false;
     
@@ -4420,7 +4420,7 @@
         desiredCameraPos = transitionPhase1StartPos.clone().lerp(transitionPhase1EndPos, p);
         desiredLookTarget = transitionFrameCenter.clone();
     
-        avatarGroup.visible = true;
+        playerGroup.visible = true;
         framesGroup.visible = true;
         platformGroup.visible = true;
         consoleGroup.visible = true;
@@ -4454,7 +4454,7 @@
         const frameFade = Math.max(0, 1 - (p - 0.08) / 0.30);
         const worldOpacity = THREE.MathUtils.clamp((p - 0.10) / 0.28, 0, 1);
     
-        avatarGroup.visible = p < 0.16;
+        playerGroup.visible = p < 0.16;
         framesGroup.visible = p < 0.72;
         platformGroup.visible = p < 0.72;
         consoleGroup.visible = p < 0.72;
@@ -4512,7 +4512,7 @@
         framesGroup.visible = false;
         platformGroup.visible = false;
         consoleGroup.visible = false;
-        avatarGroup.visible = false;
+        playerGroup.visible = false;
     
         camera.position.copy(memoryCameraPos);
         configureMemoryControls();
@@ -4522,7 +4522,7 @@
       framesGroup.visible = false;
       platformGroup.visible = false;
       consoleGroup.visible = false;
-      avatarGroup.visible = false;
+      playerGroup.visible = false;
     
       if (!memoryControlsInitialized) {
         camera.position.copy(memoryCameraPos);
@@ -4535,9 +4535,9 @@
       consoleGroup.visible = true;
 
       if (t > 0.955) {
-        avatarGroup.visible = false;
+        playerGroup.visible = false;
       } else if (appState !== "menu") {
-        avatarGroup.visible = true;
+        playerGroup.visible = true;
       }
 
       controls.target.lerp(desiredTarget, 0.06);
