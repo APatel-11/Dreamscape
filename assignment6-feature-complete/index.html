@@ -1187,90 +1187,94 @@
 
   const playerGroup = new THREE.Group();
   
-  const playerBodyMat = new THREE.MeshStandardMaterial({
-    color: 0x2a2f3a,
-    roughness: 0.55,
-    metalness: 0.18,
-    emissive: 0x0b1020,
-    emissiveIntensity: 0.12
+  const observerCloakMat = new THREE.MeshStandardMaterial({
+    color: 0x242838,
+    roughness: 0.72,
+    metalness: 0.12,
+    emissive: 0x080d18,
+    emissiveIntensity: 0.18
   });
   
-  const playerAccentMat = new THREE.MeshStandardMaterial({
-    color: 0x7fd6ff,
-    roughness: 0.3,
-    metalness: 0.5,
-    emissive: 0x10334f,
-    emissiveIntensity: 0.35
+  const observerInnerMat = new THREE.MeshStandardMaterial({
+    color: 0x0d1020,
+    roughness: 0.9,
+    metalness: 0.05,
+    emissive: 0x111b36,
+    emissiveIntensity: 0.28
   });
   
-  const legGeo = new THREE.CylinderGeometry(0.075, 0.085, 0.95, 14);
+  const observerGlowMat = new THREE.MeshBasicMaterial({
+    color: 0x83ddff,
+    transparent: true,
+    opacity: 0.55
+  });
   
-  const legLeft = new THREE.Mesh(legGeo, playerBodyMat);
-  legLeft.position.set(-0.13, 0.55, 0);
-  playerGroup.add(legLeft);
-  
-  const legRight = new THREE.Mesh(legGeo, playerBodyMat);
-  legRight.position.set(0.13, 0.55, 0);
-  playerGroup.add(legRight);
-  
-  const footLeft = new THREE.Mesh(
-    new THREE.BoxGeometry(0.18, 0.08, 0.28),
-    playerBodyMat
+  const cloak = new THREE.Mesh(
+    new THREE.ConeGeometry(0.58, 1.75, 36, 1, true),
+    observerCloakMat
   );
-  footLeft.position.set(-0.13, 0.08, 0.08);
-  playerGroup.add(footLeft);
+  cloak.position.y = 1.18;
+  cloak.rotation.y = Math.PI / 36;
+  cloak.castShadow = true;
+  cloak.receiveShadow = true;
+  playerGroup.add(cloak);
   
-  const footRight = footLeft.clone();
-  footRight.position.x = 0.13;
-  playerGroup.add(footRight);
-  
-  const torso = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.18, 0.25, 0.95, 18),
-    playerBodyMat
+  const innerShadow = new THREE.Mesh(
+    new THREE.PlaneGeometry(0.38, 1.25),
+    observerInnerMat
   );
-  torso.position.set(0, 1.42, 0);
-  playerGroup.add(torso);
+  innerShadow.position.set(0, 1.13, 0.48);
+  innerShadow.rotation.x = -0.04;
+  playerGroup.add(innerShadow);
   
-  const shoulders = new THREE.Mesh(
-    new THREE.SphereGeometry(0.2, 18, 18),
-    playerBodyMat
+  const mantle = new THREE.Mesh(
+    new THREE.SphereGeometry(0.34, 24, 16),
+    observerCloakMat
   );
-  shoulders.scale.set(1.35, 0.45, 0.8);
-  shoulders.position.set(0, 1.92, 0);
-  playerGroup.add(shoulders);
-  
-  const armGeo = new THREE.CylinderGeometry(0.055, 0.06, 0.92, 12);
-  
-  const armLeft = new THREE.Mesh(armGeo, playerBodyMat);
-  armLeft.position.set(-0.42, 1.5, 0.02);
-  armLeft.rotation.z = -0.22;
-  playerGroup.add(armLeft);
-  
-  const armRight = new THREE.Mesh(armGeo, playerBodyMat);
-  armRight.position.set(0.42, 1.5, 0.02);
-  armRight.rotation.z = 0.22;
-  playerGroup.add(armRight);
+  mantle.scale.set(1.65, 0.32, 0.9);
+  mantle.position.y = 1.92;
+  mantle.castShadow = true;
+  playerGroup.add(mantle);
   
   const head = new THREE.Mesh(
-    new THREE.SphereGeometry(0.19, 18, 18),
-    playerBodyMat
+    new THREE.SphereGeometry(0.22, 24, 18),
+    new THREE.MeshStandardMaterial({
+      color: 0x2f3448,
+      roughness: 0.55,
+      metalness: 0.18,
+      emissive: 0x111a33,
+      emissiveIntensity: 0.2
+    })
   );
-  head.position.set(0, 2.28, 0.02);
+  head.position.y = 2.25;
+  head.castShadow = true;
   playerGroup.add(head);
   
   const visor = new THREE.Mesh(
-    new THREE.PlaneGeometry(0.28, 0.1),
-    playerAccentMat
+    new THREE.PlaneGeometry(0.28, 0.08),
+    observerGlowMat
   );
-  visor.position.set(0, 2.29, 0.18);
+  visor.position.set(0, 2.25, 0.205);
   playerGroup.add(visor);
   
   const core = new THREE.Mesh(
-    new THREE.SphereGeometry(0.065, 12, 12),
-    playerAccentMat
+    new THREE.SphereGeometry(0.085, 16, 16),
+    observerGlowMat
   );
-  core.position.set(0, 1.45, 0.19);
+  core.position.set(0, 1.42, 0.42);
   playerGroup.add(core);
+  
+  const auraRing = new THREE.Mesh(
+    new THREE.TorusGeometry(0.62, 0.012, 12, 80),
+    new THREE.MeshBasicMaterial({
+      color: 0x77d6ff,
+      transparent: true,
+      opacity: 0.22
+    })
+  );
+  auraRing.position.set(0, 1.55, -0.04);
+  auraRing.rotation.x = Math.PI / 2;
+  playerGroup.add(auraRing);
   
   playerGroup.position.set(0, 0.72, 0.02);
   scene.add(playerGroup);
