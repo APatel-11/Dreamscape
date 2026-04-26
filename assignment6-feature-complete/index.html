@@ -546,8 +546,52 @@
   );
   camera.position.set(0, 4.2, 11.8);
 
+  const PerformanceSystem = {
+    mode: "balanced",
+  
+    settings: {
+      high: {
+        pixelRatio: 1.5,
+        shadowSize: 2048,
+        bloomStrength: 0.28,
+        bloomRadius: 0.35
+      },
+      balanced: {
+        pixelRatio: 1.15,
+        shadowSize: 1024,
+        bloomStrength: 0.22,
+        bloomRadius: 0.28
+      },
+      performance: {
+        pixelRatio: 1.0,
+        shadowSize: 1024,
+        bloomStrength: 0.12,
+        bloomRadius: 0.2
+      }
+    },
+  
+    get active() {
+      return this.settings[this.mode];
+    },
+  
+    applyRenderer(renderer) {
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, this.active.pixelRatio));
+    },
+  
+    applyShadowQuality(light) {
+      light.shadow.mapSize.width = this.active.shadowSize;
+      light.shadow.mapSize.height = this.active.shadowSize;
+    },
+  
+    applyBloom(bloomPass) {
+      bloomPass.strength = this.active.bloomStrength;
+      bloomPass.radius = this.active.bloomRadius;
+      bloomPass.threshold = 0.85;
+    }
+  };
+
   const renderer = new THREE.WebGLRenderer({ antialias: true });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  PerformanceSystem.applyRenderer(renderer);
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -571,10 +615,12 @@
   const composer = new THREE.EffectComposer(renderer);
   const renderPass = new THREE.RenderPass(scene, camera);
   composer.addPass(renderPass);
+  
   const bloomPass = new THREE.UnrealBloomPass(
     new THREE.Vector2(window.innerWidth / 2, window.innerHeight / 2),
     0.3, 0.4, 0.85
   );
+  PerformanceSystem.applyBloom(bloomPass);
   composer.addPass(bloomPass);
 
   const controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -591,8 +637,7 @@
   keyLight.target.position.set(0, 2.2, 0);
   
   keyLight.castShadow = true;
-  keyLight.shadow.mapSize.width = 4096;
-  keyLight.shadow.mapSize.height = 4096;
+  PerformanceSystem.applyShadowQuality(keyLight);
   keyLight.shadow.bias = -0.00015;
   keyLight.shadow.normalBias = 0.02;
   keyLight.shadow.camera.near = 1;
