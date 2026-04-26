@@ -1101,42 +1101,88 @@
   }
 
   const platformGroup = new THREE.Group();
-
+  
+  const platformBaseMat = new THREE.MeshStandardMaterial({
+    color: 0x2c2b34,
+    roughness: 0.72,
+    metalness: 0.18
+  });
+  
+  const platformTrimMat = new THREE.MeshStandardMaterial({
+    color: 0x7c8fb8,
+    roughness: 0.42,
+    metalness: 0.55,
+    emissive: 0x121a33,
+    emissiveIntensity: 0.18
+  });
+  
+  const platformGlowMat = new THREE.MeshBasicMaterial({
+    color: 0x75d7ff,
+    transparent: true,
+    opacity: 0.22
+  });
+  
+  const lowerDisk = new THREE.Mesh(
+    new THREE.CylinderGeometry(2.95, 3.05, 0.22, 96),
+    platformBaseMat
+  );
+  lowerDisk.position.y = 0.02;
+  lowerDisk.castShadow = true;
+  lowerDisk.receiveShadow = true;
+  platformGroup.add(lowerDisk);
+  
+  const middleDisk = new THREE.Mesh(
+    new THREE.CylinderGeometry(2.55, 2.7, 0.26, 96),
+    platformBaseMat
+  );
+  middleDisk.position.y = 0.23;
+  middleDisk.castShadow = true;
+  middleDisk.receiveShadow = true;
+  platformGroup.add(middleDisk);
+  
   const topDisk = new THREE.Mesh(
-    new THREE.CylinderGeometry(2.15, 2.7, 0.38, 56),
+    new THREE.CylinderGeometry(2.18, 2.32, 0.18, 96),
     new THREE.MeshStandardMaterial({
-      color: 0x5a535d,
-      roughness: 0.96,
-      metalness: 0.02
+      color: 0x4f5365,
+      roughness: 0.68,
+      metalness: 0.16
     })
   );
-  topDisk.position.y = 0.28;
+  topDisk.position.y = 0.45;
+  topDisk.castShadow = true;
+  topDisk.receiveShadow = true;
   platformGroup.add(topDisk);
-
-  const lowerCone = new THREE.Mesh(
-    new THREE.ConeGeometry(1.7, 2.35, 56),
+  
+  const outerGlowRing = new THREE.Mesh(
+    new THREE.TorusGeometry(2.68, 0.035, 12, 128),
+    platformGlowMat
+  );
+  outerGlowRing.rotation.x = Math.PI / 2;
+  outerGlowRing.position.y = 0.38;
+  platformGroup.add(outerGlowRing);
+  
+  const innerTrimRing = new THREE.Mesh(
+    new THREE.TorusGeometry(1.72, 0.025, 12, 128),
+    platformTrimMat
+  );
+  innerTrimRing.rotation.x = Math.PI / 2;
+  innerTrimRing.position.y = 0.56;
+  platformGroup.add(innerTrimRing);
+  
+  const centerInlay = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.82, 0.88, 0.035, 80),
     new THREE.MeshStandardMaterial({
-      color: 0x454049,
-      roughness: 0.99,
-      metalness: 0.01
+      color: 0x1a1d29,
+      roughness: 0.5,
+      metalness: 0.35,
+      emissive: 0x0d1830,
+      emissiveIntensity: 0.2
     })
   );
-  lowerCone.position.y = -1.15;
-  platformGroup.add(lowerCone);
-
-  const undersideRing = new THREE.Mesh(
-    new THREE.TorusGeometry(1.5, 0.05, 12, 80),
-    new THREE.MeshStandardMaterial({
-      color: 0x7b727f,
-      roughness: 0.9,
-      metalness: 0.02
-    })
-  );
-  undersideRing.rotation.x = Math.PI / 2;
-  undersideRing.position.y = -0.22;
-  platformGroup.add(undersideRing);
-
-  platformGroup.position.set(0, 0.55, 0);
+  centerInlay.position.y = 0.57;
+  platformGroup.add(centerInlay);
+  
+  platformGroup.position.set(0, 0.32, 0);
   scene.add(platformGroup);
 
   const avatarGroup = new THREE.Group();
