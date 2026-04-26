@@ -1220,11 +1220,11 @@
   });
   
   const cloakBody = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.88, 1.28, 2.05, 32, 1, true),
+    new THREE.CylinderGeometry(0.38, 0.74, 2.25, 32, 1, true),
     cloakOuterMat
   );
-  cloakBody.position.y = 1.2;
-  cloakBody.scale.set(0.72, 1.0, 0.46);
+  cloakBody.position.y = 1.28;
+  cloakBody.scale.set(0.82, 1.0, 0.52);
   cloakBody.castShadow = true;
   cloakBody.receiveShadow = true;
   playerGroup.add(cloakBody);
@@ -1233,16 +1233,16 @@
     new THREE.SphereGeometry(0.62, 32, 16),
     cloakMidMat
   );
-  shoulderCape.scale.set(1.35, 0.34, 0.72);
-  shoulderCape.position.y = 2.05;
+  shoulderCape.scale.set(0.95, 0.26, 0.55);
+  shoulderCape.position.y = 2.08;
   shoulderCape.castShadow = true;
   playerGroup.add(shoulderCape);
   
   const hood = new THREE.Mesh(
-    new THREE.SphereGeometry(0.42, 32, 18),
+    new THREE.SphereGeometry(0.32, 32, 18),
     cloakOuterMat
   );
-  hood.scale.set(0.82, 1.08, 0.72);
+  hood.scale.set(0.78, 1.12, 0.68);
   hood.position.set(0, 2.42, -0.02);
   hood.castShadow = true;
   playerGroup.add(hood);
