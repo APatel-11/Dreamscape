@@ -4346,7 +4346,7 @@
     }, 160);
   }
 
-  function startOverlay() {
+  function beginOverlay() {
     overlayActive = true;
     overlayBaseProgress = 5;
     setOverlayProgress(5);
@@ -4385,7 +4385,7 @@
 
     // Show overlay immediately so user sees feedback, not a freeze
     document.getElementById("transitionOverlay").classList.add("visible");
-    startOverlay();
+    beginOverlay();
 
     // Defer heavy work one paint cycle so overlay renders first
     setTimeout(() => {
