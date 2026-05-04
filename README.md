@@ -6,7 +6,9 @@ Dreamscape is a web-based interactive system that reimagines memory as a navigab
 
 The project explores how internal mental experiences (memory, mood, atmosphere) can be expressed through procedural generation, real-time rendering, and direct interaction.
 
-🔗 **Live Final Build:** [https://apatel-11.github.io/Dreamscape/](https://apatel-11.github.io/Dreamscape/)
+🔗 **Live Final Build(In Progress):** [https://apatel-11.github.io/Dreamscape/](https://apatel-11.github.io/Dreamscape/)
+
+🔗 **Live Build:** [https://apatel-11.github.io/Dreamscape/assignment7-final-submission](https://apatel-11.github.io/Dreamscape/assignment7-final-submission)
 
 🔗 **Repository:** [https://github.com/APatel-11/Dreamscape](https://github.com/APatel-11/Dreamscape)
 
