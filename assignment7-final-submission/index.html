@@ -570,8 +570,6 @@
   <div id="editPanelBody">
     <div class="label">Object Type</div>
     <select id="objectTypeSelect">
-      <option value="sofa">Sofa</option>
-      <option value="armchair">Armchair</option>
       <option value="bookshelf">Bookshelf</option>
       <option value="floorLamp">Floor Lamp</option>
       <option value="ceramicVase">Ceramic Vase</option>
@@ -3460,33 +3458,6 @@
 
     // ── GLB-based objects: clone already-loaded models at 65% scale ──────────
     // Models are in memory from scene load so cloning is instantaneous, no FPS hit.
-
-    if (type === "sofa") {
-      root = new THREE.Group();
-      if (loadedModels.sofa) {
-        const clone = loadedModels.sofa.clone();
-        // Match the room's sofa scale (2.5,1.5,1.8) then bring to 65%
-        const S = 0.65;
-        clone.scale.set(2.5 * S, 1.5 * S, 1.8 * S);
-        clone.position.set(0, 0.5 * 1.5 * S, 0);
-        root.add(clone);
-      }
-      root.position.y = 0;
-      label = "sofa";
-    }
-
-    if (type === "armchair") {
-      root = new THREE.Group();
-      if (loadedModels.armchair) {
-        const clone = loadedModels.armchair.clone();
-        const S = 0.65;
-        clone.scale.set(1.6 * S, 1.6 * S, 1.6 * S);
-        clone.position.set(0, 0, 0);
-        root.add(clone);
-      }
-      root.position.y = 0;
-      label = "armchair";
-    }
 
     if (type === "bookshelf") {
       root = new THREE.Group();
