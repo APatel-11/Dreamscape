@@ -1368,121 +1368,159 @@
   scene.add(platformGroup);
 
   const playerGroup = new THREE.Group();
-  
-  const cloakOuterMat = new THREE.MeshStandardMaterial({
-    color: 0x05070d,
-    roughness: 0.92,
-    metalness: 0.02,
-    emissive: 0x02040a,
-    emissiveIntensity: 0.18,
-    side: THREE.DoubleSide
+
+  // ── Materials ─────────────────────────────────────────────────────────────
+  const mannMat = new THREE.MeshStandardMaterial({
+    color: 0x3a4a58, roughness: 0.82, metalness: 0.08,
+    emissive: 0x0d1520, emissiveIntensity: 0.10
   });
-  
-  const cloakMidMat = new THREE.MeshStandardMaterial({
-    color: 0x111827,
-    roughness: 0.88,
-    metalness: 0.04,
-    emissive: 0x07101f,
-    emissiveIntensity: 0.22,
-    side: THREE.DoubleSide
+  const jointMat = new THREE.MeshStandardMaterial({
+    color: 0x4a5c6e, roughness: 0.78, metalness: 0.10,
+    emissive: 0x111e28, emissiveIntensity: 0.10
   });
-  
-  const cloakShadowMat = new THREE.MeshBasicMaterial({
-    color: 0x000000,
-    transparent: true,
-    opacity: 0.88,
-    side: THREE.DoubleSide
-  });
-  
-  const cloakGlowMat = new THREE.MeshBasicMaterial({
-    color: 0x78d9ff,
-    transparent: true,
-    opacity: 0.35,
-    side: THREE.DoubleSide
-  });
-  
-  const cloakBody = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.38, 0.74, 2.25, 32, 1, true),
-    cloakOuterMat
-  );
-  cloakBody.position.y = 1.28;
-  cloakBody.scale.set(0.82, 1.0, 0.52);
-  cloakBody.castShadow = true;
-  cloakBody.receiveShadow = true;
-  playerGroup.add(cloakBody);
-  
-  const shoulderCape = new THREE.Mesh(
-    new THREE.SphereGeometry(0.62, 32, 16),
-    cloakMidMat
-  );
-  shoulderCape.scale.set(0.95, 0.26, 0.55);
-  shoulderCape.position.y = 2.08;
-  shoulderCape.castShadow = true;
-  playerGroup.add(shoulderCape);
-  
-  const hood = new THREE.Mesh(
-    new THREE.SphereGeometry(0.32, 32, 18),
-    cloakOuterMat
-  );
-  hood.scale.set(0.78, 1.12, 0.68);
-  hood.position.set(0, 2.42, -0.02);
-  hood.castShadow = true;
-  playerGroup.add(hood);
-  
-  const hoodOpening = new THREE.Mesh(
-    new THREE.PlaneGeometry(0.34, 0.42),
-    cloakShadowMat
-  );
-  hoodOpening.position.set(0, 2.38, -0.31);
-  playerGroup.add(hoodOpening);
-  
-  const frontOpening = new THREE.Mesh(
-    new THREE.PlaneGeometry(0.32, 1.48),
-    cloakShadowMat
-  );
-  frontOpening.position.set(0, 1.35, -0.48);
-  playerGroup.add(frontOpening);
-  
-  const leftDrape = new THREE.Mesh(
-    new THREE.PlaneGeometry(0.46, 1.7),
-    cloakMidMat
-  );
-  leftDrape.position.set(-0.43, 1.12, -0.18);
-  leftDrape.rotation.z = -0.16;
-  leftDrape.rotation.y = 0.18;
-  playerGroup.add(leftDrape);
-  
-  const rightDrape = new THREE.Mesh(
-    new THREE.PlaneGeometry(0.46, 1.7),
-    cloakMidMat
-  );
-  rightDrape.position.set(0.43, 1.12, -0.18);
-  rightDrape.rotation.z = 0.16;
-  rightDrape.rotation.y = -0.18;
-  playerGroup.add(rightDrape);
-  
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
+  function ellipsoid(sx, sy, sz, mat) {
+    const m = new THREE.Mesh(new THREE.SphereGeometry(0.5, 16, 12), mat || mannMat);
+    m.scale.set(sx, sy, sz);
+    m.castShadow = true;
+    return m;
+  }
+  function limb(rt, rb, h, mat) {
+    const m = new THREE.Mesh(
+      new THREE.CylinderGeometry(rt, rb, h, 14), mat || mannMat
+    );
+    m.castShadow = true;
+    return m;
+  }
+  function place(mesh, parent, x, y, z) {
+    mesh.position.set(x, y, z);
+    parent.add(mesh);
+    return mesh;
+  }
+
+  // ── FIGURE — built from feet (y=0) upward ─────────────────────────────────
+
+  // FEET
+  place(ellipsoid(0.18, 0.08, 0.26), playerGroup,  0.11, 0.06,  0.04);
+  place(ellipsoid(0.18, 0.08, 0.26), playerGroup, -0.11, 0.06,  0.04);
+
+  // SHINS
+  place(limb(0.07, 0.08, 0.38), playerGroup,  0.11, 0.27, 0);
+  place(limb(0.07, 0.08, 0.38), playerGroup, -0.11, 0.27, 0);
+
+  // KNEE BALLS
+  place(ellipsoid(0.14, 0.14, 0.14, jointMat), playerGroup,  0.11, 0.50, 0);
+  place(ellipsoid(0.14, 0.14, 0.14, jointMat), playerGroup, -0.11, 0.50, 0);
+
+  // THIGHS — raised to meet torso bottom
+  place(limb(0.09, 0.11, 0.40), playerGroup,  0.12, 0.73, 0);
+  place(limb(0.09, 0.11, 0.40), playerGroup, -0.12, 0.73, 0);
+
+  // HIP CONNECTOR — small ellipsoid bridges thigh tops to torso bottom
+  place(ellipsoid(0.26, 0.14, 0.22, jointMat), playerGroup, 0, 0.95, 0);
+
+  // TORSO — wider at hips, narrower at chest
+  place(limb(0.18, 0.24, 0.48), playerGroup, 0, 1.20, 0);
+
+  // CHEST
+  place(ellipsoid(0.28, 0.18, 0.22), playerGroup, 0, 1.50, 0);
+
+  // SHOULDER BALLS
+  place(ellipsoid(0.13, 0.13, 0.13, jointMat), playerGroup,  0.26, 1.52, 0);
+  place(ellipsoid(0.13, 0.13, 0.13, jointMat), playerGroup, -0.26, 1.52, 0);
+
+  // NECK
+  place(limb(0.07, 0.07, 0.14), playerGroup, 0, 1.64, 0);
+
+  // HEAD — slight forward nod toward console
+  const headMesh = ellipsoid(0.28, 0.33, 0.26);
+  headMesh.rotation.x = 0.20;
+  place(headMesh, playerGroup, 0, 1.82, -0.02);
+
+  // ── ARMS — hierarchical groups ────────────────────────────────────────────
+  // Shoulder group rotates → whole arm follows (mannequin.js approach)
+  function buildArm(side) {
+    const shoulderGrp = new THREE.Group();
+    shoulderGrp.position.set(side * 0.26, 1.54, 0);
+    shoulderGrp.rotation.x = -0.88; // ~50° forward toward console
+    shoulderGrp.rotation.z = side * 0.18; // slight outward
+    playerGroup.add(shoulderGrp);
+
+    // Joint cap at y=0 — visually bridges arm to shoulder ball
+    // no matter what angle the arm is at
+    const cap = ellipsoid(0.11, 0.11, 0.11, jointMat);
+    cap.position.set(0, 0, 0);
+    shoulderGrp.add(cap);
+
+    // Upper arm hangs below shoulder group origin
+    const ua = limb(0.08, 0.07, 0.26);
+    ua.position.set(0, -0.13, 0);
+    shoulderGrp.add(ua);
+
+    // Elbow ball
+    const eb = ellipsoid(0.10, 0.10, 0.10, jointMat);
+    eb.position.set(0, -0.24, 0);
+    shoulderGrp.add(eb);
+
+    // Elbow group — child of shoulder, adds slight forward bend
+    const elbowGrp = new THREE.Group();
+    elbowGrp.position.set(0, -0.24, 0);
+    elbowGrp.rotation.x = -0.20;
+    shoulderGrp.add(elbowGrp);
+
+    // Forearm
+    const fa = limb(0.065, 0.060, 0.20);
+    fa.position.set(0, -0.10, 0);
+    elbowGrp.add(fa);
+
+    // Hand
+    const hand = ellipsoid(0.09, 0.07, 0.06, jointMat);
+    hand.position.set(0, -0.20, 0);
+    elbowGrp.add(hand);
+  }
+
+  buildArm( 1); // right
+  buildArm(-1); // left
+
+  // ── CHEST GLOW ────────────────────────────────────────────────────────────
   const chestGlow = new THREE.Mesh(
-    new THREE.CircleGeometry(0.12, 24),
-    cloakGlowMat
+    new THREE.CircleGeometry(0.055, 14),
+    new THREE.MeshBasicMaterial({ color: 0x4fb8ff, transparent: true, opacity: 0.75 })
   );
-  chestGlow.position.set(0, 1.62, -0.5);
+  chestGlow.position.set(0, 1.48, -0.12);
   playerGroup.add(chestGlow);
-  
-  const cloakBaseShadow = new THREE.Mesh(
-    new THREE.CircleGeometry(0.72, 32),
+
+  const chestHalo = new THREE.Mesh(
+    new THREE.CircleGeometry(0.13, 14),
+    new THREE.MeshBasicMaterial({ color: 0x4fb8ff, transparent: true, opacity: 0.13 })
+  );
+  chestHalo.position.set(0, 1.48, -0.11);
+  playerGroup.add(chestHalo);
+
+  // ── BASE SHADOW ───────────────────────────────────────────────────────────
+  const baseShadow = new THREE.Mesh(
+    new THREE.CircleGeometry(0.44, 24),
     new THREE.MeshBasicMaterial({
-      color: 0x000000,
-      transparent: true,
-      opacity: 0.28,
-      side: THREE.DoubleSide
+      color: 0x000000, transparent: true, opacity: 0.26, side: THREE.DoubleSide
     })
   );
-  cloakBaseShadow.rotation.x = -Math.PI / 2;
-  cloakBaseShadow.position.y = 0.03;
-  playerGroup.add(cloakBaseShadow);
+  baseShadow.rotation.x = -Math.PI / 2;
+  baseShadow.position.y = 0.01;
+  playerGroup.add(baseShadow);
+
+  // ── LIGHTING ──────────────────────────────────────────────────────────────
+  const playerRimLight = new THREE.PointLight(0x78d9ff, 1.5, 5.5);
+  playerRimLight.position.set(0, 2.8, 1.8);
+  playerGroup.add(playerRimLight);
+
+  const playerFillLight = new THREE.PointLight(0x7aaad4, 0.55, 4.5);
+  playerFillLight.position.set(0, 2.2, -2.2);
+  playerGroup.add(playerFillLight);
 
   playerGroup.position.set(0, 0.72, 0.02);
-  playerGroup.rotation.y = Math.PI;
+  playerGroup.rotation.y = Math.PI; // face the console (+Z direction)
+  playerGroup.scale.set(1.25, 1.25, 1.25); // scale up for presence
   scene.add(playerGroup);
 
   const consoleGroup = new THREE.Group();
