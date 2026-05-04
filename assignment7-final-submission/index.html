@@ -297,19 +297,22 @@
     border: 1px solid rgba(255,255,255,0.12);
   }
 
+  /* ───── Transition overlay: dreamscape "reconstructing memory" cinematic ───── */
   #transitionOverlay {
     position: fixed;
     inset: 0;
     z-index: 200;
-    background: #000;
+    background:
+      radial-gradient(ellipse at center, #0a0d1c 0%, #050408 70%),
+      #000;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-direction: column;
-    gap: 14px;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.35s ease;
+    transition: opacity 0.45s ease;
+    overflow: hidden;
   }
 
   #transitionOverlay.visible {
@@ -317,26 +320,152 @@
     pointer-events: all;
   }
 
+  /* Pulsing radial glow behind the text — cyan to magenta blend */
+  #transitionOverlay::before {
+    content: "";
+    position: absolute;
+    width: 900px;
+    height: 900px;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle at center,
+      rgba(120, 200, 255, 0.18) 0%,
+      rgba(180, 130, 255, 0.10) 30%,
+      rgba(255, 140, 200, 0.04) 55%,
+      rgba(0, 0, 0, 0) 75%
+    );
+    filter: blur(40px);
+    animation: overlayBreathe 3.2s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  /* Drifting horizontal scanlines like the holographic console */
+  #transitionOverlay::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: repeating-linear-gradient(
+      0deg,
+      rgba(140, 220, 255, 0.0) 0px,
+      rgba(140, 220, 255, 0.0) 2px,
+      rgba(140, 220, 255, 0.045) 3px,
+      rgba(140, 220, 255, 0.0) 4px
+    );
+    animation: overlayScan 8s linear infinite;
+    pointer-events: none;
+    mix-blend-mode: screen;
+  }
+
+  @keyframes overlayBreathe {
+    0%, 100% { transform: scale(0.92); opacity: 0.7; }
+    50%      { transform: scale(1.08); opacity: 1.0; }
+  }
+
+  @keyframes overlayScan {
+    0%   { background-position: 0 0;     }
+    100% { background-position: 0 -240px; }
+  }
+
+  .overlayContent {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    padding: 0 32px;
+  }
+
   #transitionOverlay .overlay-title {
-    font-family: system-ui, -apple-system, sans-serif;
-    font-size: 22px;
-    font-weight: 300;
-    letter-spacing: 0.18em;
-    color: #c8e8ff;
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-size: 30px;
+    font-weight: 200;
+    letter-spacing: 0.42em;
+    color: #e8f6ff;
     text-transform: uppercase;
+    text-shadow:
+      0 0 16px rgba(120, 200, 255, 0.6),
+      0 0 36px rgba(180, 130, 255, 0.35);
+    padding-left: 0.42em; /* compensate for the letter-spacing on the right edge */
   }
 
-  #transitionOverlay .overlay-sub {
-    font-family: monospace;
-    font-size: 12px;
-    color: rgba(160, 210, 255, 0.6);
-    letter-spacing: 0.12em;
-    animation: overlayPulse 1.4s ease-in-out infinite;
+  #transitionOverlay .overlay-divider {
+    width: 56px;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      rgba(140, 220, 255, 0) 0%,
+      rgba(140, 220, 255, 0.65) 50%,
+      rgba(200, 150, 255, 0) 100%
+    );
   }
 
-  @keyframes overlayPulse {
-    0%, 100% { opacity: 0.4; }
-    50%       { opacity: 1;   }
+  #transitionOverlay .overlay-status {
+    font-family: ui-monospace, "SFMono-Regular", "Consolas", monospace;
+    font-size: 13px;
+    color: rgba(180, 220, 255, 0.78);
+    letter-spacing: 0.14em;
+    min-height: 18px;
+    text-transform: lowercase;
+    transition: opacity 0.25s ease;
+  }
+
+  #transitionOverlay .overlay-status::after {
+    content: "";
+    display: inline-block;
+    width: 7px;
+    height: 13px;
+    background: rgba(200, 230, 255, 0.85);
+    margin-left: 4px;
+    transform: translateY(2px);
+    animation: overlayCursor 0.95s steps(2, end) infinite;
+  }
+
+  @keyframes overlayCursor {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+  }
+
+  /* Progress bar at the bottom — actual loading progress */
+  #transitionOverlay .overlay-progress-track {
+    position: absolute;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(420px, 64vw);
+    height: 2px;
+    background: rgba(140, 200, 255, 0.10);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  #transitionOverlay .overlay-progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(
+      90deg,
+      #4fb8ff 0%,
+      #a890ff 50%,
+      #f490d8 100%
+    );
+    box-shadow:
+      0 0 10px rgba(120, 200, 255, 0.7),
+      0 0 22px rgba(180, 130, 255, 0.4);
+    transition: width 0.18s ease-out;
+    border-radius: 2px;
+  }
+
+  /* Subtle vignette over everything */
+  #transitionOverlay .overlay-vignette {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(
+      ellipse at center,
+      rgba(0,0,0,0) 50%,
+      rgba(0,0,0,0.55) 100%
+    );
+    z-index: 3;
   }
 </style>
 </head>
@@ -344,8 +473,15 @@
 <body>
 
 <div id="transitionOverlay">
-  <div class="overlay-title">Dreamscape</div>
-  <div class="overlay-sub">reconstructing memory&hellip;</div>
+  <div class="overlayContent">
+    <div class="overlay-title">Dreamscape</div>
+    <div class="overlay-divider"></div>
+    <div class="overlay-status" id="overlayStatusLine">accessing archive</div>
+  </div>
+  <div class="overlay-progress-track">
+    <div class="overlay-progress-fill" id="overlayProgressFill"></div>
+  </div>
+  <div class="overlay-vignette"></div>
 </div>
 
 <div id="startOverlay">
@@ -4181,16 +4317,83 @@
 
   cycleToneBtn.addEventListener("click", cycleSelectedMemoryTone);
 
+  // ─── Transition overlay state machine ──────────────────────────────────
+  // Drives progress bar + cycling status text in sync with actual loading work.
+  const overlayStatusEl = document.getElementById("overlayStatusLine");
+  const overlayProgressEl = document.getElementById("overlayProgressFill");
+  const OVERLAY_STATUS_LINES = [
+    "accessing archive",
+    "resolving spatial structure",
+    "reconstructing memory"
+  ];
+  let overlayActive = false;
+  let overlayBaseProgress = 0;        // jumps as work milestones complete
+  let overlayStatusIndex = 0;
+  let overlayStatusTimer = null;
+
+  function setOverlayProgress(pct) {
+    if (!overlayProgressEl) return;
+    overlayProgressEl.style.width = Math.max(0, Math.min(100, pct)) + "%";
+  }
+
+  function setOverlayStatus(idx) {
+    if (!overlayStatusEl) return;
+    overlayStatusIndex = idx;
+    overlayStatusEl.style.opacity = "0";
+    setTimeout(() => {
+      overlayStatusEl.textContent = OVERLAY_STATUS_LINES[idx] || "";
+      overlayStatusEl.style.opacity = "1";
+    }, 160);
+  }
+
+  function startOverlay() {
+    overlayActive = true;
+    overlayBaseProgress = 5;
+    setOverlayProgress(5);
+    setOverlayStatus(0);
+
+    // Cycle through status lines every ~700ms while overlay is active.
+    if (overlayStatusTimer) clearInterval(overlayStatusTimer);
+    overlayStatusTimer = setInterval(() => {
+      if (!overlayActive) return;
+      const next = Math.min(overlayStatusIndex + 1, OVERLAY_STATUS_LINES.length - 1);
+      if (next !== overlayStatusIndex) setOverlayStatus(next);
+    }, 750);
+  }
+
+  function stopOverlay() {
+    overlayActive = false;
+    if (overlayStatusTimer) {
+      clearInterval(overlayStatusTimer);
+      overlayStatusTimer = null;
+    }
+    setOverlayProgress(100);
+    document.getElementById("transitionOverlay").classList.remove("visible");
+  }
+
+  // Expose for the animate-loop progress driver
+  window.__updateOverlayProgress = function(beziertProgress01) {
+    if (!overlayActive) return;
+    // Map: heavy work done = ~30%, then bezier 0..1 maps to 30..98%
+    const mapped = overlayBaseProgress + (beziertProgress01 * (98 - overlayBaseProgress));
+    setOverlayProgress(mapped);
+  };
+
   enterBtn.addEventListener("click", () => {
     if (!selectedFrame) return;
+    if (overlayActive) return; // ignore double clicks
 
     // Show overlay immediately so user sees feedback, not a freeze
-    const transOverlay = document.getElementById("transitionOverlay");
-    transOverlay.classList.add("visible");
+    document.getElementById("transitionOverlay").classList.add("visible");
+    startOverlay();
 
     // Defer heavy work one paint cycle so overlay renders first
     setTimeout(() => {
       loadSelectedMemoryObjects();
+      // Heavy work done - bump progress
+      overlayBaseProgress = 30;
+      setOverlayProgress(30);
+
       beginMemoryTransition();
       setAppState("memory");
       updateMemoryPanel();
@@ -4199,7 +4402,8 @@
   });
 
   exitBtn.addEventListener("click", () => {
-    document.getElementById("transitionOverlay").classList.remove("visible");
+    if (typeof stopOverlay === "function") stopOverlay();
+    else document.getElementById("transitionOverlay").classList.remove("visible");
     isMemoryTransitioning = false;
     memoryTransitionProgress = 0;
     memoryWorldGroup.visible = false;
@@ -4238,7 +4442,8 @@
   });
 
   backToMenuBtn.addEventListener("click", () => {
-    document.getElementById("transitionOverlay").classList.remove("visible");
+    if (typeof stopOverlay === "function") stopOverlay();
+    else document.getElementById("transitionOverlay").classList.remove("visible");
     isMemoryTransitioning = false;
     memoryTransitionProgress = 0;
     memoryWorldGroup.visible = false;
@@ -4325,7 +4530,8 @@
       }
     
       if (appState === "memory") {
-        document.getElementById("transitionOverlay").classList.remove("visible");
+        if (typeof stopOverlay === "function") stopOverlay();
+        else document.getElementById("transitionOverlay").classList.remove("visible");
         resetMovementFlags();
         clearSpawnedMemoryObjects();
         memoryWorldGroup.visible = false;
@@ -4524,6 +4730,12 @@
     
     if (appState === "memory" && isMemoryTransitioning) {
       memoryTransitionProgress = Math.min(1, memoryTransitionProgress + 0.018);
+
+      // Feed actual bezier progress into the overlay progress bar
+      if (window.__updateOverlayProgress) {
+        window.__updateOverlayProgress(memoryTransitionProgress);
+      }
+
     
       const phaseSplit = 0.34;
     
@@ -4633,10 +4845,18 @@
         camera.position.copy(memoryCameraPos);
         configureMemoryControls();
 
-        // Fade out the transition overlay and reveal the edit panel
-        const transOverlay = document.getElementById("transitionOverlay");
-        transOverlay.classList.remove("visible");
-        editPanel.style.display = "block";
+        // Fill progress to 100, then fade out the overlay
+        if (window.__updateOverlayProgress) window.__updateOverlayProgress(1);
+        if (typeof stopOverlay === "function") {
+          // Brief delay so the user sees the bar hit 100% before the fade
+          setTimeout(() => {
+            stopOverlay();
+            editPanel.style.display = "block";
+          }, 220);
+        } else {
+          document.getElementById("transitionOverlay").classList.remove("visible");
+          editPanel.style.display = "block";
+        }
       }
     } else if (appState === "memory") {
       memoryWorldGroup.visible = true;
