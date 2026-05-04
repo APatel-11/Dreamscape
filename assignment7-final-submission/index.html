@@ -604,44 +604,197 @@
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
 
 <script>
-  function createBlankCanvasTexture(seed) {
+  // ── Memory frame texture — unique art per memory, updates with tone ────────
+  function createMemoryFrameTexture(memName, tone) {
+    const W = 512, H = 768;
     const c = document.createElement("canvas");
-    c.width = 512;
-    c.height = 768;
+    c.width = W; c.height = H;
     const g = c.getContext("2d");
 
-    const tones = [
-      ["#1d2128", "#2b313b"],
-      ["#242129", "#36313c"],
-      ["#1b2427", "#2d383d"],
-      ["#26211f", "#39302d"],
-      ["#1e2026", "#2f3440"]
-    ];
-    const pair = tones[seed % tones.length];
+    // Seeded random from memory name so same name always gives same composition
+    let _s = 5381;
+    for (let i = 0; i < memName.length; i++) _s = ((_s << 5) + _s) ^ memName.charCodeAt(i);
+    _s = Math.abs(_s) % 2147483647 || 1;
+    const rand = () => { _s = (_s * 16807) % 2147483647; return (_s - 1) / 2147483646; };
 
-    const grad = g.createLinearGradient(0, 0, 0, c.height);
-    grad.addColorStop(0, pair[0]);
-    grad.addColorStop(1, pair[1]);
-    g.fillStyle = grad;
-    g.fillRect(0, 0, c.width, c.height);
+    const TONE_DEFS = {
+      warm:    { bg: ["#1a0800","#3d1400","#5c1e00"], colors: ["#f5a623","#ff7a3a","#ffcc80","#e05500","#ffd060"] },
+      cool:    { bg: ["#000d20","#001a40","#002860"], colors: ["#4fb8ff","#2060ff","#90d8ff","#0050d0","#c0e8ff"] },
+      dream:   { bg: ["#0d0020","#220045","#380070"], colors: ["#c890ff","#8040ff","#ffb0e8","#6010c0","#e8b0ff"] },
+      echo:    { bg: ["#040e08","#0a2010","#10301a"], colors: ["#50b880","#208050","#90e0b0","#108040","#b0f0d0"] },
+      neutral: { bg: ["#08080e","#10101c","#181828"], colors: ["#8888bb","#5555aa","#aaaacc","#404468","#ccccee"] }
+    };
 
-    g.fillStyle = "rgba(255,255,255,0.018)";
-    for (let i = 0; i < 120; i++) {
-      const x = Math.random() * c.width;
-      const y = Math.random() * c.height;
-      const r = Math.random() * 2 + 0.5;
-      g.beginPath();
-      g.arc(x, y, r, 0, Math.PI * 2);
-      g.fill();
+    const T = TONE_DEFS[tone] || TONE_DEFS.neutral;
+    const cx = W / 2, cy = H / 2;
+
+    // Background
+    const bg = g.createLinearGradient(0, 0, W, H);
+    bg.addColorStop(0, T.bg[0]); bg.addColorStop(0.5, T.bg[1]); bg.addColorStop(1, T.bg[2]);
+    g.fillStyle = bg; g.fillRect(0, 0, W, H);
+
+    // ── Dream blob base — shared by all tones ──────────────────────────────
+    if (tone !== "neutral") {
+      for (let i = 0; i < 6 + Math.floor(rand() * 4); i++) {
+        const bx = rand() * W, by = rand() * H;
+        const rx = 30 + rand() * 90, ry = 20 + rand() * 60;
+        const rot = rand() * Math.PI * 2;
+        g.globalAlpha = 0.10 + rand() * 0.16;
+        g.fillStyle = T.colors[Math.floor(rand() * T.colors.length)];
+        g.save(); g.translate(bx, by); g.rotate(rot);
+        g.beginPath(); g.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2); g.fill();
+        g.restore();
+      }
     }
 
-    g.strokeStyle = "rgba(255,255,255,0.03)";
-    g.lineWidth = 2;
-    g.strokeRect(24, 24, c.width - 48, c.height - 48);
+    // ── Tone-specific art ─────────────────────────────────────────────────
+    if (tone === "warm") {
+      // Radiating lines from a warm offset center
+      const ox = cx + (rand()-0.5)*W*0.28, oy = cy + (rand()-0.5)*H*0.28;
+      const lc = 16 + Math.floor(rand() * 10);
+      for (let i = 0; i < lc; i++) {
+        const angle = (i / lc) * Math.PI * 2;
+        const len = (0.3 + rand() * 0.5) * Math.max(W, H);
+        g.strokeStyle = T.colors[Math.floor(rand() * 3)];
+        g.globalAlpha = 0.06 + rand() * 0.14;
+        g.lineWidth = 1 + rand() * 4;
+        g.beginPath(); g.moveTo(ox, oy);
+        g.lineTo(ox + Math.cos(angle)*len, oy + Math.sin(angle)*len); g.stroke();
+      }
+      for (let i = 0; i < 4; i++) {
+        const bx = rand()*W, by = rand()*H, br = 30 + rand()*60;
+        const gr = g.createRadialGradient(bx,by,0,bx,by,br);
+        gr.addColorStop(0, T.colors[0]); gr.addColorStop(1, "transparent");
+        g.globalAlpha = 0.22 + rand() * 0.18; g.fillStyle = gr;
+        g.beginPath(); g.arc(bx, by, br, 0, Math.PI*2); g.fill();
+      }
+    }
+
+    else if (tone === "cool") {
+      // Drifting geometric forms
+      for (let i = 0; i < 4 + Math.floor(rand()*3); i++) {
+        const sides = 3 + Math.floor(rand()*3);
+        const pr = 20 + rand()*55, px = rand()*W, py = rand()*H, rot = rand()*Math.PI*2;
+        g.globalAlpha = 0.12 + rand()*0.18;
+        g.strokeStyle = T.colors[Math.floor(rand()*3)]; g.lineWidth = 1.5 + rand()*2.5;
+        g.beginPath();
+        for (let s = 0; s < sides; s++) {
+          const a = rot + (s/sides)*Math.PI*2;
+          s===0 ? g.moveTo(px+Math.cos(a)*pr, py+Math.sin(a)*pr)
+                : g.lineTo(px+Math.cos(a)*pr, py+Math.sin(a)*pr);
+        }
+        g.closePath(); g.stroke();
+      }
+      for (let i = 0; i < 4; i++) {
+        g.globalAlpha = 0.07 + rand()*0.09; g.strokeStyle = T.colors[2]; g.lineWidth = 1;
+        g.beginPath(); g.moveTo(rand()*W, rand()*H); g.lineTo(rand()*W, rand()*H); g.stroke();
+      }
+    }
+
+    else if (tone === "dream") {
+      // Spiral — the dream signature
+      g.globalAlpha = 0.22; g.strokeStyle = T.colors[0]; g.lineWidth = 1.5;
+      const sx = cx+(rand()-0.5)*W*0.25, sy = cy+(rand()-0.5)*H*0.25;
+      const maxR = Math.min(W,H)*0.36;
+      g.beginPath();
+      for (let a = 0; a < Math.PI*7; a += 0.05) {
+        const r = (a/(Math.PI*7))*maxR;
+        const px = sx+Math.cos(a)*r, py = sy+Math.sin(a)*r;
+        a===0 ? g.moveTo(px,py) : g.lineTo(px,py);
+      }
+      g.stroke();
+      for (let i = 0; i < 4 + Math.floor(rand()*3); i++) {
+        const bx = rand()*W, by = rand()*H, br = 10 + rand()*30;
+        g.globalAlpha = 0.18 + rand()*0.22;
+        g.fillStyle = T.colors[Math.floor(rand()*T.colors.length)];
+        g.beginPath(); g.arc(bx, by, br, 0, Math.PI*2); g.fill();
+      }
+    }
+
+    else if (tone === "echo") {
+      // Concentric rings — ripples/echoes
+      const ox = cx+(rand()-0.5)*W*0.22, oy = cy+(rand()-0.5)*H*0.22;
+      const rings = 5 + Math.floor(rand()*4);
+      for (let i = rings; i > 0; i--) {
+        const r = (i/rings)*Math.min(W,H)*0.46;
+        g.globalAlpha = 0.05 + (i/rings)*0.18;
+        g.strokeStyle = T.colors[Math.floor(rand()*3)]; g.lineWidth = 1 + rand()*2;
+        g.beginPath(); g.arc(ox, oy, r, 0, Math.PI*2); g.stroke();
+      }
+      for (let i = 0; i < 5; i++) {
+        const wy = 10 + rand()*(H-20);
+        g.globalAlpha = 0.06 + rand()*0.07; g.strokeStyle = T.colors[1]; g.lineWidth = 1;
+        g.beginPath(); g.moveTo(0, wy);
+        for (let px = 0; px < W; px += 6)
+          g.lineTo(px, wy + Math.sin(px*0.08 + rand()*2)*8);
+        g.stroke();
+      }
+    }
+
+    else if (tone === "neutral") {
+      // Star map grid (A) + constellation lines (B) + faint dream blobs
+      const cols = 7, rows = 10;
+      const cW = W/cols, cH = H/rows;
+      const stars = [];
+      for (let r = 0; r < rows; r++) {
+        for (let cc = 0; cc < cols; cc++) {
+          const sx = cc*cW + cW*0.15 + rand()*cW*0.7;
+          const sy = r*cH + cH*0.15 + rand()*cH*0.7;
+          const size = 1.2 + rand()*3.6;
+          const opacity = 0.20 + rand()*0.50;
+          const bright = rand() > 0.80;
+          stars.push({sx, sy, size, opacity, bright});
+        }
+      }
+      // Constellation lines (darker, like real star maps)
+      g.lineWidth = 0.8;
+      for (let i = 0; i < stars.length; i++) {
+        for (let j = i+1; j < stars.length; j++) {
+          const dx = stars[i].sx - stars[j].sx;
+          const dy = stars[i].sy - stars[j].sy;
+          const dist = Math.sqrt(dx*dx + dy*dy);
+          if (dist < cW * 1.5) {
+            g.globalAlpha = 0.28 + rand()*0.20; // darker than before
+            g.strokeStyle = T.colors[2];
+            g.beginPath(); g.moveTo(stars[i].sx, stars[i].sy);
+            g.lineTo(stars[j].sx, stars[j].sy); g.stroke();
+          }
+        }
+      }
+      // Stars (dots)
+      stars.forEach(({sx, sy, size, opacity, bright}) => {
+        if (bright) {
+          const gr = g.createRadialGradient(sx,sy,0,sx,sy,size*5);
+          gr.addColorStop(0, T.colors[2]); gr.addColorStop(1,"transparent");
+          g.globalAlpha = opacity * 0.30; g.fillStyle = gr;
+          g.beginPath(); g.arc(sx, sy, size*5, 0, Math.PI*2); g.fill();
+        }
+        g.globalAlpha = opacity; g.fillStyle = bright ? T.colors[2] : T.colors[0];
+        g.beginPath(); g.arc(sx, sy, size, 0, Math.PI*2); g.fill();
+      });
+      // Faint dream blobs underneath — keeps it in the Dreamscape family
+      for (let i = 0; i < 3; i++) {
+        const bx = rand()*W, by = rand()*H, rx = 40+rand()*60, ry = 25+rand()*40;
+        g.globalAlpha = 0.04 + rand()*0.05; g.fillStyle = T.colors[Math.floor(rand()*T.colors.length)];
+        g.save(); g.translate(bx,by); g.rotate(rand()*Math.PI*2);
+        g.beginPath(); g.ellipse(0,0,rx,ry,0,0,Math.PI*2); g.fill(); g.restore();
+      }
+    }
+
+    // ── Vignette border — museum framing effect ───────────────────────────
+    g.globalAlpha = 1;
+    const vig = g.createRadialGradient(cx,cy,Math.min(W,H)*0.20,cx,cy,Math.max(W,H)*0.82);
+    vig.addColorStop(0,"rgba(0,0,0,0)"); vig.addColorStop(1,"rgba(0,0,0,0.72)");
+    g.fillStyle = vig; g.fillRect(0,0,W,H);
 
     const tex = new THREE.CanvasTexture(c);
     tex.needsUpdate = true;
     return tex;
+  }
+
+  // Legacy alias — keeps any old call sites working
+  function createBlankCanvasTexture(seed) {
+    return createMemoryFrameTexture("Memory " + seed, "neutral");
   }
 
   function createConsoleTexture() {
@@ -980,6 +1133,20 @@
     return tones[index % tones.length];
   }
 
+  // Regenerate canvas textures for all frames belonging to a memory
+  // Called whenever a memory's tone changes so the hub updates in real time
+  function refreshFrameTextures(memoryId) {
+    const mem = memories[memoryId];
+    if (!mem) return;
+    frameMeshes.forEach(frame => {
+      if (frame.userData.memoryId === memoryId) {
+        const newTex = createMemoryFrameTexture(mem.name, mem.tone);
+        frame.userData.inner.material.map = newTex;
+        frame.userData.inner.material.needsUpdate = true;
+      }
+    });
+  }
+
   function cycleSelectedMemoryTone() {
     const tones = ["neutral", "warm", "cool", "dream", "echo"];
     const memory = memories[selectedMemoryId];
@@ -992,6 +1159,9 @@
     saveMemories();
     updateMemoryPanel();
     applyMemoryTone();
+
+    // Update frame textures in real time so hub reflects new tone immediately
+    refreshFrameTextures(selectedMemoryId);
   }
 
   function resetMovementFlags() {
@@ -1671,7 +1841,7 @@
 
   const frameMeshes = [];
 
-  function createFrame(seed, totalFrames) {
+  function createFrame(seed, totalFrames, memName, memTone) {
     const frame = new THREE.Group();
 
     const bronzeMat = new THREE.MeshStandardMaterial({
@@ -1718,7 +1888,7 @@
     const inner = new THREE.Mesh(
       new THREE.PlaneGeometry(w - 0.06, h - 0.06),
       new THREE.MeshBasicMaterial({
-        map: createBlankCanvasTexture(seed),
+        map: createMemoryFrameTexture(memName || ("Memory " + seed), memTone || "neutral"),
         transparent: false,
         opacity: 1
       })
@@ -1776,7 +1946,9 @@
         const y = yNorm * shellRadius + 2.55;
         const z = Math.sin(theta) * radial * shellRadius;
   
-        const frame = createFrame(frameIndex + 1, totalFrames);
+        const memId = frameIndex % memories.length;
+        const mem = memories[memId];
+        const frame = createFrame(frameIndex + 1, totalFrames, mem.name, mem.tone);
         frame.position.set(x, y, z);
         frame.lookAt(0, 2.55, 0);
   
