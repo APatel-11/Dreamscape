@@ -6,11 +6,9 @@ Dreamscape is a web-based interactive system that reimagines memory as a navigab
 
 The project explores how internal mental experiences (memory, mood, atmosphere) can be expressed through procedural generation, real-time rendering, and direct interaction.
 
-🔗 **Live Final Build(In Progress):** [https://apatel-11.github.io/Dreamscape/](https://apatel-11.github.io/Dreamscape/)
+🔗 **Live Final Build:** [https://apatel-99.github.io/Dreamscape/](https://apatel-99.github.io/Dreamscape/)
 
-🔗 **Live Build:** [https://apatel-11.github.io/Dreamscape/assignment7-final-submission](https://apatel-11.github.io/Dreamscape/assignment7-final-submission)
-
-🔗 **Repository:** [https://github.com/APatel-11/Dreamscape](https://github.com/APatel-11/Dreamscape)
+🔗 **Repository:** [https://github.com/APatel-99/Dreamscape](https://github.com/APatel-99/Dreamscape)
 
 ---
 
@@ -27,12 +25,14 @@ The project shifted from an early concept of abstract particle visualization (As
 This project is built on two primary pillars from the course:
 
 ### 1. Procedural Generation
+
 - The memory archive procedurally distributes memory frames across one to four spherical shells based on the number of memories, using the Fibonacci / golden-angle distribution to avoid clustering
 - Adaptive frame scaling based on archive density
-- Procedurally generated painting textures (canvas-based) inside the memory environment
+- Frame textures are procedurally generated at runtime using seeded canvas drawing — each memory gets unique abstract art derived from its name and emotional tone, updating in real time when tone changes
 - Procedural particle (dust mote) systems in both the archive and memory environments
 
 ### 2. Rendering
+
 - Real-time PBR-style rendering using Three.js with HDRI-based environment lighting
 - Custom-tuned dynamic lighting system inside memory environments (warm/cool/dream/echo/neutral tones, each with their own light color, intensity, fog, and bloom curves)
 - Post-processing pipeline: ACES filmic tone mapping + Unreal Bloom
@@ -40,6 +40,7 @@ This project is built on two primary pillars from the course:
 - Bezier-curve cinematic camera transitions between hub and memory states
 
 ### Supporting Pillars
+
 - **Interaction & Navigation:** First-person WASD navigation, raycast-based object selection, real-time editing (move/rotate/scale/add/remove)
 - **Animation:** Frame orbital motion, walk bobbing, console scanlines, particle drift, and cinematic camera animation
 
@@ -48,6 +49,7 @@ This project is built on two primary pillars from the course:
 ## Core Features
 
 ### Game Loop
+
 1. **Menu** — start screen with onboarding instructions
 2. **Hub** — the holographic memory archive, where the user stands inside a sphere of orbiting memory frames
 3. **Memory Transition** — cinematic camera bezier into the selected memory, with a custom "reconstructing memory" loading overlay
@@ -55,36 +57,44 @@ This project is built on two primary pillars from the course:
 5. **Exit** — return to the hub
 
 ### The Holographic Console
+
 A custom 3D console (built from procedural geometry, not images) sits in the center of the archive and acts as the system's narrative anchor. It displays animated waveforms, scanlines, pulse bars, glowing accents, and the title "DREAMSCAPE | MEMORY ARCHIVE". The actual interaction controls are provided through a synced HTML overlay panel.
 
 ### Memory Editing
+
 Inside each memory the user can:
-- Add new objects (10 object types: cubes, spheres, plants, lamps, vases, crystals, memory pillars, etc.)
+
+- Add new objects (4 object types: bookshelf, floor lamp, ceramic vase, side table)
 - Select objects by clicking; selected objects glow cyan
 - Move (arrow keys), rotate (W/E), scale (Q/R), or delete (Backspace)
 - All edits persist per-memory, per-session via `localStorage`
 
 ### Memory Tone System
+
 Each memory has a "tone" (warm / cool / dream / echo / neutral) that drives the entire scene's:
+
 - Fog color and density
 - Window light color and intensity
 - Sky gradient
 - Bloom strength and threshold
 - Tone mapping exposure
 
-Cycling tones via the console produces a coherent, dramatic atmospheric shift, not just a color swap.
+Cycling tones via the console produces a coherent, dramatic atmospheric shift, not just a color swap. Frame art in the archive hub updates in real time to reflect the new tone.
 
 ### Cinematic Transition Overlay
+
 The transition into a memory uses a layered cinematic overlay:
+
 - Pulsing radial glow with cyan-violet-pink gradient
 - Drifting holographic scanlines
 - Cycling status text ("accessing archive" → "resolving spatial structure" → "reconstructing memory")
 - Live progress bar tied to actual loading work + bezier transition progress
-- Subtle vignette and film grain
+- Subtle vignette
 
 The overlay is **dynamic** — it stays up exactly as long as the system needs to load, then fades cleanly when the bezier camera completes its arc into the memory.
 
 ### Persistent Memory Archive
+
 - Memory names, tones, clarity values, and edited objects all persist in `localStorage`
 - The archive can be expanded (Add Memory), pruned (Erase Memory), or fully reset
 
@@ -104,6 +114,7 @@ The overlay is **dynamic** — it stays up exactly as long as the system needs t
 | Storage | Browser `localStorage` |
 
 ### External Three.js Modules Used
+
 - `OrbitControls` — camera control
 - `GLTFLoader` — model loading
 - `RGBELoader` — HDRI environment maps
@@ -115,6 +126,7 @@ The overlay is **dynamic** — it stays up exactly as long as the system needs t
 ## Controls
 
 ### Hub (Memory Archive)
+
 | Action | Control |
 |---|---|
 | Orbit camera | Drag |
@@ -123,6 +135,7 @@ The overlay is **dynamic** — it stays up exactly as long as the system needs t
 | Enter selected memory | Click `Enter Memory` button |
 
 ### Memory (First-Person Interior)
+
 | Action | Control |
 |---|---|
 | Walk | `W` `A` `S` `D` |
@@ -135,6 +148,7 @@ The overlay is **dynamic** — it stays up exactly as long as the system needs t
 | Exit memory | Click `Exit Memory` button |
 
 ### Global
+
 | Action | Control |
 |---|---|
 | Save memory name | `R` |
@@ -158,7 +172,7 @@ Dreamscape/
 ├── assignment6-feature-complete/  # Feature-complete build (peer playtested)
 ├── assignment7-final-submission/  # Final build (polish + cinematic transition)
 │
-├── index.html                     # Repo landing page
+├── index.html                     # Repo landing page (loads final build)
 └── README.md
 ```
 
@@ -167,21 +181,23 @@ Dreamscape/
 ## Running the Project
 
 ### Option 1 — GitHub Pages (Recommended)
+
 Each milestone has a deployed live build:
 
 | Milestone | Live URL |
 |---|---|
-| **Final Submission** | [assignment7-final-submission/](https://apatel-11.github.io/Dreamscape/assignment7-final-submission/) |
-| Feature Complete | [assignment6-feature-complete/](https://apatel-11.github.io/Dreamscape/assignment6-feature-complete/) |
-| Beta Build | [assignment5-beta/](https://apatel-11.github.io/Dreamscape/assignment5-beta/) |
-| Alpha Build | [assignment4-alpha/](https://apatel-11.github.io/Dreamscape/assignment4-alpha/) |
-| MVP Prototype | [assignment3-mvp/](https://apatel-11.github.io/Dreamscape/assignment3-mvp/) |
+| **Final Submission** | [assignment7-final-submission/](https://apatel-99.github.io/Dreamscape/assignment7-final-submission/) |
+| Feature Complete | [assignment6-feature-complete/](https://apatel-99.github.io/Dreamscape/assignment6-feature-complete/) |
+| Beta Build | [assignment5-beta/](https://apatel-99.github.io/Dreamscape/assignment5-beta/) |
+| Alpha Build | [assignment4-alpha/](https://apatel-99.github.io/Dreamscape/assignment4-alpha/) |
+| MVP Prototype | [assignment3-mvp/](https://apatel-99.github.io/Dreamscape/assignment3-mvp/) |
 
 ### Option 2 — Run Locally
+
 Because the project loads textures, models, and HDRIs from the local file system, it must be served from an HTTP server (not opened directly via `file://`).
 
 ```bash
-git clone https://github.com/APatel-11/Dreamscape.git
+git clone https://github.com/APatel-99/Dreamscape.git
 cd Dreamscape
 python3 -m http.server 8000
 ```
@@ -200,7 +216,7 @@ Then open: `http://localhost:8000/assignment7-final-submission/`
 | 4 | Production Plan & Alpha Build | Full game loop (menu → hub → memory) and memory selection |
 | 5 | Beta Build | Interior memory environment, editing system, lighting upgrade |
 | 6 | Feature Complete & Peer Playtesting | Performance system, traversal stability, 5+ subject user study |
-| 7 | Final Submission | Cinematic transition overlay, UI cohesion, camera polish, applied playtest feedback |
+| 7 | Final Submission | Cinematic transition overlay, UI cohesion, camera polish, frame art, applied playtest feedback |
 
 ---
 
@@ -236,7 +252,7 @@ The project targets **60 FPS** in modern desktop browsers (Chrome / Firefox / Sa
 **Akanksha Patel**
 Computer Science, Rutgers University
 NetID: ap2490
-GitHub: [@APatel-11](https://github.com/APatel-11)
+GitHub: [@APatel-99](https://github.com/APatel-99)
 
 ---
 
